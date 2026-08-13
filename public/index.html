@@ -1396,7 +1396,9 @@
             state.socket.emit('call-response', { callId: data.callId, accepted: true });
             state.isFriendCall = true;
             state.currentCallId = data.callId;
-            connectToPeer(data.fromPeerId, data.from);
+            // IMPORTANT: do NOT call connectToPeer() here. Only the caller initiates the
+            // actual PeerJS media call (peer.call). We just wait for it — it will arrive
+            // via the peer.on('call', ...) handler in initPeer(), which answers automatically.
             els.endFriendCallBtn.style.display = 'inline-block';
             els.connectBtn.style.display = 'none';
             els.friendCallStatus.textContent = '🔊 Connecting with ' + data.fromName + '...';
@@ -1431,7 +1433,22 @@
         state.socket.on('call-timeout', () => { els.friendCallStatus.textContent = '⏰ No response from user'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
         state.socket.on('call-ended', () => { endFriendCall(); els.friendCallStatus.textContent = '📞 Call ended'; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
         state.socket.on('no-users-available', () => { els.friendCallStatus.textContent = '❌ No users available. Try later.'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
-        state.socket.on('random-match', (data) => { els.friendCallStatus.textContent = '✅ Matched with ' + data.userName; state.isFriendCall = true; connectToPeer(data.peerId, data.userId); els.endFriendCallBtn.style.display = 'inline-block'; els.connectBtn.style.display = 'none'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; startCallTimer(); });
+        state.socket.on('random-match', (data) => {
+          state.isFriendCall = true;
+          els.endFriendCallBtn.style.display = 'inline-block';
+          els.connectBtn.style.display = 'none';
+          els.connectBtn.disabled = false;
+          els.connectBtn.textContent = 'Connect';
+          startCallTimer();
+          // Only ONE side should initiate the actual PeerJS call, otherwise both sides
+          // create separate connections that close each other out. Higher userId calls,
+          // the other side just waits for the incoming call.
+          if (Number(state.userId) > Number(data.userId)) {
+            connectToPeer(data.peerId, data.userId);
+          } else {
+            els.friendCallStatus.textContent = '🔊 Connecting with ' + data.userName + '...';
+          }
+        });
         state.socket.on('call-error', (msg) => { els.friendCallStatus.textContent = '❌ ' + msg; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
       }
 
@@ -1503,7 +1520,7 @@
             const call = state.peer.call(peerId, stream);
             state.currentCall = call;
             state.isCallActive = true;
-            state.currentCallId = Date.now().toString();
+            if (!state.currentCallId) { state.currentCallId = Date.now().toString(); }
             els.friendCallStatus.textContent = '📞 Calling ' + friendId + '...';
             call.on('stream', (remoteStream) => {
               console.log('📡 Remote stream received for call:', state.currentCallId);
@@ -1542,6 +1559,13 @@
       // ==========================================================
       function endFriendCall() {
         console.log('📞 Ending friend call - cleanup started');
+        // Tell the server the call is over so it can reset the "busy" flag for BOTH users
+        // and notify the other party to auto hang up. Without this, the server never
+        // learns the call ended (it only knows via this event or a socket disconnect),
+        // so busy stays stuck true and the other side never gets 'call-ended'.
+        if (state.socket && state.socket.connected && (state.isFriendCall || state.isCallActive)) {
+          try { state.socket.emit('end-call', state.currentCallId); } catch (e) { console.error('Error notifying server of call end:', e); }
+        }
         if (state.currentCall) { try { state.currentCall.close(); console.log('✅ Peer connection closed'); } catch (e) { console.error('Error closing peer connection:', e); } state.currentCall = null; }
         if (state.localStream) { try { state.localStream.getTracks().forEach(t => t.stop()); console.log('🎤 Stopped tracks'); } catch (e) { console.error('Error stopping tracks:', e); } state.localStream = null; }
         if (state.remoteStream) { state.remoteStream = null; }
@@ -2045,12 +2069,6 @@
 
         els.endFriendCallBtn.addEventListener('click', () => {
           endFriendCall();
-          els.friendCallStatus.textContent = '📞 Call ended';
-          els.endFriendCallBtn.style.display = 'none';
-          els.connectBtn.style.display = 'inline-block';
-          els.connectBtn.disabled = false;
-          els.connectBtn.textContent = 'Connect';
-          stopCallTimer();
         });
       }
 
