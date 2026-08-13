@@ -58,16 +58,18 @@ function getVoiceConversation(userId) {
   return voiceChatMemory.get(userId);
 }
 
+// FIXED: Store messages WITHOUT timestamp for API
 function addTextMessage(userId, role, content) {
   const conv = getTextConversation(userId);
-  conv.messages.push({ role, content, timestamp: Date.now() });
+  // Store without timestamp - only role and content
+  conv.messages.push({ role, content });
   if (conv.messages.length > 50) conv.messages = conv.messages.slice(-50);
   return conv.messages.length - 1;
 }
 
 function addVoiceMessage(userId, role, content) {
   const conv = getVoiceConversation(userId);
-  conv.messages.push({ role, content, timestamp: Date.now() });
+  conv.messages.push({ role, content });
   if (conv.messages.length > 50) conv.messages = conv.messages.slice(-50);
   return conv.messages.length - 1;
 }
@@ -435,7 +437,7 @@ function broadcastOnlineUsers() {
 }
 
 // ============================================================
-// AI TEXT CHAT ENDPOINT
+// AI TEXT CHAT ENDPOINT - FIXED (NO TIMESTAMP)
 // ============================================================
 app.post("/api/text-chat", async (req, res) => {
   try {
@@ -469,6 +471,7 @@ app.post("/api/text-chat", async (req, res) => {
 
     let historyText = '';
     if (recentMessages.length > 1) {
+      // FIXED: Only include role and content, NO timestamp
       historyText = recentMessages.map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
     }
 
@@ -510,8 +513,10 @@ RESPONSE FORMAT (JSON only):
   "explanation": "Brief explanation of the main mistake"
 }`;
 
+    // FIXED: Build API messages WITHOUT timestamp
     const apiMessages = [{ role: "system", content: systemPrompt }];
     const historyToSend = recentMessages.slice(-10);
+    // Only add role and content, no timestamp
     apiMessages.push(...historyToSend);
     if (!apiMessages.some(m => m.role === 'user' && m.content === message)) {
       apiMessages.push({ role: 'user', content: message });
@@ -574,7 +579,7 @@ RESPONSE FORMAT (JSON only):
 });
 
 // ============================================================
-// AI VOICE CHAT ENDPOINT
+// AI VOICE CHAT ENDPOINT - FIXED (NO TIMESTAMP)
 // ============================================================
 app.post("/api/voice-chat", async (req, res) => {
   try {
@@ -608,6 +613,7 @@ app.post("/api/voice-chat", async (req, res) => {
 
     let historyText = '';
     if (recentMessages.length > 1) {
+      // FIXED: Only include role and content, NO timestamp
       historyText = recentMessages.map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
     }
 
@@ -649,6 +655,7 @@ RESPONSE FORMAT (JSON only):
   "explanation": "Brief explanation of the main mistake"
 }`;
 
+    // FIXED: Build API messages WITHOUT timestamp
     const apiMessages = [{ role: "system", content: systemPrompt }];
     const historyToSend = recentMessages.slice(-10);
     apiMessages.push(...historyToSend);
