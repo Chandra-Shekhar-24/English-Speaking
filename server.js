@@ -17,44 +17,90 @@ const io = new Server(server, {
   pingInterval: 25000
 });
 
-const API_KEY = process.env.GROQ_API_KEY;
+const API_KEY = process.env.GROQ_API_KEY || "your_api_key_here";
 const MODEL = "llama-3.1-8b-instant";
 
 // ============================================================
-// STORES
+// STORES - SEPARATE FOR TEXT AND VOICE
 // ============================================================
-const conversationMemory = new Map();
+const textChatMemory = new Map();      // userId -> text chat messages
+const voiceChatMemory = new Map();     // userId -> voice chat messages
 const users = new Map();
 const userIdPool = new Set();
 const activeCalls = new Map();
 const pendingCallRequests = new Map();
 
 // ============================================================
-// CONVERSATION MEMORY
+// SEPARATE CONVERSATION MEMORY
 // ============================================================
-function getConversation(userId) {
-  if (!conversationMemory.has(userId)) {
-    conversationMemory.set(userId, {
+function getTextConversation(userId) {
+  if (!textChatMemory.has(userId)) {
+    textChatMemory.set(userId, {
       messages: [],
       context: {},
       topic: null,
       facts: {},
-      lastQuestion: null,
-      emotionContext: 'neutral'
+      conversationStarted: false,
+      userName: null
     });
   }
-  return conversationMemory.get(userId);
+  return textChatMemory.get(userId);
 }
 
-function addMessage(userId, role, content) {
-  const conv = getConversation(userId);
+function getVoiceConversation(userId) {
+  if (!voiceChatMemory.has(userId)) {
+    voiceChatMemory.set(userId, {
+      messages: [],
+      context: {},
+      topic: null,
+      facts: {},
+      conversationStarted: false,
+      userName: null
+    });
+  }
+  return voiceChatMemory.get(userId);
+}
+
+function addTextMessage(userId, role, content) {
+  const conv = getTextConversation(userId);
   conv.messages.push({ role, content });
-  if (conv.messages.length > 30) conv.messages = conv.messages.slice(-30);
+  if (conv.messages.length > 50) conv.messages = conv.messages.slice(-50);
 }
 
-function getRecentMessages(userId, count = 15) {
-  const conv = getConversation(userId);
+function addVoiceMessage(userId, role, content) {
+  const conv = getVoiceConversation(userId);
+  conv.messages.push({ role, content });
+  if (conv.messages.length > 50) conv.messages = conv.messages.slice(-50);
+}
+
+function getTextMessages(userId, count = 20) {
+  const conv = getTextConversation(userId);
   return conv.messages.slice(-count);
+}
+
+function getVoiceMessages(userId, count = 20) {
+  const conv = getVoiceConversation(userId);
+  return conv.messages.slice(-count);
+}
+
+function clearTextHistory(userId) {
+  const conv = getTextConversation(userId);
+  conv.messages = [];
+  conv.context = {};
+  conv.topic = null;
+  conv.facts = {};
+  conv.conversationStarted = false;
+  conv.userName = null;
+}
+
+function clearVoiceHistory(userId) {
+  const conv = getVoiceConversation(userId);
+  conv.messages = [];
+  conv.context = {};
+  conv.topic = null;
+  conv.facts = {};
+  conv.conversationStarted = false;
+  conv.userName = null;
 }
 
 function generateUniqueId() {
@@ -69,7 +115,7 @@ function generateUniqueId() {
 }
 
 // ============================================================
-// VOICE CONFIGURATION - 20 Indian Voices with SSML Support
+// 20 VOICES
 // ============================================================
 const VOICES = {
   male: [
@@ -99,312 +145,155 @@ const VOICES = {
 };
 
 // ============================================================
-// SSML HELPER - NATURAL HUMAN-LIKE VOICE
+// EMOTION DETECTION
 // ============================================================
-function generateSSML(text, emotion = 'neutral', voiceId = 'en-IN-NeerjaNeural') {
-  // Detect if it's a question
-  const isQuestion = text.trim().endsWith('?');
-  
-  // Emotion-based prosody settings
-  const emotionSettings = {
-    'neutral': { rate: '0%', pitch: '0%', volume: 'medium', style: 'general' },
-    'happy': { rate: '+5%', pitch: '+10%', volume: 'medium', style: 'cheerful' },
-    'sad': { rate: '-8%', pitch: '-5%', volume: 'soft', style: 'sad' },
-    'encouraging': { rate: '+5%', pitch: '+8%', volume: 'medium', style: 'encouraging' },
-    'empathetic': { rate: '-5%', pitch: '-3%', volume: 'soft', style: 'empathetic' },
-    'excited': { rate: '+12%', pitch: '+15%', volume: 'loud', style: 'excited' },
-    'calm': { rate: '-8%', pitch: '-5%', volume: 'soft', style: 'calm' },
-    'thoughtful': { rate: '-10%', pitch: '-5%', volume: 'medium', style: 'thoughtful' },
-    'friendly': { rate: '+3%', pitch: '+5%', volume: 'medium', style: 'friendly' },
-    'professional': { rate: '0%', pitch: '0%', volume: 'medium', style: 'professional' }
-  };
-
-  const settings = emotionSettings[emotion] || emotionSettings['neutral'];
-  
-  // Build SSML with natural pauses and emphasis
-  let ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-IN">`;
-  
-  // Voice with style
-  ssml += `<voice name="${voiceId}">`;
-  ssml += `<prosody rate="${settings.rate}" pitch="${settings.pitch}" volume="${settings.volume}">`;
-  
-  // Add style if available
-  if (settings.style && settings.style !== 'general') {
-    ssml += `<mstts:express-as style="${settings.style}" styledegree="1.0">`;
-  }
-
-  // Split text into sentences for natural pauses
-  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-  
-  sentences.forEach((sentence, index) => {
-    const trimmed = sentence.trim();
-    if (!trimmed) return;
-    
-    // Add natural pause between sentences
-    if (index > 0) {
-      ssml += `<break time="250ms"/>`;
-    }
-    
-    // Add emphasis on important words (keywords)
-    const words = trimmed.split(' ');
-    let processed = '';
-    words.forEach((word, i) => {
-      // Emphasize important words (longer words, or words in all caps)
-      const cleanWord = word.replace(/[.,!?;:]/g, '');
-      if (cleanWord.length > 6 || word === word.toUpperCase()) {
-        processed += `<emphasis level="moderate">${word}</emphasis> `;
-      } else if (i === 0 || i === words.length - 1) {
-        // Emphasize first and last word slightly
-        processed += `<emphasis level="reduced">${word}</emphasis> `;
-      } else {
-        processed += word + ' ';
-      }
-    });
-    
-    // Add question intonation
-    if (trimmed.endsWith('?')) {
-      ssml += `<prosody pitch="+5%">${processed.trim()}</prosody>`;
-    } else {
-      ssml += processed.trim();
-    }
-    
-    // Add sentence-ending pause
-    if (trimmed.endsWith('!')) {
-      ssml += `<break time="300ms"/>`;
-    } else if (trimmed.endsWith('?')) {
-      ssml += `<break time="200ms"/>`;
-    } else if (trimmed.endsWith('.')) {
-      ssml += `<break time="400ms"/>`;
-    } else {
-      ssml += `<break time="150ms"/>`;
-    }
-  });
-  
-  // Close tags
-  if (settings.style && settings.style !== 'general') {
-    ssml += `</mstts:express-as>`;
-  }
-  ssml += `</prosody>`;
-  ssml += `</voice>`;
-  ssml += `</speak>`;
-  
-  return ssml;
-}
-
-// ============================================================
-// DETECT EMOTION FROM CONVERSATION CONTEXT
-// ============================================================
-function detectEmotion(userMessage, recentHistory) {
+function detectEmotion(userMessage) {
   const lower = userMessage.toLowerCase();
-  
-  // Happy/positive indicators
-  if (lower.includes('happy') || lower.includes('great') || lower.includes('awesome') || 
-      lower.includes('wonderful') || lower.includes('excellent') || lower.includes('love') ||
-      lower.includes('enjoy') || lower.includes('amazing') || lower.includes('fantastic')) {
-    return 'happy';
-  }
-  
-  // Sad/negative indicators
-  if (lower.includes('sad') || lower.includes('upset') || lower.includes('depressed') || 
-      lower.includes('worried') || lower.includes('anxious') || lower.includes('stressed') ||
-      lower.includes('difficult') || lower.includes('hard') || lower.includes('tough')) {
-    return 'sad';
-  }
-  
-  // Encouragement indicators (user is trying)
-  if (lower.includes('try') || lower.includes('attempt') || lower.includes('practice') || 
-      lower.includes('learn') || lower.includes('improve') || lower.includes('better')) {
-    return 'encouraging';
-  }
-  
-  // Empathy indicators (user sharing personal experience)
-  if (lower.includes('feel') || lower.includes('experience') || lower.includes('myself') || 
-      lower.includes('personally') || lower.includes('i think') || lower.includes('i believe')) {
-    return 'empathetic';
-  }
-  
-  // Excitement indicators
-  if (lower.includes('wow') || lower.includes('really') || lower.includes('very') || 
-      lower.includes('so') || lower.includes('too')) {
-    return 'excited';
-  }
-  
-  // Question - thoughtful
-  if (userMessage.trim().endsWith('?')) {
-    return 'thoughtful';
-  }
-  
-  // Friendly conversation
-  if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey') || 
-      lower.includes('thanks') || lower.includes('thank you')) {
-    return 'friendly';
-  }
-  
+  if (lower.includes('happy') || lower.includes('great') || lower.includes('awesome') || lower.includes('wonderful') || lower.includes('excellent')) return 'happy';
+  if (lower.includes('sad') || lower.includes('upset') || lower.includes('depressed') || lower.includes('worried') || lower.includes('anxious')) return 'sad';
+  if (lower.includes('try') || lower.includes('attempt') || lower.includes('practice') || lower.includes('improve') || lower.includes('better')) return 'encouraging';
+  if (lower.includes('feel') || lower.includes('experience') || lower.includes('myself') || lower.includes('personally')) return 'empathetic';
+  if (lower.includes('wow') || lower.includes('really') || lower.includes('very') || lower.includes('so')) return 'excited';
+  if (userMessage.trim().endsWith('?')) return 'thoughtful';
+  if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey') || lower.includes('thanks')) return 'friendly';
   return 'neutral';
 }
 
 // ============================================================
-// SOCKET.IO - COMPLETE FRIEND CALL FIXED
+// SSML GENERATOR
+// ============================================================
+function generateSSML(text, emotion = 'neutral', voiceId = 'en-IN-NeerjaNeural') {
+  const emotionSettings = {
+    'neutral': { rate: '0%', pitch: '0%', style: 'general' },
+    'happy': { rate: '+5%', pitch: '+10%', style: 'cheerful' },
+    'sad': { rate: '-8%', pitch: '-5%', style: 'sad' },
+    'encouraging': { rate: '+5%', pitch: '+8%', style: 'encouraging' },
+    'empathetic': { rate: '-5%', pitch: '-3%', style: 'empathetic' },
+    'excited': { rate: '+12%', pitch: '+15%', style: 'excited' },
+    'calm': { rate: '-8%', pitch: '-5%', style: 'calm' },
+    'thoughtful': { rate: '-10%', pitch: '-5%', style: 'thoughtful' },
+    'friendly': { rate: '+3%', pitch: '+5%', style: 'friendly' }
+  };
+
+  const settings = emotionSettings[emotion] || emotionSettings['neutral'];
+  let ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-IN"><voice name="${voiceId}"><prosody rate="${settings.rate}" pitch="${settings.pitch}">`;
+  if (settings.style && settings.style !== 'general') {
+    ssml += `<mstts:express-as style="${settings.style}" styledegree="1.0">`;
+  }
+
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  sentences.forEach((sentence, index) => {
+    const trimmed = sentence.trim();
+    if (!trimmed) return;
+    if (index > 0) ssml += `<break time="250ms"/>`;
+    if (trimmed.endsWith('?')) ssml += `<prosody pitch="+5%">${trimmed}</prosody>`;
+    else if (trimmed.endsWith('!')) { ssml += trimmed; ssml += `<break time="300ms"/>`; }
+    else { ssml += trimmed; ssml += `<break time="400ms"/>`; }
+  });
+
+  if (settings.style && settings.style !== 'general') ssml += `</mstts:express-as>`;
+  ssml += `</prosody></voice></speak>`;
+  return ssml;
+}
+
+// ============================================================
+// SOCKET.IO
 // ============================================================
 io.on("connection", (socket) => {
   console.log("🟢 Client connected:", socket.id);
-
   const userId = generateUniqueId();
-  
   users.set(userId, {
     socketId: socket.id,
     connected: true,
     busy: false,
     peerId: null,
     voicePreference: 'en-IN-NeerjaNeural',
-    joinedAt: Date.now()
+    joinedAt: Date.now(),
+    userName: null
   });
-  
   socket.userId = userId;
   socket.emit("user-id", userId);
-  console.log(`👤 User ${userId} registered (NOT busy)`);
+  console.log(`👤 User ${userId} registered`);
   broadcastOnlineUsers();
 
-  // ========== SET PEER ID ==========
-  socket.on("set-peer-id", (peerId) => {
+  socket.on("set-user-name", (userName) => {
     const user = users.get(userId);
     if (user) {
-      user.peerId = peerId;
-      console.log(`🔗 User ${userId} set Peer ID: ${peerId}`);
+      user.userName = userName;
+      console.log(`📝 User ${userId} set name: ${userName}`);
+      broadcastOnlineUsers();
     }
   });
 
-  // ========== SET VOICE PREFERENCE ==========
+  socket.on("set-peer-id", (peerId) => {
+    const user = users.get(userId);
+    if (user) user.peerId = peerId;
+  });
+
   socket.on("set-voice-preference", (voiceId) => {
     const user = users.get(userId);
     if (user) user.voicePreference = voiceId;
   });
 
-  // ========== GET VOICES ==========
-  socket.on("get-voices", (callback) => {
-    callback(VOICES);
-  });
+  socket.on("get-voices", (callback) => callback(VOICES));
 
-  // ========== FIND USER ==========
   socket.on("find-user", (targetUserId, callback) => {
-    console.log(`🔍 Looking for user: ${targetUserId}`);
     const user = users.get(targetUserId);
-    
-    if (!user) {
-      callback({ exists: false, message: "User not found" });
-      return;
-    }
-    
-    if (!user.connected) {
-      callback({ exists: true, online: false, message: "User is offline" });
-      return;
-    }
-    
-    if (user.busy) {
-      callback({ exists: true, online: true, busy: true, message: "User is in a call" });
-      return;
-    }
-    
-    console.log(`✅ User ${targetUserId} found and available`);
-    callback({
+    if (!user) callback({ exists: false, message: "User not found" });
+    else if (!user.connected) callback({ exists: true, online: false, message: "User is offline" });
+    else if (user.busy) callback({ exists: true, online: true, busy: true, message: "User is in a call" });
+    else callback({
       exists: true,
       online: true,
       busy: false,
       peerId: user.peerId,
-      userId: targetUserId
+      userId: targetUserId,
+      userName: user.userName || targetUserId
     });
   });
 
-  // ========== CALL REQUEST - FIXED ==========
   socket.on("call-request", (targetUserId) => {
-    console.log(`📞 ${userId} calling ${targetUserId}`);
-    
     const caller = users.get(userId);
     const target = users.get(targetUserId);
-
-    if (!caller || !target || !target.connected) {
-      socket.emit("call-error", "User not available");
-      return;
-    }
-
-    if (target.busy) {
-      socket.emit("call-error", "User is in a call");
-      return;
-    }
-
-    if (caller.busy) {
-      socket.emit("call-error", "You are already in a call");
-      return;
-    }
-
-    // Mark caller as busy
+    if (!caller || !target || !target.connected) { socket.emit("call-error", "User not available"); return; }
+    if (target.busy) { socket.emit("call-error", "User is in a call"); return; }
+    if (caller.busy) { socket.emit("call-error", "You are already in a call"); return; }
     caller.busy = true;
-    
-    // Generate call ID
     const callId = `call_${Date.now()}_${userId}_${targetUserId}`;
-    
-    // Store pending request with timeout
     pendingCallRequests.set(callId, {
-      caller: userId,
-      target: targetUserId,
-      status: 'pending',
-      timestamp: Date.now(),
+      caller: userId, target: targetUserId, status: 'pending', timestamp: Date.now(),
       timeout: setTimeout(() => {
-        // Call timeout
         const pending = pendingCallRequests.get(callId);
         if (pending && pending.status === 'pending') {
-          console.log(`⏰ Call ${callId} timed out`);
           pending.status = 'timedout';
-          
-          // Free caller
           const callerUser = users.get(pending.caller);
           if (callerUser) callerUser.busy = false;
-          
-          // Notify caller
           const callerSocket = users.get(pending.caller);
           if (callerSocket && callerSocket.connected) {
             io.to(callerSocket.socketId).emit("call-timeout");
           }
-          
           pendingCallRequests.delete(callId);
           broadcastOnlineUsers();
         }
-      }, 30000) // 30 second timeout
+      }, 30000)
     });
-
-    console.log(`📤 Sending incoming-call to ${targetUserId} (socket: ${target.socketId})`);
-    
-    // Send incoming call to target
+    const callerName = caller.userName || `User ${userId}`;
     io.to(target.socketId).emit("incoming-call", {
-      callId: callId,
+      callId,
       from: userId,
       fromPeerId: caller.peerId,
-      fromName: `User ${userId}`
+      fromName: callerName
     });
-    
     broadcastOnlineUsers();
   });
 
-  // ========== CALL RESPONSE - FIXED ==========
   socket.on("call-response", (data) => {
     const { callId, accepted } = data;
-    
-    console.log(`📞 Call response for ${callId}: ${accepted ? 'ACCEPTED' : 'DECLINED'}`);
-    
     const pendingCall = pendingCallRequests.get(callId);
-    if (!pendingCall) {
-      socket.emit("call-error", "Call request expired");
-      return;
-    }
-
-    // Clear timeout
-    if (pendingCall.timeout) {
-      clearTimeout(pendingCall.timeout);
-    }
-
+    if (!pendingCall) { socket.emit("call-error", "Call request expired"); return; }
+    if (pendingCall.timeout) clearTimeout(pendingCall.timeout);
     const caller = users.get(pendingCall.caller);
     const responder = users.get(pendingCall.target);
-
     if (!caller || !caller.connected) {
       socket.emit("call-error", "Caller no longer available");
       if (responder) responder.busy = false;
@@ -412,179 +301,101 @@ io.on("connection", (socket) => {
       broadcastOnlineUsers();
       return;
     }
-
     if (accepted) {
-      console.log(`✅ ${pendingCall.target} accepted call from ${pendingCall.caller}`);
-      
-      // Mark both as busy
       if (caller) caller.busy = true;
       if (responder) responder.busy = true;
-
-      // Create active call record
-      activeCalls.set(callId, {
-        userA: pendingCall.caller,
-        userB: pendingCall.target,
-        status: 'connected',
-        startedAt: Date.now()
-      });
-
-      // Remove from pending
+      activeCalls.set(callId, { userA: pendingCall.caller, userB: pendingCall.target, status: 'connected', startedAt: Date.now() });
       pendingCallRequests.delete(callId);
-
-      // Send acceptance to caller
+      const responderName = responder.userName || `User ${pendingCall.target}`;
       io.to(caller.socketId).emit("call-accepted", {
-        callId: callId,
+        callId,
         peerId: responder.peerId,
-        userId: pendingCall.target
+        userId: pendingCall.target,
+        userName: responderName
       });
-      
-      // Send connected to responder
+      const callerName = caller.userName || `User ${pendingCall.caller}`;
       io.to(responder.socketId).emit("call-connected", {
-        callId: callId,
+        callId,
         peerId: caller.peerId,
-        userId: pendingCall.caller
+        userId: pendingCall.caller,
+        userName: callerName
       });
-      
       broadcastOnlineUsers();
     } else {
-      console.log(`❌ ${pendingCall.target} declined call from ${pendingCall.caller}`);
-      
-      // Free caller from busy state
       if (caller) caller.busy = false;
       if (responder) responder.busy = false;
-      
-      // Remove from pending
       pendingCallRequests.delete(callId);
-      
-      // Notify caller
       io.to(caller.socketId).emit("call-declined");
       broadcastOnlineUsers();
     }
   });
 
-  // ========== CANCEL CALL - FIXED ==========
   socket.on("cancel-call", (callId) => {
-    console.log(`📞 ${userId} cancelling call: ${callId}`);
-    
     const pendingCall = pendingCallRequests.get(callId);
     if (pendingCall) {
-      // Clear timeout
-      if (pendingCall.timeout) {
-        clearTimeout(pendingCall.timeout);
-      }
-      
-      // Free caller
+      if (pendingCall.timeout) clearTimeout(pendingCall.timeout);
       const caller = users.get(pendingCall.caller);
       if (caller) caller.busy = false;
-      
-      // Notify target if needed
-      const target = users.get(pendingCall.target);
-      if (target && target.connected) {
-        io.to(target.socketId).emit("call-cancelled");
-      }
-      
       pendingCallRequests.delete(callId);
       broadcastOnlineUsers();
     }
   });
 
-  // ========== END CALL ==========
   socket.on("end-call", (callId) => {
-    console.log(`📞 ${userId} ending call: ${callId}`);
-    
     const user = users.get(userId);
     if (user) user.busy = false;
-    
     if (callId && activeCalls.has(callId)) {
       const call = activeCalls.get(callId);
       const otherId = call.userA === userId ? call.userB : call.userA;
       const otherUser = users.get(otherId);
-      
       if (otherUser && otherUser.connected) {
         otherUser.busy = false;
         io.to(otherUser.socketId).emit("call-ended");
       }
-      
       activeCalls.delete(callId);
-    } else {
-      // Clean up any call involving this user
-      for (const [id, call] of activeCalls) {
-        if (call.userA === userId || call.userB === userId) {
-          const otherId = call.userA === userId ? call.userB : call.userA;
-          const otherUser = users.get(otherId);
-          if (otherUser && otherUser.connected) {
-            otherUser.busy = false;
-            io.to(otherUser.socketId).emit("call-ended");
-          }
-          activeCalls.delete(id);
-        }
-      }
     }
-    
     broadcastOnlineUsers();
   });
 
-  // ========== FIND RANDOM ==========
   socket.on("find-random", () => {
-    console.log(`🎲 ${userId} looking for random user`);
-    
     const availableUsers = [];
     users.forEach((user, id) => {
       if (id !== userId && user.connected && !user.busy && user.peerId) {
         availableUsers.push({
           userId: id,
           peerId: user.peerId,
-          socketId: user.socketId
+          socketId: user.socketId,
+          userName: user.userName || id
         });
       }
     });
-
-    if (availableUsers.length === 0) {
-      socket.emit("no-users-available");
-      return;
-    }
-
-    const randomIndex = Math.floor(Math.random() * availableUsers.length);
-    const match = availableUsers[randomIndex];
-
+    if (availableUsers.length === 0) { socket.emit("no-users-available"); return; }
+    const match = availableUsers[Math.floor(Math.random() * availableUsers.length)];
     const user1 = users.get(userId);
     const user2 = users.get(match.userId);
-    
     if (user1) user1.busy = true;
     if (user2) user2.busy = true;
-
     const callId = `call_${Date.now()}_${userId}_${match.userId}`;
-    activeCalls.set(callId, {
-      userA: userId,
-      userB: match.userId,
-      status: 'connected',
-      startedAt: Date.now()
-    });
-
+    activeCalls.set(callId, { userA: userId, userB: match.userId, status: 'connected', startedAt: Date.now() });
     socket.emit("random-match", {
       peerId: match.peerId,
-      userId: match.userId
+      userId: match.userId,
+      userName: match.userName
     });
-    
     io.to(match.socketId).emit("random-match", {
       peerId: user1.peerId,
-      userId: userId
+      userId: userId,
+      userName: user1.userName || userId
     });
-
     broadcastOnlineUsers();
   });
 
-  // ========== DISCONNECT ==========
   socket.on("disconnect", () => {
-    console.log(`🔴 Client disconnected: ${socket.id}`);
-    
     if (socket.userId) {
       const user = users.get(socket.userId);
       if (user) {
         user.connected = false;
         user.busy = false;
-        
-        // Clean up active calls
         for (const [callId, call] of activeCalls) {
           if (call.userA === socket.userId || call.userB === socket.userId) {
             activeCalls.delete(callId);
@@ -596,22 +407,11 @@ io.on("connection", (socket) => {
             }
           }
         }
-        
-        // Clean up pending requests with timeout
-        for (const [callId, req] of pendingCallRequests) {
-          if (req.caller === socket.userId || req.target === socket.userId) {
-            if (req.timeout) clearTimeout(req.timeout);
-            pendingCallRequests.delete(callId);
-          }
-        }
-        
         broadcastOnlineUsers();
-        
         setTimeout(() => {
           if (users.has(socket.userId) && !users.get(socket.userId).connected) {
             userIdPool.delete(socket.userId);
             users.delete(socket.userId);
-            console.log(`🗑️ Removed user ${socket.userId}`);
           }
         }, 30000);
       }
@@ -619,58 +419,53 @@ io.on("connection", (socket) => {
   });
 });
 
-// ========== BROADCAST ONLINE USERS ==========
 function broadcastOnlineUsers() {
   const onlineUsers = [];
   users.forEach((user, id) => {
     if (user.connected) {
       onlineUsers.push({
         userId: id,
-        busy: user.busy || false
+        busy: user.busy || false,
+        userName: user.userName || id
       });
     }
   });
-  console.log(`📊 Broadcasting ${onlineUsers.length} online users`);
   io.emit("online-users", onlineUsers);
 }
 
 // ============================================================
-// AI CHAT ENDPOINT WITH EMOTION DETECTION
+// AI TEXT CHAT ENDPOINT - COMPLETELY INDEPENDENT
 // ============================================================
-app.post("/api/chat", async (req, res) => {
+app.post("/api/text-chat", async (req, res) => {
   try {
     if (!API_KEY || API_KEY === "your_api_key_here") {
-      return res.status(500).json({
-        error: "GROQ_API_KEY missing. Get free key from console.groq.com"
-      });
+      return res.status(500).json({ error: "GROQ_API_KEY missing. Get free key from console.groq.com" });
     }
 
-    const { messages: newMessages, userLevel, userProfession, userGoal, conversationId } = req.body || {};
+    const { message, userLevel, userProfession, userGoal, conversationId, userName } = req.body || {};
 
-    if (!newMessages || !Array.isArray(newMessages) || newMessages.length === 0) {
-      return res.status(400).json({ error: "'messages' array required." });
+    if (!message) {
+      return res.status(400).json({ error: "'message' is required." });
     }
 
-    const userMessage = newMessages[newMessages.length - 1]?.content || '';
+    // SEPARATE TEXT CHAT HISTORY
+    const textConv = getTextConversation(conversationId);
+    addTextMessage(conversationId, 'user', message);
 
-    if (conversationId) {
-      addMessage(conversationId, 'user', userMessage);
+    if (userName && !textConv.userName) {
+      textConv.userName = userName;
+      textConv.facts.user_name = userName;
     }
 
-    const recentMessages = conversationId ? getRecentMessages(conversationId, 15) : [];
-    const conv = conversationId ? getConversation(conversationId) : { facts: {}, topic: null };
-
-    // Detect emotion
-    const emotion = detectEmotion(userMessage, recentMessages);
-    conv.emotionContext = emotion;
+    const recentMessages = getTextMessages(conversationId, 20);
+    const isFirstMessage = !textConv.conversationStarted;
+    const displayName = textConv.userName || 'there';
 
     let contextSummary = '';
-    if (conv.facts && Object.keys(conv.facts).length > 0) {
-      contextSummary = `\nIMPORTANT FACTS:\n${Object.entries(conv.facts).map(([k, v]) => `- ${k}: ${v}`).join('\n')}`;
+    if (textConv.facts && Object.keys(textConv.facts).length > 0) {
+      contextSummary = `\nIMPORTANT FACTS:\n${Object.entries(textConv.facts).map(([k, v]) => `- ${k}: ${v}`).join('\n')}`;
     }
-    if (conv.topic) {
-      contextSummary += `\nCURRENT TOPIC: ${conv.topic}`;
-    }
+    if (textConv.topic) contextSummary += `\nCURRENT TOPIC: ${textConv.topic}`;
 
     let historyText = '';
     if (recentMessages.length > 1) {
@@ -683,121 +478,81 @@ app.post("/api/chat", async (req, res) => {
       advanced: "ADVANCED - Speak fluently, use sophisticated language."
     };
 
-    const level = levelMap[userLevel] || levelMap['intermediate'];
-
-    const emotionInstruction = {
-      'happy': "The user sounds happy or positive. Respond with warm, encouraging, and joyful energy. Sound genuinely happy for them.",
-      'sad': "The user sounds sad or upset. Respond with calm, gentle, and empathetic tone. Be supportive and understanding.",
-      'encouraging': "The user is trying to improve. Respond with strong encouragement and motivation. Sound supportive and confident.",
-      'empathetic': "The user is sharing something personal. Respond with deep empathy, warmth, and understanding.",
-      'excited': "The user is excited. Match their energy with enthusiasm and positive energy.",
-      'calm': "The user sounds calm or thoughtful. Respond with a calm, measured, and thoughtful tone.",
-      'thoughtful': "The user is thinking deeply. Respond with a thoughtful, measured, and reflective tone.",
-      'friendly': "The user is being friendly. Respond warmly and casually like a friend.",
-      'professional': "The user is being professional. Respond with a clear, professional, and articulate tone.",
-      'neutral': "Respond with a natural, friendly, and conversational tone."
-    };
-
-    const systemPrompt = `You are an intelligent, empathetic English conversation partner named Madhu. You are helping an Indian user improve their English.
+    const systemPrompt = `You are an intelligent, empathetic English conversation partner named Madhu. You are helping an Indian user named "${displayName}" improve their English through TEXT CHAT.
 
 USER PROFILE:
-- Level: ${level}
+- Name: ${displayName}
+- Level: ${levelMap[userLevel] || 'INTERMEDIATE'}
 - Profession: ${userProfession || 'Not specified'}
 - Goal: ${userGoal || 'General conversation'}
 
-CONVERSATION CONTEXT:
+TEXT CHAT CONVERSATION CONTEXT:
 ${contextSummary}
 
-RECENT CONVERSATION:
-${historyText || 'This is a new conversation.'}
+RECENT TEXT CHAT:
+${historyText || 'This is a new text chat conversation.'}
 
-EMOTION DETECTED: ${emotion}
-EMOTION INSTRUCTION: ${emotionInstruction[emotion] || emotionInstruction['neutral']}
+${isFirstMessage ? `This is the FIRST message in text chat. Start the conversation naturally by greeting ${displayName} by name and asking a friendly question.` : ''}
 
 CRITICAL RULES:
-1. If the user asks a question, ANSWER IT DIRECTLY first.
-2. If the user asks about "my last response", analyze the ACTUAL previous user message.
-3. NEVER say a response is correct without analyzing it.
-4. Never return null/empty correction.
+1. This is TEXT CHAT - separate from voice conversation.
+2. Always address the user by their name "${displayName}" naturally.
+3. If the user asks a question, ANSWER IT DIRECTLY first.
+4. PROVIDE THE FULL CORRECTED SENTENCE, not just word changes.
 5. Respond naturally like a human with appropriate emotion.
-6. Only ask a follow-up question if it's relevant.
+6. Always ask a follow-up question to continue the conversation.
+7. Keep the conversation flowing - don't end after one response.
 
 RESPONSE FORMAT (JSON only):
 {
-  "reply": "Your natural spoken response (1-3 sentences)",
-  "correction": "Direct grammatical correction of the user's sentence (preserve meaning)",
-  "naturalVersion": "More natural way to say the same thing",
-  "wordChanges": [{"wrong": "original word", "correct": "corrected word", "reason": "why"}],
-  "explanation": "Brief explanation of the main mistake",
-  "emotion": "The emotion you are expressing (happy, sad, encouraging, empathetic, excited, calm, thoughtful, friendly, professional, neutral)"
+  "reply": "Your natural text response (2-3 sentences, use the user's name, include a question)",
+  "correction": "FULL corrected version of the user's entire sentence (preserve meaning) or null if perfect",
+  "naturalVersion": "More natural way to say the same thing, or null",
+  "wordChanges": [{"wrong": "word", "correct": "word", "reason": "why"}],
+  "explanation": "Brief explanation of the main mistake"
 }`;
 
     const apiMessages = [{ role: "system", content: systemPrompt }];
     const historyToSend = recentMessages.slice(-10);
     apiMessages.push(...historyToSend);
-
-    if (!apiMessages.some(m => m.role === 'user' && m.content === userMessage)) {
-      apiMessages.push({ role: 'user', content: userMessage });
+    if (!apiMessages.some(m => m.role === 'user' && m.content === message)) {
+      apiMessages.push({ role: 'user', content: message });
     }
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${API_KEY}`
-      },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
       body: JSON.stringify({
         model: MODEL,
         messages: apiMessages,
-        max_tokens: 800,
+        max_tokens: 600,
         temperature: 0.8,
         response_format: { type: "json_object" }
       })
     });
 
     const data = await response.json();
-
     if (!response.ok) {
       console.error("Groq API error:", data);
-      return res.status(response.status).json({
-        error: data.error?.message || "Groq API error"
-      });
+      return res.status(response.status).json({ error: data.error?.message || "Groq API error" });
     }
 
     const aiContent = data.choices?.[0]?.message?.content ||
-      '{"reply":"I understand. Could you say that again?","correction":null,"naturalVersion":null,"wordChanges":[],"explanation":"","emotion":"neutral"}';
+      '{"reply":"I understand. Could you tell me more about that?","correction":null,"naturalVersion":null,"wordChanges":[],"explanation":""}';
 
     let parsed;
-    try {
-      parsed = JSON.parse(aiContent);
-    } catch (e) {
-      parsed = {
-        reply: "I appreciate you sharing that. Could you tell me more?",
-        correction: null,
-        naturalVersion: null,
-        wordChanges: [],
-        explanation: "",
-        emotion: "neutral"
-      };
+    try { parsed = JSON.parse(aiContent); } catch (e) {
+      parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, naturalVersion: null, wordChanges: [], explanation: "" };
     }
 
-    if (conversationId) {
-      addMessage(conversationId, 'assistant', parsed.reply);
-      if (userMessage.toLowerCase().includes('my name is') || userMessage.toLowerCase().includes('call me')) {
-        const nameMatch = userMessage.match(/(?:my name is|call me|i am)\s+(\w+)/i);
-        if (nameMatch) {
-          const facts = conv.facts || {};
-          facts.user_name = nameMatch[1];
-          conv.facts = facts;
-        }
-      }
-      if (userMessage.length > 10) {
-        conv.topic = userMessage.substring(0, 50);
-      }
+    // Store in TEXT CHAT history only
+    addTextMessage(conversationId, 'assistant', parsed.reply);
+    textConv.conversationStarted = true;
+    if (message.toLowerCase().includes('my name is') || message.toLowerCase().includes('call me')) {
+      const nameMatch = message.match(/(?:my name is|call me|i am)\s+(\w+)/i);
+      if (nameMatch) { textConv.facts.user_name = nameMatch[1]; textConv.userName = nameMatch[1]; }
     }
-
-    // Use detected emotion or fallback to neutral
-    const responseEmotion = parsed.emotion || emotion || 'neutral';
+    if (message.length > 10) textConv.topic = message.substring(0, 50);
 
     res.json({
       reply: parsed.reply || "I understand what you mean.",
@@ -805,68 +560,203 @@ RESPONSE FORMAT (JSON only):
       naturalVersion: parsed.naturalVersion || null,
       wordChanges: parsed.wordChanges || [],
       explanation: parsed.explanation || "",
-      emotion: responseEmotion
+      emotion: detectEmotion(message)
     });
 
   } catch (err) {
-    console.error("Server error:", err);
+    console.error("Text Chat error:", err);
     res.status(500).json({ error: err.message || "Server error." });
   }
 });
 
 // ============================================================
-// TTS ENDPOINT WITH SSML SUPPORT
+// AI VOICE CHAT ENDPOINT - COMPLETELY INDEPENDENT
+// ============================================================
+app.post("/api/voice-chat", async (req, res) => {
+  try {
+    if (!API_KEY || API_KEY === "your_api_key_here") {
+      return res.status(500).json({ error: "GROQ_API_KEY missing. Get free key from console.groq.com" });
+    }
+
+    const { message, userLevel, userProfession, userGoal, conversationId, userName } = req.body || {};
+
+    if (!message) {
+      return res.status(400).json({ error: "'message' is required." });
+    }
+
+    // SEPARATE VOICE CHAT HISTORY
+    const voiceConv = getVoiceConversation(conversationId);
+    addVoiceMessage(conversationId, 'user', message);
+
+    if (userName && !voiceConv.userName) {
+      voiceConv.userName = userName;
+      voiceConv.facts.user_name = userName;
+    }
+
+    const recentMessages = getVoiceMessages(conversationId, 20);
+    const isFirstMessage = !voiceConv.conversationStarted;
+    const displayName = voiceConv.userName || 'there';
+
+    let contextSummary = '';
+    if (voiceConv.facts && Object.keys(voiceConv.facts).length > 0) {
+      contextSummary = `\nIMPORTANT FACTS:\n${Object.entries(voiceConv.facts).map(([k, v]) => `- ${k}: ${v}`).join('\n')}`;
+    }
+    if (voiceConv.topic) contextSummary += `\nCURRENT TOPIC: ${voiceConv.topic}`;
+
+    let historyText = '';
+    if (recentMessages.length > 1) {
+      historyText = recentMessages.map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
+    }
+
+    const levelMap = {
+      beginner: "BEGINNER - Use simple words, short sentences, be extremely encouraging.",
+      intermediate: "INTERMEDIATE - They can form sentences but make mistakes. Correct gently.",
+      advanced: "ADVANCED - Speak fluently, use sophisticated language."
+    };
+
+    const systemPrompt = `You are an intelligent, empathetic English conversation partner named Madhu. You are helping an Indian user named "${displayName}" improve their English through VOICE CONVERSATION.
+
+USER PROFILE:
+- Name: ${displayName}
+- Level: ${levelMap[userLevel] || 'INTERMEDIATE'}
+- Profession: ${userProfession || 'Not specified'}
+- Goal: ${userGoal || 'General conversation'}
+
+VOICE CONVERSATION CONTEXT:
+${contextSummary}
+
+RECENT VOICE CONVERSATION:
+${historyText || 'This is a new voice conversation.'}
+
+${isFirstMessage ? `This is the FIRST message in voice conversation. Start the conversation naturally by greeting ${displayName} by name and asking a friendly question.` : ''}
+
+CRITICAL RULES:
+1. This is VOICE CONVERSATION - separate from text chat.
+2. Always address the user by their name "${displayName}" naturally.
+3. If the user asks a question, ANSWER IT DIRECTLY first.
+4. PROVIDE THE FULL CORRECTED SENTENCE, not just word changes.
+5. Respond naturally like a human with appropriate emotion.
+6. Always ask a follow-up question to continue the conversation.
+7. Keep the conversation flowing - don't end after one response.
+
+RESPONSE FORMAT (JSON only):
+{
+  "reply": "Your natural spoken response (2-3 sentences, use the user's name, include a question)",
+  "correction": "FULL corrected version of the user's entire sentence (preserve meaning) or null if perfect",
+  "naturalVersion": "More natural way to say the same thing, or null",
+  "wordChanges": [{"wrong": "word", "correct": "word", "reason": "why"}],
+  "explanation": "Brief explanation of the main mistake"
+}`;
+
+    const apiMessages = [{ role: "system", content: systemPrompt }];
+    const historyToSend = recentMessages.slice(-10);
+    apiMessages.push(...historyToSend);
+    if (!apiMessages.some(m => m.role === 'user' && m.content === message)) {
+      apiMessages.push({ role: 'user', content: message });
+    }
+
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: apiMessages,
+        max_tokens: 600,
+        temperature: 0.8,
+        response_format: { type: "json_object" }
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Groq API error:", data);
+      return res.status(response.status).json({ error: data.error?.message || "Groq API error" });
+    }
+
+    const aiContent = data.choices?.[0]?.message?.content ||
+      '{"reply":"I understand. Could you tell me more about that?","correction":null,"naturalVersion":null,"wordChanges":[],"explanation":""}';
+
+    let parsed;
+    try { parsed = JSON.parse(aiContent); } catch (e) {
+      parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, naturalVersion: null, wordChanges: [], explanation: "" };
+    }
+
+    // Store in VOICE CHAT history only
+    addVoiceMessage(conversationId, 'assistant', parsed.reply);
+    voiceConv.conversationStarted = true;
+    if (message.toLowerCase().includes('my name is') || message.toLowerCase().includes('call me')) {
+      const nameMatch = message.match(/(?:my name is|call me|i am)\s+(\w+)/i);
+      if (nameMatch) { voiceConv.facts.user_name = nameMatch[1]; voiceConv.userName = nameMatch[1]; }
+    }
+    if (message.length > 10) voiceConv.topic = message.substring(0, 50);
+
+    res.json({
+      reply: parsed.reply || "I understand what you mean.",
+      correction: parsed.correction || null,
+      naturalVersion: parsed.naturalVersion || null,
+      wordChanges: parsed.wordChanges || [],
+      explanation: parsed.explanation || "",
+      emotion: detectEmotion(message)
+    });
+
+  } catch (err) {
+    console.error("Voice Chat error:", err);
+    res.status(500).json({ error: err.message || "Server error." });
+  }
+});
+
+// ============================================================
+// CLEAR CHAT HISTORY ENDPOINTS
+// ============================================================
+app.post("/api/clear-text", (req, res) => {
+  const { conversationId } = req.body;
+  if (conversationId) {
+    clearTextHistory(conversationId);
+    res.json({ success: true, message: "Text chat history cleared" });
+  } else {
+    res.status(400).json({ error: "conversationId required" });
+  }
+});
+
+app.post("/api/clear-voice", (req, res) => {
+  const { conversationId } = req.body;
+  if (conversationId) {
+    clearVoiceHistory(conversationId);
+    res.json({ success: true, message: "Voice chat history cleared" });
+  } else {
+    res.status(400).json({ error: "conversationId required" });
+  }
+});
+
+// ============================================================
+// TTS ENDPOINT
 // ============================================================
 app.post('/api/tts', async (req, res) => {
   try {
     const { text, voice = 'en-IN-NeerjaNeural', emotion = 'neutral' } = req.body;
-    
-    if (!text) {
-      return res.status(400).json({ error: 'Text is required' });
-    }
+    if (!text) return res.status(400).json({ error: 'Text is required' });
 
-    console.log(`🔊 TTS: Speaking "${text.substring(0, 50)}..." with voice ${voice}, emotion: ${emotion}`);
-
-    // Generate SSML with natural speech
     const ssml = generateSSML(text, emotion, voice);
-
-    // Use Edge TTS with SSML
     const response = await fetch('https://edge-tts-api.vercel.app/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text: ssml,
-        voice: voice,
-        rate: 0,
-        pitch: 0
-      })
+      body: JSON.stringify({ text: ssml, voice, rate: 0, pitch: 0 })
     });
 
-    if (!response.ok) {
-      throw new Error('TTS service failed');
-    }
-
+    if (!response.ok) throw new Error('TTS service failed');
     const audioBuffer = await response.arrayBuffer();
-    console.log(`✅ TTS: Generated ${audioBuffer.byteLength} bytes of audio`);
-    
     res.setHeader('Content-Type', 'audio/mpeg');
     res.setHeader('Cache-Control', 'public, max-age=3600');
     res.send(Buffer.from(audioBuffer));
 
   } catch (err) {
     console.error('❌ TTS Error:', err);
-    // Fallback to basic TTS without SSML
     try {
       const { text, voice = 'en-IN-NeerjaNeural' } = req.body;
       const response = await fetch('https://edge-tts-api.vercel.app/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: text,
-          voice: voice,
-          rate: 0,
-          pitch: 0
-        })
+        body: JSON.stringify({ text, voice, rate: 0, pitch: 0 })
       });
       if (response.ok) {
         const audioBuffer = await response.arrayBuffer();
@@ -874,16 +764,11 @@ app.post('/api/tts', async (req, res) => {
         res.send(Buffer.from(audioBuffer));
         return;
       }
-    } catch (fallbackErr) {
-      console.error('Fallback TTS also failed:', fallbackErr);
-    }
+    } catch (fallbackErr) { console.error('Fallback TTS failed:', fallbackErr); }
     res.status(500).json({ error: err.message || 'TTS failed' });
   }
 });
 
-// ============================================================
-// HEALTH CHECK
-// ============================================================
 app.get("/api/health", (req, res) => {
   res.json({
     ok: true,
@@ -891,9 +776,9 @@ app.get("/api/health", (req, res) => {
     model: MODEL,
     onlineUsers: users.size,
     activeCalls: activeCalls.size,
-    pendingCalls: pendingCallRequests.size,
     totalVoiceOptions: VOICES.male.length + VOICES.female.length,
-    activeConversations: conversationMemory.size,
+    textChatCount: textChatMemory.size,
+    voiceChatCount: voiceChatMemory.size,
     uptime: process.uptime()
   });
 });
@@ -905,8 +790,10 @@ server.listen(PORT, () => {
     console.log("  ⚠️  GROQ_API_KEY not set. Get free key from https://console.groq.com\n");
   }
   console.log(`  ✅ ${VOICES.male.length + VOICES.female.length} Voice Options Available`);
-  console.log(`  ✅ SSML Natural Voice with Emotions Enabled`);
-  console.log(`  ✅ Real-time Presence System Active`);
+  console.log(`  ✅ Text Chat & Voice Conversation - COMPLETELY INDEPENDENT`);
+  console.log(`  ✅ Separate histories for Text and Voice`);
+  console.log(`  ✅ User Name System Active`);
+  console.log(`  ✅ SSML Natural Voice with Emotions`);
   console.log(`  ✅ Friend Call with Accept/Decline/Timeout`);
-  console.log(`  ✅ Features: AI Chat, AI Voice, Friend Call\n`);
+  console.log(`  ✅ Features: AI Text Chat, AI Voice, Friend Call\n`);
 });

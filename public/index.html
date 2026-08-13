@@ -121,6 +121,26 @@
       font-size: 13px;
     }
 
+    .onboarding-card input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 16px;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .onboarding-card input:focus {
+      border-color: var(--blue);
+    }
+
+    .onboarding-card input::placeholder {
+      color: var(--text-muted);
+    }
+
     .onboarding-card select {
       width: 100%;
       padding: 12px 14px;
@@ -158,6 +178,12 @@
     .onboarding-card .start-btn:hover {
       transform: scale(1.02);
       opacity: 0.9;
+    }
+
+    .onboarding-card .name-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
     }
 
     /* Header */
@@ -198,6 +224,15 @@
       color: var(--blue);
       font-weight: 600;
       border: 1px solid rgba(79, 195, 247, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .user-id-badge .name-display {
+      color: var(--text-secondary);
+      font-weight: 400;
+      font-size: 11px;
     }
 
     .online-count {
@@ -372,7 +407,18 @@
       display: block;
     }
 
-    /* Correction Message - Improved */
+    .conv-msg.system {
+      align-self: center;
+      background: rgba(255, 213, 79, 0.06);
+      color: var(--yellow);
+      font-size: 12px;
+      max-width: 95%;
+      text-align: center;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    /* Correction Message */
     .conv-msg.correction {
       align-self: flex-start;
       background: rgba(255, 107, 107, 0.04);
@@ -470,17 +516,6 @@
       margin-top: 8px;
       padding-top: 8px;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .conv-msg.system {
-      align-self: center;
-      background: rgba(255, 213, 79, 0.06);
-      color: var(--yellow);
-      font-size: 12px;
-      max-width: 95%;
-      text-align: center;
-      padding: 6px 14px;
-      border-radius: 20px;
     }
 
     .conv-msg.listening-indicator {
@@ -638,7 +673,6 @@
       animation: pulse-dot 0.6s infinite;
     }
 
-    /* Voice Select Compact */
     .voice-select-compact {
       display: flex;
       align-items: center;
@@ -934,6 +968,11 @@
       background: var(--red);
     }
 
+    .online-users .chip .name-label {
+      color: var(--text-muted);
+      font-size: 10px;
+    }
+
     .online-users .empty {
       color: var(--text-muted);
       font-size: 12px;
@@ -1049,6 +1088,17 @@
       .call-header {
         padding: 6px 10px;
       }
+
+      .friend-row input {
+        font-size: 16px;
+        letter-spacing: 4px;
+        padding: 10px 12px;
+      }
+
+      .friend-row button {
+        padding: 10px 14px;
+        font-size: 12px;
+      }
     }
 
     @media (max-width: 380px) {
@@ -1074,11 +1124,19 @@
 
 <body>
 
+  <!-- ========================================================== -->
   <!-- ONBOARDING -->
+  <!-- ========================================================== -->
   <div class="onboarding-overlay" id="onboarding">
     <div class="onboarding-card">
       <h2>🇮🇳 English Passport</h2>
       <p class="subtitle">Your AI English conversation partner</p>
+
+      <!-- NAME INPUT -->
+      <label>👤 Your Name</label>
+      <input type="text" id="nameInput" placeholder="Enter your name" />
+      <div class="name-hint">This name will be used throughout the app</div>
+
       <label>📚 Your English Level</label>
       <select id="levelSelect">
         <option value="beginner">Beginner (Basic words)</option>
@@ -1108,7 +1166,9 @@
     </div>
   </div>
 
+  <!-- ========================================================== -->
   <!-- MAIN APP -->
+  <!-- ========================================================== -->
   <div class="app-container" id="mainApp" style="display:none;">
 
     <!-- HEADER -->
@@ -1124,13 +1184,15 @@
 
     <!-- TABS -->
     <div class="tabs">
-      <button class="tab-btn" data-tab="text">💬 Chat</button>
-      <button class="tab-btn voice-tab active" data-tab="voice">🎤 AI Voice</button>
+      <button class="tab-btn active" data-tab="text">💬 Chat</button>
+      <button class="tab-btn voice-tab" data-tab="voice">🎤 AI Voice</button>
       <button class="tab-btn" data-tab="friend">👥 Friends</button>
     </div>
 
+    <!-- ========================================================== -->
     <!-- TAB: TEXT CHAT -->
-    <div id="tab-text" class="panel">
+    <!-- ========================================================== -->
+    <div id="tab-text" class="panel active">
       <div class="conversation-area" id="textChatBox">
         <div class="empty-state">
           <div class="icon">💬</div>
@@ -1143,11 +1205,12 @@
       </div>
     </div>
 
+    <!-- ========================================================== -->
     <!-- TAB: AI VOICE CALL -->
-    <div id="tab-voice" class="panel active">
+    <!-- ========================================================== -->
+    <div id="tab-voice" class="panel">
       <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;padding:4px 0;">
 
-        <!-- Call Header -->
         <div class="call-header">
           <div class="ai-avatar-small" id="aiAvatar">🤖</div>
           <div class="call-header-info">
@@ -1163,7 +1226,6 @@
           </div>
         </div>
 
-        <!-- Live Conversation Area -->
         <div class="conversation-area" id="conversationArea">
           <div class="empty-state">
             <div class="icon">🎤</div>
@@ -1173,7 +1235,6 @@
           </div>
         </div>
 
-        <!-- Bottom Controls -->
         <div class="bottom-controls">
           <button class="ctrl-btn replay-btn" id="replayBtn" title="Listen Again">🔊</button>
           <button class="mic-btn" id="micBtn">🎙️</button>
@@ -1183,7 +1244,9 @@
       </div>
     </div>
 
+    <!-- ========================================================== -->
     <!-- TAB: FRIENDS -->
+    <!-- ========================================================== -->
     <div id="tab-friend" class="panel">
       <div class="friend-area">
         <div class="friend-info">
@@ -1228,6 +1291,7 @@
         peer: null,
         currentCall: null,
         localStream: null,
+        remoteStream: null,
         isRecording: false,
         recognition: null,
         selectedVoice: 'en-IN-NeerjaNeural',
@@ -1241,7 +1305,11 @@
         _stopTimeout: null,
         isAICallActive: false,
         currentCallId: null,
-        isCalling: false
+        isCalling: false,
+        conversationHistory: [],
+        isConversationStarted: false,
+        userName: '',
+        activeTab: 'text' // 'text' or 'voice'
       };
 
       // ==========================================================
@@ -1255,20 +1323,111 @@
         'friendIdInput', 'connectBtn', 'randomMatchBtn', 'friendStatus',
         'textChatBox', 'textInput', 'textSend', 'voiceSelectCompact',
         'levelSelect', 'professionSelect', 'goalSelect', 'startBtn',
-        'onboarding', 'mainApp', 'endFriendCallBtn'
+        'onboarding', 'mainApp', 'endFriendCallBtn', 'nameInput'
       ].forEach(id => { els[id] = $(id); });
 
       // ==========================================================
       // ONBOARDING
       // ==========================================================
       els.startBtn.addEventListener('click', () => {
+        const userName = els.nameInput.value.trim() || 'Friend';
         state.userProfile.level = els.levelSelect.value;
         state.userProfile.profession = els.professionSelect.value;
         state.userProfile.goal = els.goalSelect.value;
+        state.userName = userName;
+
         els.onboarding.style.display = 'none';
         els.mainApp.style.display = 'flex';
         initApp();
+
+        setTimeout(() => {
+          if (state.socket && state.socket.connected) {
+            state.socket.emit('set-user-name', userName);
+          }
+        }, 500);
+
+        const badge = document.querySelector('.user-id-badge');
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'name-display';
+        nameSpan.textContent = '👤 ' + userName;
+        badge.appendChild(nameSpan);
+
+        // Start text chat greeting
+        setTimeout(() => {
+          startTextChatGreeting();
+        }, 1000);
       });
+
+      // ==========================================================
+      // TEXT CHAT GREETING - INDEPENDENT
+      // ==========================================================
+      async function startTextChatGreeting() {
+        try {
+          const res = await fetch('/api/text-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: 'Hello! I am ready to practice English with you through text chat. Please start the conversation.',
+              userLevel: state.userProfile.level,
+              userProfession: state.userProfile.profession,
+              userGoal: state.userProfile.goal,
+              conversationId: state.userId,
+              userName: state.userName
+            })
+          });
+          const data = await res.json();
+          if (data.reply) {
+            addTextChatMessage(data.reply, 'ai');
+            if (data.correction) {
+              addTextChatMessage(data.correction, 'correction', {
+                original: 'Hello! I am ready to practice English with you through text chat. Please start the conversation.',
+                correction: data.correction,
+                naturalVersion: data.naturalVersion,
+                wordChanges: data.wordChanges || [],
+                explanation: data.explanation
+              });
+            }
+          }
+        } catch (e) {
+          console.error('Text chat greeting error:', e);
+        }
+      }
+
+      // ==========================================================
+      // VOICE CHAT GREETING - INDEPENDENT
+      // ==========================================================
+      async function startVoiceChatGreeting() {
+        try {
+          const res = await fetch('/api/voice-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: 'Hello! I am ready to practice English with you through voice conversation. Please start the conversation.',
+              userLevel: state.userProfile.level,
+              userProfession: state.userProfile.profession,
+              userGoal: state.userProfile.goal,
+              conversationId: state.userId,
+              userName: state.userName
+            })
+          });
+          const data = await res.json();
+          if (data.reply) {
+            addConversationMessage('ai', data.reply);
+            speakText(data.reply, data.emotion || 'friendly');
+            if (data.correction) {
+              addConversationMessage('correction', data.correction, {
+                original: 'Hello! I am ready to practice English with you through voice conversation. Please start the conversation.',
+                correction: data.correction,
+                naturalVersion: data.naturalVersion,
+                wordChanges: data.wordChanges || [],
+                explanation: data.explanation
+              });
+            }
+          }
+        } catch (e) {
+          console.error('Voice chat greeting error:', e);
+        }
+      }
 
       // ==========================================================
       // INITIALIZATION
@@ -1295,6 +1454,9 @@
 
         state.socket.on('connect', () => {
           console.log('✅ Socket connected');
+          if (state.userName) {
+            state.socket.emit('set-user-name', state.userName);
+          }
         });
 
         state.socket.on('connect_error', (error) => {
@@ -1309,42 +1471,33 @@
         });
 
         state.socket.on('online-users', (users) => {
-          console.log('📊 Online users:', users);
           renderOnlineUsers(users);
           const online = users.filter(u => !u.busy).length;
           els.onlineCount.textContent = online;
         });
 
-        // ========== FRIEND CALL SOCKET EVENTS ==========
+        // Friend Call Events with Names
         state.socket.on('incoming-call', (data) => {
-          console.log('📞 INCOMING CALL RECEIVED:', data);
-
           if (state.isCallActive || state.isFriendCall) {
             state.socket.emit('call-response', { callId: data.callId, accepted: false });
             return;
           }
-
-          // Show incoming call dialog
-          const accept = confirm(`📞 Incoming call from User ${data.from}\n\nAccept?`);
-
+          const accept = confirm(`📞 ${data.fromName} is calling you!\n\nAccept?`);
           if (accept) {
-            console.log('✅ Accepting call from:', data.from);
             state.socket.emit('call-response', { callId: data.callId, accepted: true });
             state.isFriendCall = true;
             state.currentCallId = data.callId;
             connectToPeer(data.fromPeerId, data.from);
             els.endFriendCallBtn.style.display = 'inline-block';
             els.connectBtn.style.display = 'none';
-            els.friendCallStatus.textContent = '🔊 Connecting with ' + data.from + '...';
+            els.friendCallStatus.textContent = '🔊 Connecting with ' + data.fromName + '...';
           } else {
-            console.log('❌ Declining call from:', data.from);
             state.socket.emit('call-response', { callId: data.callId, accepted: false });
           }
         });
 
         state.socket.on('call-connected', (data) => {
-          console.log('📞 CALL CONNECTED:', data);
-          els.friendCallStatus.textContent = '✅ Connected with ' + data.userId;
+          els.friendCallStatus.textContent = '✅ Connected with ' + data.userName;
           state.isFriendCall = true;
           els.endFriendCallBtn.style.display = 'inline-block';
           els.connectBtn.style.display = 'none';
@@ -1353,8 +1506,7 @@
         });
 
         state.socket.on('call-accepted', (data) => {
-          console.log('✅ CALL ACCEPTED:', data);
-          els.friendCallStatus.textContent = '✅ Connected with ' + data.userId;
+          els.friendCallStatus.textContent = '✅ Connected with ' + data.userName;
           state.isFriendCall = true;
           state.currentCallId = data.callId;
           connectToPeer(data.peerId, data.userId);
@@ -1365,7 +1517,6 @@
         });
 
         state.socket.on('call-declined', () => {
-          console.log('❌ Call declined');
           els.friendCallStatus.textContent = '❌ Call declined';
           state.isFriendCall = false;
           state.isCalling = false;
@@ -1376,7 +1527,6 @@
         });
 
         state.socket.on('call-timeout', () => {
-          console.log('⏰ Call timeout');
           els.friendCallStatus.textContent = '⏰ No response from user';
           state.isFriendCall = false;
           state.isCalling = false;
@@ -1386,16 +1536,7 @@
           els.connectBtn.textContent = 'Connect';
         });
 
-        state.socket.on('call-cancelled', () => {
-          console.log('📞 Call cancelled by caller');
-          els.friendCallStatus.textContent = '📞 Call cancelled';
-          state.isFriendCall = false;
-          els.endFriendCallBtn.style.display = 'none';
-          els.connectBtn.style.display = 'inline-block';
-        });
-
         state.socket.on('call-ended', () => {
-          console.log('📞 Call ended');
           endFriendCall();
           els.friendCallStatus.textContent = '📞 Call ended';
           els.endFriendCallBtn.style.display = 'none';
@@ -1411,8 +1552,7 @@
         });
 
         state.socket.on('random-match', (data) => {
-          console.log('🎲 Random match with:', data.userId);
-          els.friendCallStatus.textContent = '✅ Matched with ' + data.userId;
+          els.friendCallStatus.textContent = '✅ Matched with ' + data.userName;
           state.isFriendCall = true;
           connectToPeer(data.peerId, data.userId);
           els.endFriendCallBtn.style.display = 'inline-block';
@@ -1422,7 +1562,6 @@
         });
 
         state.socket.on('call-error', (msg) => {
-          console.error('❌ Call error:', msg);
           els.friendCallStatus.textContent = '❌ ' + msg;
           state.isFriendCall = false;
           state.isCalling = false;
@@ -1430,10 +1569,6 @@
           els.connectBtn.style.display = 'inline-block';
           els.connectBtn.disabled = false;
           els.connectBtn.textContent = 'Connect';
-        });
-
-        state.socket.on('disconnect', () => {
-          console.warn('Socket disconnected');
         });
       }
 
@@ -1466,9 +1601,15 @@
               state.isCallActive = true;
               els.friendCallStatus.textContent = '🔊 Connected';
               incomingCall.on('stream', (remoteStream) => {
+                state.remoteStream = remoteStream;
                 const audio = new Audio();
                 audio.srcObject = remoteStream;
-                audio.play().catch(() => { });
+                audio.play().catch(err => {
+                  console.error('Audio play error:', err);
+                  document.addEventListener('click', () => {
+                    audio.play().catch(() => { });
+                  }, { once: true });
+                });
               });
               incomingCall.on('close', () => { endFriendCall(); });
             })
@@ -1505,10 +1646,14 @@
 
             call.on('stream', (remoteStream) => {
               console.log('📡 Remote stream received');
+              state.remoteStream = remoteStream;
               const audio = new Audio();
               audio.srcObject = remoteStream;
-              audio.play().catch((err) => {
+              audio.play().catch(err => {
                 console.error('Audio play error:', err);
+                document.addEventListener('click', () => {
+                  audio.play().catch(() => { });
+                }, { once: true });
               });
               els.friendCallStatus.textContent = '🔊 Connected with ' + friendId;
             });
@@ -1555,11 +1700,12 @@
         }
 
         if (state.localStream) {
-          state.localStream.getTracks().forEach(t => {
-            t.stop();
-            console.log('🎤 Stopped track:', t.kind);
-          });
+          state.localStream.getTracks().forEach(t => t.stop());
           state.localStream = null;
+        }
+
+        if (state.remoteStream) {
+          state.remoteStream = null;
         }
 
         if (state.socket && state.socket.connected) {
@@ -1592,15 +1738,29 @@
           btn.addEventListener('click', () => {
             tabs.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            state.activeTab = btn.dataset.tab;
             Object.keys(panels).forEach(k => {
               panels[k].classList.toggle('active', k === btn.dataset.tab);
             });
+
+            // When switching to voice tab, start voice greeting if not started
+            if (btn.dataset.tab === 'voice' && !state.isConversationStarted) {
+              state.isConversationStarted = true;
+              setTimeout(() => {
+                startVoiceChatGreeting();
+              }, 500);
+            }
+
+            // When switching to text tab, ensure text greeting already happened (onboarding time)
+            if (btn.dataset.tab === 'text') {
+              // Text greeting already triggered in onboarding
+            }
           });
         });
       }
 
       // ==========================================================
-      // TEXT CHAT
+      // TEXT CHAT - COMPLETELY INDEPENDENT
       // ==========================================================
       function setupTextChat() {
         els.textSend.addEventListener('click', sendTextMessage);
@@ -1616,14 +1776,7 @@
         div.className = 'conv-msg ' + type;
         if (type === 'correction') {
           let html = `<div class="corr-label">✏️ Correction</div>`;
-
-          html += `
-            <div class="section">
-              <div class="section-label">🗣️ You Said</div>
-              <div class="section-content you-said">${extra.original || ''}</div>
-            </div>
-          `;
-
+          html += `<div class="section"><div class="section-label">🗣️ You Said</div><div class="section-content you-said">${extra.original || ''}</div></div>`;
           if (extra.correction) {
             let correctedHighlighted = extra.correction;
             if (extra.wordChanges && extra.wordChanges.length > 0) {
@@ -1632,52 +1785,28 @@
                 correctedHighlighted = correctedHighlighted.replace(regex, `<span class="correct-part">$&</span>`);
               });
             }
-            html += `
-              <div class="section">
-                <div class="section-label">✏️ Corrected Version</div>
-                <div class="section-content corrected">${correctedHighlighted}</div>
-              </div>
-            `;
+            html += `<div class="section"><div class="section-label">✏️ Corrected Version</div><div class="section-content corrected">${correctedHighlighted}</div></div>`;
           }
-
           if (extra.naturalVersion) {
-            html += `
-              <div class="section">
-                <div class="section-label">⭐ More Natural</div>
-                <div class="section-content natural">${extra.naturalVersion}</div>
-              </div>
-            `;
+            html += `<div class="section"><div class="section-label">⭐ More Natural</div><div class="section-content natural">${extra.naturalVersion}</div></div>`;
           }
-
           if (extra.wordChanges && extra.wordChanges.length > 0) {
-            html += `
-              <div class="section">
-                <div class="section-label">🔍 What Changed</div>
-                <div style="padding:6px 10px;background:rgba(255,213,79,0.04);border-radius:6px;margin-top:2px;">
-            `;
+            html += `<div class="section"><div class="section-label">🔍 What Changed</div><div style="padding:6px 10px;background:rgba(255,213,79,0.04);border-radius:6px;margin-top:2px;">`;
             extra.wordChanges.forEach(change => {
-              html += `
-                <div class="word-change">
-                  <span class="wrong">${change.wrong}</span>
-                  <span class="arrow">→</span>
-                  <span class="correct">${change.correct}</span>
-                  <span class="reason">(${change.reason || ''})</span>
-                </div>
-              `;
+              html += `<div class="word-change"><span class="wrong">${change.wrong}</span><span class="arrow">→</span><span class="correct">${change.correct}</span><span class="reason">(${change.reason || ''})</span></div>`;
             });
             html += `</div></div>`;
           }
-
           if (extra.explanation) {
             html += `<div class="explanation">💡 ${extra.explanation}</div>`;
           }
-
           div.innerHTML = html;
         } else {
           div.textContent = text;
         }
         els.textChatBox.appendChild(div);
         els.textChatBox.scrollTop = els.textChatBox.scrollHeight;
+        return div;
       }
 
       async function sendTextMessage() {
@@ -1685,25 +1814,43 @@
         if (!msg) return;
         els.textInput.value = '';
         addTextChatMessage(msg, 'user');
-        await processAIResponse(msg, (data) => {
-          addTextChatMessage(data.reply, 'ai');
-          if (data.correction) {
-            addTextChatMessage(data.correction, 'correction', {
-              original: msg,
-              correction: data.correction,
-              naturalVersion: data.naturalVersion,
-              wordChanges: data.wordChanges || [],
-              explanation: data.explanation
-            });
+
+        try {
+          const res = await fetch('/api/text-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: msg,
+              userLevel: state.userProfile.level,
+              userProfession: state.userProfile.profession,
+              userGoal: state.userProfile.goal,
+              conversationId: state.userId,
+              userName: state.userName
+            })
+          });
+          const data = await res.json();
+          if (data.reply) {
+            addTextChatMessage(data.reply, 'ai');
+            if (data.correction) {
+              addTextChatMessage(data.correction, 'correction', {
+                original: msg,
+                correction: data.correction,
+                naturalVersion: data.naturalVersion,
+                wordChanges: data.wordChanges || [],
+                explanation: data.explanation
+              });
+            }
+          } else {
+            addTextChatMessage('❌ Error: ' + (data.error || 'No response'), 'system');
           }
-          if (data.nextQuestion) {
-            addTextChatMessage('❓ ' + data.nextQuestion, 'ai');
-          }
-        });
+        } catch (err) {
+          console.error('Text chat error:', err);
+          addTextChatMessage('❌ Network error. Please try again.', 'system');
+        }
       }
 
       // ==========================================================
-      // AI VOICE UI
+      // AI VOICE UI - COMPLETELY INDEPENDENT
       // ==========================================================
       function setupVoiceUI() {
         els.voiceSelectCompact.addEventListener('change', (e) => {
@@ -1713,11 +1860,13 @@
           }
         });
 
-        if ('webkitSpeechRecognition' in window) {
-          state.recognition = new webkitSpeechRecognition();
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+          const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+          state.recognition = new SR();
           state.recognition.lang = 'en-IN';
           state.recognition.continuous = false;
           state.recognition.interimResults = true;
+          state.recognition.maxAlternatives = 1;
 
           state.recognition.onstart = () => {
             state.isRecording = true;
@@ -1744,12 +1893,13 @@
           };
 
           state.recognition.onerror = (e) => {
+            console.error('Speech recognition error:', e);
             state.isRecording = false;
             els.micBtn.classList.remove('recording');
             els.aiAvatar.className = 'ai-avatar-small';
             updateCallStatus('online', '⚠️ Error: ' + e.error);
             if (e.error === 'not-allowed') {
-              addConversationMessage('system', '❌ Microphone access denied');
+              addConversationMessage('system', '❌ Microphone access denied. Please allow microphone in browser settings.');
             }
           };
 
@@ -1782,7 +1932,7 @@
                 if (state.recognition && state.isRecording) {
                   state.recognition.stop();
                 }
-              }, 1200);
+              }, 1500);
             } else if (interim) {
               let interimMsg = els.conversationArea.querySelector('.conv-msg.user:last-child');
               if (interimMsg && interimMsg.dataset.final !== 'true') {
@@ -1798,9 +1948,10 @@
             }
           };
         } else {
-          updateCallStatus('online', '⚠️ Use Chrome for voice');
+          updateCallStatus('online', '⚠️ Speech recognition not supported');
           els.micBtn.disabled = true;
           els.micBtn.style.opacity = '0.4';
+          addConversationMessage('system', '⚠️ Your browser does not support speech recognition. Please use Chrome.');
         }
 
         els.micBtn.addEventListener('click', () => {
@@ -1818,7 +1969,7 @@
       }
 
       // ==========================================================
-      // CONVERSATION MESSAGES
+      // CONVERSATION MESSAGES - VOICE
       // ==========================================================
       function addConversationMessage(type, content, extra = {}) {
         const emptyState = els.conversationArea.querySelector('.empty-state');
@@ -1833,14 +1984,7 @@
           div.textContent = 'You: ' + content;
         } else if (type === 'correction') {
           let html = `<div class="corr-label">✏️ Correction</div>`;
-
-          html += `
-            <div class="section">
-              <div class="section-label">🗣️ You Said</div>
-              <div class="section-content you-said">${extra.original || ''}</div>
-            </div>
-          `;
-
+          html += `<div class="section"><div class="section-label">🗣️ You Said</div><div class="section-content you-said">${extra.original || ''}</div></div>`;
           if (extra.correction) {
             let correctedHighlighted = extra.correction;
             if (extra.wordChanges && extra.wordChanges.length > 0) {
@@ -1849,46 +1993,21 @@
                 correctedHighlighted = correctedHighlighted.replace(regex, `<span class="correct-part">$&</span>`);
               });
             }
-            html += `
-              <div class="section">
-                <div class="section-label">✏️ Corrected Version</div>
-                <div class="section-content corrected">${correctedHighlighted}</div>
-              </div>
-            `;
+            html += `<div class="section"><div class="section-label">✏️ Corrected Version</div><div class="section-content corrected">${correctedHighlighted}</div></div>`;
           }
-
           if (extra.naturalVersion) {
-            html += `
-              <div class="section">
-                <div class="section-label">⭐ More Natural</div>
-                <div class="section-content natural">${extra.naturalVersion}</div>
-              </div>
-            `;
+            html += `<div class="section"><div class="section-label">⭐ More Natural</div><div class="section-content natural">${extra.naturalVersion}</div></div>`;
           }
-
           if (extra.wordChanges && extra.wordChanges.length > 0) {
-            html += `
-              <div class="section">
-                <div class="section-label">🔍 What Changed</div>
-                <div style="padding:6px 10px;background:rgba(255,213,79,0.04);border-radius:6px;margin-top:2px;">
-            `;
+            html += `<div class="section"><div class="section-label">🔍 What Changed</div><div style="padding:6px 10px;background:rgba(255,213,79,0.04);border-radius:6px;margin-top:2px;">`;
             extra.wordChanges.forEach(change => {
-              html += `
-                <div class="word-change">
-                  <span class="wrong">${change.wrong}</span>
-                  <span class="arrow">→</span>
-                  <span class="correct">${change.correct}</span>
-                  <span class="reason">(${change.reason || ''})</span>
-                </div>
-              `;
+              html += `<div class="word-change"><span class="wrong">${change.wrong}</span><span class="arrow">→</span><span class="correct">${change.correct}</span><span class="reason">(${change.reason || ''})</span></div>`;
             });
             html += `</div></div>`;
           }
-
           if (extra.explanation) {
             html += `<div class="explanation">💡 ${extra.explanation}</div>`;
           }
-
           div.innerHTML = html;
         } else if (type === 'listening-indicator') {
           div.innerHTML = `<span>${content}</span><span class="dots"><span></span><span></span><span></span></span>`;
@@ -1920,7 +2039,7 @@
       }
 
       // ==========================================================
-      // SEND VOICE TO AI
+      // SEND VOICE TO AI - INDEPENDENT
       // ==========================================================
       async function sendVoiceToAI(userText) {
         if (state.isProcessing) return;
@@ -1935,20 +2054,21 @@
         }
 
         try {
-          const res = await fetch('/api/chat', {
+          const res = await fetch('/api/voice-chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              messages: [{ role: 'user', content: userText }],
+              message: userText,
               userLevel: state.userProfile.level,
               userProfession: state.userProfile.profession,
               userGoal: state.userProfile.goal,
-              conversationId: state.userId
+              conversationId: state.userId,
+              userName: state.userName
             })
           });
 
           const data = await res.json();
-          console.log('📥 AI Response:', data);
+          console.log('📥 AI Voice Response:', data);
 
           if (data.reply) {
             if (data.correction && data.correction !== userText) {
@@ -1974,7 +2094,7 @@
           }
 
         } catch (err) {
-          console.error('❌ AI API Error:', err);
+          console.error('❌ AI Voice API Error:', err);
           addConversationMessage('system', '⚠️ Network error. Please try again.');
         }
 
@@ -1986,7 +2106,7 @@
       }
 
       // ==========================================================
-      // SPEAK TEXT - WITH EMOTION SUPPORT
+      // SPEAK TEXT - NATURAL HUMAN-LIKE VOICE
       // ==========================================================
       async function speakText(text, emotion = 'neutral') {
         if (state.isSpeaking) return;
@@ -2020,9 +2140,9 @@
 
         } catch (err) {
           console.error('TTS error:', err);
-          // Fallback
           const fallback = new SpeechSynthesisUtterance(text);
           fallback.rate = 0.9;
+          fallback.pitch = 1;
           window.speechSynthesis.speak(fallback);
           await new Promise(resolve => { fallback.onend = resolve; });
         }
@@ -2061,6 +2181,7 @@
         els.replayBtn.disabled = true;
         addConversationMessage('system', '📞 AI Call ended. Tap mic to start again.');
         state.isAICallActive = false;
+        state.isConversationStarted = false;
       }
 
       // ==========================================================
@@ -2102,10 +2223,9 @@
       }
 
       // ==========================================================
-      // FRIEND CALL - COMPLETELY FIXED
+      // FRIEND CALL SETUP
       // ==========================================================
       function setupFriendCall() {
-        // Connect button
         els.connectBtn.addEventListener('click', () => {
           const targetId = els.friendIdInput.value.trim();
           if (!targetId || targetId.length !== 4) {
@@ -2123,8 +2243,6 @@
           state.isCalling = true;
 
           state.socket.emit('find-user', targetId, (result) => {
-            console.log('Find user result:', result);
-
             if (!result.exists) {
               els.friendCallStatus.textContent = '❌ User not found';
               els.connectBtn.disabled = false;
@@ -2146,20 +2264,16 @@
               state.isCalling = false;
               return;
             }
-
-            // Send call request
             els.friendCallStatus.textContent = '📞 Calling ' + targetId + '...';
             state.socket.emit('call-request', targetId);
           });
         });
 
-        // Random match button
         els.randomMatchBtn.addEventListener('click', () => {
           els.friendCallStatus.textContent = '🔍 Finding a random user...';
           state.socket.emit('find-random');
         });
 
-        // End friend call button
         els.endFriendCallBtn.addEventListener('click', () => {
           endFriendCall();
           els.friendCallStatus.textContent = '📞 Call ended';
@@ -2174,8 +2288,6 @@
       // RENDER ONLINE USERS
       // ==========================================================
       function renderOnlineUsers(users) {
-        console.log('📊 Rendering online users:', users);
-
         const online = users.filter(u => !u.busy);
         const busy = users.filter(u => u.busy);
 
@@ -2184,62 +2296,21 @@
           html = '<div class="empty">No users online</div>';
         } else {
           online.forEach(u => {
-            html += `<span class="chip"><span class="dot"></span> ${u.userId}</span>`;
+            const name = u.userName || u.userId;
+            html += `<span class="chip"><span class="dot"></span> ${u.userId} <span class="name-label">(${name})</span></span>`;
           });
           busy.forEach(u => {
-            html += `<span class="chip"><span class="dot busy"></span> ${u.userId} (busy)</span>`;
+            const name = u.userName || u.userId;
+            html += `<span class="chip"><span class="dot busy"></span> ${u.userId} <span class="name-label">(${name})</span></span>`;
           });
         }
         els.onlineUsersList.innerHTML = html;
       }
 
-      // ==========================================================
-      // AI RESPONSE PROCESSOR
-      // ==========================================================
-      async function processAIResponse(userMessage, callback) {
-        try {
-          const res = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              messages: [{ role: 'user', content: userMessage }],
-              userLevel: state.userProfile.level,
-              userProfession: state.userProfile.profession,
-              userGoal: state.userProfile.goal,
-              conversationId: state.userId
-            })
-          });
-          const data = await res.json();
-          if (data.reply) {
-            callback(data);
-          } else {
-            callback({
-              reply: 'Sorry, I could not process that.',
-              correction: null,
-              naturalVersion: null,
-              wordChanges: [],
-              explanation: '',
-              emotion: 'neutral',
-              nextQuestion: 'What would you like to talk about?'
-            });
-          }
-        } catch (e) {
-          console.error('API error:', e);
-          callback({
-            reply: 'Network error. Please try again.',
-            correction: null,
-            naturalVersion: null,
-            wordChanges: [],
-            explanation: '',
-            emotion: 'neutral',
-            nextQuestion: ''
-          });
-        }
-      }
-
       console.log('🚀 English Passport Pro loaded successfully!');
-      console.log('✅ AI Voice: Natural human-like voice with emotions');
-      console.log('✅ Friend Call: Real-time presence with Accept/Decline');
+      console.log('✅ Text Chat & Voice Conversation - COMPLETELY INDEPENDENT');
+      console.log('✅ Separate histories for Text and Voice');
+      console.log('✅ User Name System Active');
       console.log('✅ 20 Indian Voices available');
     })();
   </script>
