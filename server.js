@@ -23,16 +23,13 @@ const MODEL = "llama-3.1-8b-instant";
 // ============================================================
 // STORES - SEPARATE FOR TEXT AND VOICE
 // ============================================================
-const textChatMemory = new Map();      // userId -> text chat messages
-const voiceChatMemory = new Map();     // userId -> voice chat messages
+const textChatMemory = new Map();
+const voiceChatMemory = new Map();
 const users = new Map();
 const userIdPool = new Set();
 const activeCalls = new Map();
 const pendingCallRequests = new Map();
 
-// ============================================================
-// SEPARATE CONVERSATION MEMORY
-// ============================================================
 function getTextConversation(userId) {
   if (!textChatMemory.has(userId)) {
     textChatMemory.set(userId, {
@@ -81,26 +78,6 @@ function getTextMessages(userId, count = 20) {
 function getVoiceMessages(userId, count = 20) {
   const conv = getVoiceConversation(userId);
   return conv.messages.slice(-count);
-}
-
-function clearTextHistory(userId) {
-  const conv = getTextConversation(userId);
-  conv.messages = [];
-  conv.context = {};
-  conv.topic = null;
-  conv.facts = {};
-  conv.conversationStarted = false;
-  conv.userName = null;
-}
-
-function clearVoiceHistory(userId) {
-  const conv = getVoiceConversation(userId);
-  conv.messages = [];
-  conv.context = {};
-  conv.topic = null;
-  conv.facts = {};
-  conv.conversationStarted = false;
-  conv.userName = null;
 }
 
 function generateUniqueId() {
@@ -160,19 +137,19 @@ function detectEmotion(userMessage) {
 }
 
 // ============================================================
-// SSML GENERATOR
+// SSML GENERATOR - FAST SPEED
 // ============================================================
 function generateSSML(text, emotion = 'neutral', voiceId = 'en-IN-NeerjaNeural') {
   const emotionSettings = {
-    'neutral': { rate: '0%', pitch: '0%', style: 'general' },
-    'happy': { rate: '+5%', pitch: '+10%', style: 'cheerful' },
-    'sad': { rate: '-8%', pitch: '-5%', style: 'sad' },
-    'encouraging': { rate: '+5%', pitch: '+8%', style: 'encouraging' },
-    'empathetic': { rate: '-5%', pitch: '-3%', style: 'empathetic' },
-    'excited': { rate: '+12%', pitch: '+15%', style: 'excited' },
-    'calm': { rate: '-8%', pitch: '-5%', style: 'calm' },
-    'thoughtful': { rate: '-10%', pitch: '-5%', style: 'thoughtful' },
-    'friendly': { rate: '+3%', pitch: '+5%', style: 'friendly' }
+    'neutral': { rate: '+15%', pitch: '0%', style: 'general' },
+    'happy': { rate: '+20%', pitch: '+10%', style: 'cheerful' },
+    'sad': { rate: '+10%', pitch: '-5%', style: 'sad' },
+    'encouraging': { rate: '+18%', pitch: '+8%', style: 'encouraging' },
+    'empathetic': { rate: '+10%', pitch: '-3%', style: 'empathetic' },
+    'excited': { rate: '+25%', pitch: '+15%', style: 'excited' },
+    'calm': { rate: '+12%', pitch: '-5%', style: 'calm' },
+    'thoughtful': { rate: '+10%', pitch: '-5%', style: 'thoughtful' },
+    'friendly': { rate: '+18%', pitch: '+5%', style: 'friendly' }
   };
 
   const settings = emotionSettings[emotion] || emotionSettings['neutral'];
@@ -185,10 +162,10 @@ function generateSSML(text, emotion = 'neutral', voiceId = 'en-IN-NeerjaNeural')
   sentences.forEach((sentence, index) => {
     const trimmed = sentence.trim();
     if (!trimmed) return;
-    if (index > 0) ssml += `<break time="250ms"/>`;
+    if (index > 0) ssml += `<break time="100ms"/>`;
     if (trimmed.endsWith('?')) ssml += `<prosody pitch="+5%">${trimmed}</prosody>`;
-    else if (trimmed.endsWith('!')) { ssml += trimmed; ssml += `<break time="300ms"/>`; }
-    else { ssml += trimmed; ssml += `<break time="400ms"/>`; }
+    else if (trimmed.endsWith('!')) { ssml += trimmed; ssml += `<break time="150ms"/>`; }
+    else { ssml += trimmed; ssml += `<break time="200ms"/>`; }
   });
 
   if (settings.style && settings.style !== 'general') ssml += `</mstts:express-as>`;
@@ -209,7 +186,8 @@ io.on("connection", (socket) => {
     peerId: null,
     voicePreference: 'en-IN-NeerjaNeural',
     joinedAt: Date.now(),
-    userName: null
+    userName: null,
+    currentCallId: null
   });
   socket.userId = userId;
   socket.emit("user-id", userId);
@@ -260,6 +238,7 @@ io.on("connection", (socket) => {
     if (caller.busy) { socket.emit("call-error", "You are already in a call"); return; }
     caller.busy = true;
     const callId = `call_${Date.now()}_${userId}_${targetUserId}`;
+    caller.currentCallId = callId;
     pendingCallRequests.set(callId, {
       caller: userId, target: targetUserId, status: 'pending', timestamp: Date.now(),
       timeout: setTimeout(() => {
@@ -267,7 +246,7 @@ io.on("connection", (socket) => {
         if (pending && pending.status === 'pending') {
           pending.status = 'timedout';
           const callerUser = users.get(pending.caller);
-          if (callerUser) callerUser.busy = false;
+          if (callerUser) { callerUser.busy = false; callerUser.currentCallId = null; }
           const callerSocket = users.get(pending.caller);
           if (callerSocket && callerSocket.connected) {
             io.to(callerSocket.socketId).emit("call-timeout");
@@ -296,14 +275,14 @@ io.on("connection", (socket) => {
     const responder = users.get(pendingCall.target);
     if (!caller || !caller.connected) {
       socket.emit("call-error", "Caller no longer available");
-      if (responder) responder.busy = false;
+      if (responder) { responder.busy = false; responder.currentCallId = null; }
       pendingCallRequests.delete(callId);
       broadcastOnlineUsers();
       return;
     }
     if (accepted) {
-      if (caller) caller.busy = true;
-      if (responder) responder.busy = true;
+      if (caller) { caller.busy = true; caller.currentCallId = callId; }
+      if (responder) { responder.busy = true; responder.currentCallId = callId; }
       activeCalls.set(callId, { userA: pendingCall.caller, userB: pendingCall.target, status: 'connected', startedAt: Date.now() });
       pendingCallRequests.delete(callId);
       const responderName = responder.userName || `User ${pendingCall.target}`;
@@ -322,8 +301,8 @@ io.on("connection", (socket) => {
       });
       broadcastOnlineUsers();
     } else {
-      if (caller) caller.busy = false;
-      if (responder) responder.busy = false;
+      if (caller) { caller.busy = false; caller.currentCallId = null; }
+      if (responder) { responder.busy = false; responder.currentCallId = null; }
       pendingCallRequests.delete(callId);
       io.to(caller.socketId).emit("call-declined");
       broadcastOnlineUsers();
@@ -335,7 +314,7 @@ io.on("connection", (socket) => {
     if (pendingCall) {
       if (pendingCall.timeout) clearTimeout(pendingCall.timeout);
       const caller = users.get(pendingCall.caller);
-      if (caller) caller.busy = false;
+      if (caller) { caller.busy = false; caller.currentCallId = null; }
       pendingCallRequests.delete(callId);
       broadcastOnlineUsers();
     }
@@ -343,16 +322,34 @@ io.on("connection", (socket) => {
 
   socket.on("end-call", (callId) => {
     const user = users.get(userId);
-    if (user) user.busy = false;
+    if (user) {
+      user.busy = false;
+      user.currentCallId = null;
+    }
+
     if (callId && activeCalls.has(callId)) {
       const call = activeCalls.get(callId);
       const otherId = call.userA === userId ? call.userB : call.userA;
       const otherUser = users.get(otherId);
       if (otherUser && otherUser.connected) {
         otherUser.busy = false;
+        otherUser.currentCallId = null;
         io.to(otherUser.socketId).emit("call-ended");
       }
       activeCalls.delete(callId);
+    } else {
+      for (const [id, call] of activeCalls) {
+        if (call.userA === userId || call.userB === userId) {
+          const otherId = call.userA === userId ? call.userB : call.userA;
+          const otherUser = users.get(otherId);
+          if (otherUser && otherUser.connected) {
+            otherUser.busy = false;
+            otherUser.currentCallId = null;
+            io.to(otherUser.socketId).emit("call-ended");
+          }
+          activeCalls.delete(id);
+        }
+      }
     }
     broadcastOnlineUsers();
   });
@@ -373,8 +370,8 @@ io.on("connection", (socket) => {
     const match = availableUsers[Math.floor(Math.random() * availableUsers.length)];
     const user1 = users.get(userId);
     const user2 = users.get(match.userId);
-    if (user1) user1.busy = true;
-    if (user2) user2.busy = true;
+    if (user1) { user1.busy = true; user1.currentCallId = `random_${Date.now()}`; }
+    if (user2) { user2.busy = true; user2.currentCallId = `random_${Date.now()}`; }
     const callId = `call_${Date.now()}_${userId}_${match.userId}`;
     activeCalls.set(callId, { userA: userId, userB: match.userId, status: 'connected', startedAt: Date.now() });
     socket.emit("random-match", {
@@ -396,6 +393,7 @@ io.on("connection", (socket) => {
       if (user) {
         user.connected = false;
         user.busy = false;
+        user.currentCallId = null;
         for (const [callId, call] of activeCalls) {
           if (call.userA === socket.userId || call.userB === socket.userId) {
             activeCalls.delete(callId);
@@ -404,6 +402,7 @@ io.on("connection", (socket) => {
             if (otherUser && otherUser.connected) {
               io.to(otherUser.socketId).emit("call-ended");
               otherUser.busy = false;
+              otherUser.currentCallId = null;
             }
           }
         }
@@ -434,7 +433,7 @@ function broadcastOnlineUsers() {
 }
 
 // ============================================================
-// AI TEXT CHAT ENDPOINT - COMPLETELY INDEPENDENT
+// AI TEXT CHAT ENDPOINT
 // ============================================================
 app.post("/api/text-chat", async (req, res) => {
   try {
@@ -448,7 +447,6 @@ app.post("/api/text-chat", async (req, res) => {
       return res.status(400).json({ error: "'message' is required." });
     }
 
-    // SEPARATE TEXT CHAT HISTORY
     const textConv = getTextConversation(conversationId);
     addTextMessage(conversationId, 'user', message);
 
@@ -501,7 +499,6 @@ CRITICAL RULES:
 4. PROVIDE THE FULL CORRECTED SENTENCE, not just word changes.
 5. Respond naturally like a human with appropriate emotion.
 6. Always ask a follow-up question to continue the conversation.
-7. Keep the conversation flowing - don't end after one response.
 
 RESPONSE FORMAT (JSON only):
 {
@@ -545,7 +542,6 @@ RESPONSE FORMAT (JSON only):
       parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, naturalVersion: null, wordChanges: [], explanation: "" };
     }
 
-    // Store in TEXT CHAT history only
     addTextMessage(conversationId, 'assistant', parsed.reply);
     textConv.conversationStarted = true;
     if (message.toLowerCase().includes('my name is') || message.toLowerCase().includes('call me')) {
@@ -570,7 +566,7 @@ RESPONSE FORMAT (JSON only):
 });
 
 // ============================================================
-// AI VOICE CHAT ENDPOINT - COMPLETELY INDEPENDENT
+// AI VOICE CHAT ENDPOINT
 // ============================================================
 app.post("/api/voice-chat", async (req, res) => {
   try {
@@ -584,7 +580,6 @@ app.post("/api/voice-chat", async (req, res) => {
       return res.status(400).json({ error: "'message' is required." });
     }
 
-    // SEPARATE VOICE CHAT HISTORY
     const voiceConv = getVoiceConversation(conversationId);
     addVoiceMessage(conversationId, 'user', message);
 
@@ -637,7 +632,6 @@ CRITICAL RULES:
 4. PROVIDE THE FULL CORRECTED SENTENCE, not just word changes.
 5. Respond naturally like a human with appropriate emotion.
 6. Always ask a follow-up question to continue the conversation.
-7. Keep the conversation flowing - don't end after one response.
 
 RESPONSE FORMAT (JSON only):
 {
@@ -681,7 +675,6 @@ RESPONSE FORMAT (JSON only):
       parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, naturalVersion: null, wordChanges: [], explanation: "" };
     }
 
-    // Store in VOICE CHAT history only
     addVoiceMessage(conversationId, 'assistant', parsed.reply);
     voiceConv.conversationStarted = true;
     if (message.toLowerCase().includes('my name is') || message.toLowerCase().includes('call me')) {
@@ -706,30 +699,7 @@ RESPONSE FORMAT (JSON only):
 });
 
 // ============================================================
-// CLEAR CHAT HISTORY ENDPOINTS
-// ============================================================
-app.post("/api/clear-text", (req, res) => {
-  const { conversationId } = req.body;
-  if (conversationId) {
-    clearTextHistory(conversationId);
-    res.json({ success: true, message: "Text chat history cleared" });
-  } else {
-    res.status(400).json({ error: "conversationId required" });
-  }
-});
-
-app.post("/api/clear-voice", (req, res) => {
-  const { conversationId } = req.body;
-  if (conversationId) {
-    clearVoiceHistory(conversationId);
-    res.json({ success: true, message: "Voice chat history cleared" });
-  } else {
-    res.status(400).json({ error: "conversationId required" });
-  }
-});
-
-// ============================================================
-// TTS ENDPOINT
+// TTS ENDPOINT - FAST RESPONSE
 // ============================================================
 app.post('/api/tts', async (req, res) => {
   try {
@@ -737,10 +707,16 @@ app.post('/api/tts', async (req, res) => {
     if (!text) return res.status(400).json({ error: 'Text is required' });
 
     const ssml = generateSSML(text, emotion, voice);
+
     const response = await fetch('https://edge-tts-api.vercel.app/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: ssml, voice, rate: 0, pitch: 0 })
+      body: JSON.stringify({
+        text: ssml,
+        voice,
+        rate: '+15%',
+        pitch: 0
+      })
     });
 
     if (!response.ok) throw new Error('TTS service failed');
@@ -756,7 +732,7 @@ app.post('/api/tts', async (req, res) => {
       const response = await fetch('https://edge-tts-api.vercel.app/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voice, rate: 0, pitch: 0 })
+        body: JSON.stringify({ text, voice, rate: '+15%', pitch: 0 })
       });
       if (response.ok) {
         const audioBuffer = await response.arrayBuffer();
@@ -777,8 +753,6 @@ app.get("/api/health", (req, res) => {
     onlineUsers: users.size,
     activeCalls: activeCalls.size,
     totalVoiceOptions: VOICES.male.length + VOICES.female.length,
-    textChatCount: textChatMemory.size,
-    voiceChatCount: voiceChatMemory.size,
     uptime: process.uptime()
   });
 });
@@ -791,9 +765,7 @@ server.listen(PORT, () => {
   }
   console.log(`  ✅ ${VOICES.male.length + VOICES.female.length} Voice Options Available`);
   console.log(`  ✅ Text Chat & Voice Conversation - COMPLETELY INDEPENDENT`);
-  console.log(`  ✅ Separate histories for Text and Voice`);
-  console.log(`  ✅ User Name System Active`);
-  console.log(`  ✅ SSML Natural Voice with Emotions`);
-  console.log(`  ✅ Friend Call with Accept/Decline/Timeout`);
+  console.log(`  ✅ FAST TTS Response (+15% speed, reduced pauses)`);
+  console.log(`  ✅ Friend Call with Multi-Call Audio Fix`);
   console.log(`  ✅ Features: AI Text Chat, AI Voice, Friend Call\n`);
 });

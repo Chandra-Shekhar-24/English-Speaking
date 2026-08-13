@@ -73,7 +73,6 @@
       border-radius: 10px;
     }
 
-    /* Onboarding */
     .onboarding-overlay {
       position: absolute;
       inset: 0;
@@ -186,7 +185,6 @@
       margin-top: 4px;
     }
 
-    /* Header */
     .app-header {
       padding: 14px 20px 10px;
       background: var(--bg-secondary);
@@ -269,7 +267,6 @@
       font-weight: 600;
     }
 
-    /* Tabs */
     .tabs {
       display: flex;
       gap: 4px;
@@ -314,7 +311,6 @@
       color: var(--bg-primary);
     }
 
-    /* Panels */
     .panel {
       display: none;
       flex: 1;
@@ -328,7 +324,6 @@
       display: flex;
     }
 
-    /* Conversation Area */
     .conversation-area {
       flex: 1;
       background: var(--bg-input);
@@ -354,7 +349,6 @@
       margin-bottom: 10px;
     }
 
-    /* Messages */
     .conv-msg {
       animation: msgIn 0.3s ease;
       max-width: 92%;
@@ -418,7 +412,6 @@
       border-radius: 20px;
     }
 
-    /* Correction Message */
     .conv-msg.correction {
       align-self: flex-start;
       background: rgba(255, 107, 107, 0.04);
@@ -566,7 +559,6 @@
       }
     }
 
-    /* Call Header */
     .call-header {
       display: flex;
       align-items: center;
@@ -698,7 +690,6 @@
       background: var(--bg-secondary);
     }
 
-    /* Bottom Controls */
     .bottom-controls {
       display: flex;
       align-items: center;
@@ -800,7 +791,6 @@
       background: rgba(255, 107, 107, 0.25);
     }
 
-    /* Friend Call */
     .friend-area {
       flex: 1;
       display: flex;
@@ -995,7 +985,6 @@
       font-weight: 600;
     }
 
-    /* Text Chat Input */
     .input-row {
       display: flex;
       gap: 10px;
@@ -1041,7 +1030,6 @@
       transform: scale(1.02);
     }
 
-    /* Responsive */
     @media (max-width: 480px) {
       body {
         padding: 0;
@@ -1124,19 +1112,13 @@
 
 <body>
 
-  <!-- ========================================================== -->
-  <!-- ONBOARDING -->
-  <!-- ========================================================== -->
   <div class="onboarding-overlay" id="onboarding">
     <div class="onboarding-card">
       <h2>🇮🇳 English Passport</h2>
       <p class="subtitle">Your AI English conversation partner</p>
-
-      <!-- NAME INPUT -->
       <label>👤 Your Name</label>
       <input type="text" id="nameInput" placeholder="Enter your name" />
       <div class="name-hint">This name will be used throughout the app</div>
-
       <label>📚 Your English Level</label>
       <select id="levelSelect">
         <option value="beginner">Beginner (Basic words)</option>
@@ -1166,12 +1148,7 @@
     </div>
   </div>
 
-  <!-- ========================================================== -->
-  <!-- MAIN APP -->
-  <!-- ========================================================== -->
   <div class="app-container" id="mainApp" style="display:none;">
-
-    <!-- HEADER -->
     <div class="app-header">
       <div class="header-top">
         <div class="app-title">🇮🇳 English <span>Passport</span></div>
@@ -1182,16 +1159,12 @@
       </div>
     </div>
 
-    <!-- TABS -->
     <div class="tabs">
       <button class="tab-btn active" data-tab="text">💬 Chat</button>
       <button class="tab-btn voice-tab" data-tab="voice">🎤 AI Voice</button>
       <button class="tab-btn" data-tab="friend">👥 Friends</button>
     </div>
 
-    <!-- ========================================================== -->
-    <!-- TAB: TEXT CHAT -->
-    <!-- ========================================================== -->
     <div id="tab-text" class="panel active">
       <div class="conversation-area" id="textChatBox">
         <div class="empty-state">
@@ -1205,12 +1178,8 @@
       </div>
     </div>
 
-    <!-- ========================================================== -->
-    <!-- TAB: AI VOICE CALL -->
-    <!-- ========================================================== -->
     <div id="tab-voice" class="panel">
       <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;padding:4px 0;">
-
         <div class="call-header">
           <div class="ai-avatar-small" id="aiAvatar">🤖</div>
           <div class="call-header-info">
@@ -1225,28 +1194,20 @@
             <select id="voiceSelectCompact"></select>
           </div>
         </div>
-
         <div class="conversation-area" id="conversationArea">
           <div class="empty-state">
             <div class="icon">🎤</div>
             <div>Tap the microphone and start speaking!</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">Your conversation will appear here with
-              corrections</div>
           </div>
         </div>
-
         <div class="bottom-controls">
           <button class="ctrl-btn replay-btn" id="replayBtn" title="Listen Again">🔊</button>
           <button class="mic-btn" id="micBtn">🎙️</button>
           <button class="ctrl-btn end-call-btn" id="endCallBtn" title="End Call">📞</button>
         </div>
-
       </div>
     </div>
 
-    <!-- ========================================================== -->
-    <!-- TAB: FRIENDS -->
-    <!-- ========================================================== -->
     <div id="tab-friend" class="panel">
       <div class="friend-area">
         <div class="friend-info">
@@ -1271,50 +1232,25 @@
         <div class="friend-status" id="friendCallStatus">Not connected</div>
       </div>
     </div>
-
   </div>
 
-  <!-- ========================================================== -->
-  <!-- JAVASCRIPT -->
-  <!-- ========================================================== -->
   <script>
     (function () {
       'use strict';
 
-      // ==========================================================
-      // STATE
-      // ==========================================================
       const state = {
-        userId: null,
-        userPeerId: null,
-        socket: null,
-        peer: null,
-        currentCall: null,
-        localStream: null,
-        remoteStream: null,
-        isRecording: false,
-        recognition: null,
+        userId: null, userPeerId: null, socket: null, peer: null,
+        currentCall: null, localStream: null, remoteStream: null,
+        isRecording: false, recognition: null,
         selectedVoice: 'en-IN-NeerjaNeural',
-        currentQuestion: '',
-        isSpeaking: false,
-        isProcessing: false,
-        isFriendCall: false,
-        voiceList: { male: [], female: [] },
+        currentQuestion: '', isSpeaking: false, isProcessing: false,
+        isFriendCall: false, voiceList: { male: [], female: [] },
         userProfile: { level: 'intermediate', profession: 'college student', goal: 'daily conversation' },
-        isCallActive: false,
-        _stopTimeout: null,
-        isAICallActive: false,
-        currentCallId: null,
-        isCalling: false,
-        conversationHistory: [],
-        isConversationStarted: false,
-        userName: '',
-        activeTab: 'text' // 'text' or 'voice'
+        isCallActive: false, _stopTimeout: null, isAICallActive: false,
+        currentCallId: null, isCalling: false, userName: '', activeTab: 'text',
+        isConversationStarted: false
       };
 
-      // ==========================================================
-      // DOM REFS
-      // ==========================================================
       const $ = id => document.getElementById(id);
       const els = {};
       ['conversationArea', 'micBtn', 'replayBtn', 'endCallBtn', 'aiAvatar',
@@ -1335,32 +1271,18 @@
         state.userProfile.profession = els.professionSelect.value;
         state.userProfile.goal = els.goalSelect.value;
         state.userName = userName;
-
         els.onboarding.style.display = 'none';
         els.mainApp.style.display = 'flex';
         initApp();
-
-        setTimeout(() => {
-          if (state.socket && state.socket.connected) {
-            state.socket.emit('set-user-name', userName);
-          }
-        }, 500);
-
+        setTimeout(() => { if (state.socket && state.socket.connected) state.socket.emit('set-user-name', userName); }, 500);
         const badge = document.querySelector('.user-id-badge');
         const nameSpan = document.createElement('span');
         nameSpan.className = 'name-display';
         nameSpan.textContent = '👤 ' + userName;
         badge.appendChild(nameSpan);
-
-        // Start text chat greeting
-        setTimeout(() => {
-          startTextChatGreeting();
-        }, 1000);
+        setTimeout(() => startTextChatGreeting(), 1000);
       });
 
-      // ==========================================================
-      // TEXT CHAT GREETING - INDEPENDENT
-      // ==========================================================
       async function startTextChatGreeting() {
         try {
           const res = await fetch('/api/text-chat', {
@@ -1388,14 +1310,9 @@
               });
             }
           }
-        } catch (e) {
-          console.error('Text chat greeting error:', e);
-        }
+        } catch (e) { console.error('Text chat greeting error:', e); }
       }
 
-      // ==========================================================
-      // VOICE CHAT GREETING - INDEPENDENT
-      // ==========================================================
       async function startVoiceChatGreeting() {
         try {
           const res = await fetch('/api/voice-chat', {
@@ -1424,9 +1341,7 @@
               });
             }
           }
-        } catch (e) {
-          console.error('Voice chat greeting error:', e);
-        }
+        } catch (e) { console.error('Voice chat greeting error:', e); }
       }
 
       // ==========================================================
@@ -1446,42 +1361,14 @@
       // SOCKET.IO
       // ==========================================================
       function connectSocket() {
-        state.socket = io({
-          reconnection: true,
-          reconnectionAttempts: 5,
-          reconnectionDelay: 1000
-        });
+        state.socket = io({ reconnection: true, reconnectionAttempts: 5, reconnectionDelay: 1000 });
+        state.socket.on('connect', () => { console.log('✅ Socket connected'); if (state.userName) state.socket.emit('set-user-name', state.userName); });
+        state.socket.on('connect_error', (error) => { console.error('❌ Socket error:', error); });
+        state.socket.on('user-id', (id) => { state.userId = id; els.userIdDisplay.textContent = 'ID: ' + id; els.friendUserId.textContent = id; initPeer(); });
+        state.socket.on('online-users', (users) => { renderOnlineUsers(users); const online = users.filter(u => !u.busy).length; els.onlineCount.textContent = online; });
 
-        state.socket.on('connect', () => {
-          console.log('✅ Socket connected');
-          if (state.userName) {
-            state.socket.emit('set-user-name', state.userName);
-          }
-        });
-
-        state.socket.on('connect_error', (error) => {
-          console.error('❌ Socket error:', error);
-        });
-
-        state.socket.on('user-id', (id) => {
-          state.userId = id;
-          els.userIdDisplay.textContent = 'ID: ' + id;
-          els.friendUserId.textContent = id;
-          initPeer();
-        });
-
-        state.socket.on('online-users', (users) => {
-          renderOnlineUsers(users);
-          const online = users.filter(u => !u.busy).length;
-          els.onlineCount.textContent = online;
-        });
-
-        // Friend Call Events with Names
         state.socket.on('incoming-call', (data) => {
-          if (state.isCallActive || state.isFriendCall) {
-            state.socket.emit('call-response', { callId: data.callId, accepted: false });
-            return;
-          }
+          if (state.isCallActive || state.isFriendCall) { state.socket.emit('call-response', { callId: data.callId, accepted: false }); return; }
           const accept = confirm(`📞 ${data.fromName} is calling you!\n\nAccept?`);
           if (accept) {
             state.socket.emit('call-response', { callId: data.callId, accepted: true });
@@ -1496,15 +1383,6 @@
           }
         });
 
-        state.socket.on('call-connected', (data) => {
-          els.friendCallStatus.textContent = '✅ Connected with ' + data.userName;
-          state.isFriendCall = true;
-          els.endFriendCallBtn.style.display = 'inline-block';
-          els.connectBtn.style.display = 'none';
-          els.connectBtn.disabled = false;
-          els.connectBtn.textContent = 'Connect';
-        });
-
         state.socket.on('call-accepted', (data) => {
           els.friendCallStatus.textContent = '✅ Connected with ' + data.userName;
           state.isFriendCall = true;
@@ -1516,60 +1394,21 @@
           els.connectBtn.textContent = 'Connect';
         });
 
-        state.socket.on('call-declined', () => {
-          els.friendCallStatus.textContent = '❌ Call declined';
-          state.isFriendCall = false;
-          state.isCalling = false;
-          els.endFriendCallBtn.style.display = 'none';
-          els.connectBtn.style.display = 'inline-block';
-          els.connectBtn.disabled = false;
-          els.connectBtn.textContent = 'Connect';
-        });
-
-        state.socket.on('call-timeout', () => {
-          els.friendCallStatus.textContent = '⏰ No response from user';
-          state.isFriendCall = false;
-          state.isCalling = false;
-          els.endFriendCallBtn.style.display = 'none';
-          els.connectBtn.style.display = 'inline-block';
-          els.connectBtn.disabled = false;
-          els.connectBtn.textContent = 'Connect';
-        });
-
-        state.socket.on('call-ended', () => {
-          endFriendCall();
-          els.friendCallStatus.textContent = '📞 Call ended';
-          els.endFriendCallBtn.style.display = 'none';
-          els.connectBtn.style.display = 'inline-block';
-          els.connectBtn.disabled = false;
-          els.connectBtn.textContent = 'Connect';
-        });
-
-        state.socket.on('no-users-available', () => {
-          els.friendCallStatus.textContent = '❌ No users available. Try later.';
-          els.connectBtn.disabled = false;
-          els.connectBtn.textContent = 'Connect';
-        });
-
-        state.socket.on('random-match', (data) => {
-          els.friendCallStatus.textContent = '✅ Matched with ' + data.userName;
+        state.socket.on('call-connected', (data) => {
+          els.friendCallStatus.textContent = '✅ Connected with ' + data.userName;
           state.isFriendCall = true;
-          connectToPeer(data.peerId, data.userId);
           els.endFriendCallBtn.style.display = 'inline-block';
           els.connectBtn.style.display = 'none';
           els.connectBtn.disabled = false;
           els.connectBtn.textContent = 'Connect';
         });
 
-        state.socket.on('call-error', (msg) => {
-          els.friendCallStatus.textContent = '❌ ' + msg;
-          state.isFriendCall = false;
-          state.isCalling = false;
-          els.endFriendCallBtn.style.display = 'none';
-          els.connectBtn.style.display = 'inline-block';
-          els.connectBtn.disabled = false;
-          els.connectBtn.textContent = 'Connect';
-        });
+        state.socket.on('call-declined', () => { els.friendCallStatus.textContent = '❌ Call declined'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
+        state.socket.on('call-timeout', () => { els.friendCallStatus.textContent = '⏰ No response from user'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
+        state.socket.on('call-ended', () => { endFriendCall(); els.friendCallStatus.textContent = '📞 Call ended'; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
+        state.socket.on('no-users-available', () => { els.friendCallStatus.textContent = '❌ No users available. Try later.'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
+        state.socket.on('random-match', (data) => { els.friendCallStatus.textContent = '✅ Matched with ' + data.userName; state.isFriendCall = true; connectToPeer(data.peerId, data.userId); els.endFriendCallBtn.style.display = 'inline-block'; els.connectBtn.style.display = 'none'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
+        state.socket.on('call-error', (msg) => { els.friendCallStatus.textContent = '❌ ' + msg; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
       }
 
       // ==========================================================
@@ -1577,23 +1416,11 @@
       // ==========================================================
       function initPeer() {
         if (state.peer) { state.peer.destroy(); }
-        state.peer = new Peer(undefined, {
-          config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
-        });
-
-        state.peer.on('open', (id) => {
-          state.userPeerId = id;
-          state.socket.emit('set-peer-id', id);
-          console.log('PeerJS ID:', id);
-        });
-
+        state.peer = new Peer(undefined, { config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] } });
+        state.peer.on('open', (id) => { state.userPeerId = id; state.socket.emit('set-peer-id', id); console.log('PeerJS ID:', id); });
         state.peer.on('call', (incomingCall) => {
-          if (state.currentCall || state.isCallActive) {
-            incomingCall.answer();
-            incomingCall.close();
-            return;
-          }
-          navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+          if (state.currentCall || state.isCallActive) { incomingCall.answer(); incomingCall.close(); return; }
+          navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false })
             .then((stream) => {
               state.localStream = stream;
               incomingCall.answer(stream);
@@ -1604,78 +1431,52 @@
                 state.remoteStream = remoteStream;
                 const audio = new Audio();
                 audio.srcObject = remoteStream;
-                audio.play().catch(err => {
-                  console.error('Audio play error:', err);
-                  document.addEventListener('click', () => {
-                    audio.play().catch(() => { });
-                  }, { once: true });
-                });
+                audio.autoplay = true;
+                audio.volume = 1.0;
+                document.body.appendChild(audio);
+                audio.play().catch(err => { console.error('Audio play error:', err); document.addEventListener('click', () => { audio.play().catch(() => { }); }, { once: true }); });
               });
               incomingCall.on('close', () => { endFriendCall(); });
             })
-            .catch(() => {
-              els.friendCallStatus.textContent = '❌ Mic access denied';
-            });
+            .catch(() => { els.friendCallStatus.textContent = '❌ Mic access denied'; });
         });
-
-        state.peer.on('error', (err) => {
-          console.error('Peer error:', err);
-        });
+        state.peer.on('error', (err) => { console.error('Peer error:', err); });
       }
 
       // ==========================================================
-      // CONNECT TO PEER
+      // CONNECT TO PEER - FIXED FOR MULTIPLE CALLS
       // ==========================================================
       function connectToPeer(peerId, friendId) {
         console.log('🔗 Connecting to peer:', peerId);
-
-        if (state.currentCall) {
-          endFriendCall();
-        }
-
-        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        if (state.currentCall) { endFriendCall(); }
+        navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false })
           .then((stream) => {
-            console.log('🎤 Microphone access granted');
+            console.log('🎤 Fresh microphone stream obtained');
             state.localStream = stream;
-
             const call = state.peer.call(peerId, stream);
             state.currentCall = call;
             state.isCallActive = true;
-
+            state.currentCallId = Date.now().toString();
             els.friendCallStatus.textContent = '📞 Calling ' + friendId + '...';
-
             call.on('stream', (remoteStream) => {
-              console.log('📡 Remote stream received');
+              console.log('📡 Remote stream received for call:', state.currentCallId);
               state.remoteStream = remoteStream;
-              const audio = new Audio();
-              audio.srcObject = remoteStream;
-              audio.play().catch(err => {
+              const audioEl = document.createElement('audio');
+              audioEl.id = 'remoteAudio_' + state.currentCallId;
+              audioEl.autoplay = true;
+              audioEl.volume = 1.0;
+              audioEl.srcObject = remoteStream;
+              const oldAudio = document.getElementById('remoteAudio');
+              if (oldAudio) { oldAudio.pause(); oldAudio.srcObject = null; oldAudio.remove(); }
+              audioEl.id = 'remoteAudio';
+              document.body.appendChild(audioEl);
+              audioEl.play().then(() => { console.log('🔊 Remote audio playing'); els.friendCallStatus.textContent = '🔊 Connected with ' + friendId; }).catch(err => {
                 console.error('Audio play error:', err);
-                document.addEventListener('click', () => {
-                  audio.play().catch(() => { });
-                }, { once: true });
+                document.addEventListener('click', () => { audioEl.play().catch(() => { }); }, { once: true });
               });
-              els.friendCallStatus.textContent = '🔊 Connected with ' + friendId;
             });
-
-            call.on('close', () => {
-              console.log('📞 Call closed');
-              endFriendCall();
-              els.endFriendCallBtn.style.display = 'none';
-              els.connectBtn.style.display = 'inline-block';
-              els.connectBtn.disabled = false;
-              els.connectBtn.textContent = 'Connect';
-            });
-
-            call.on('error', (err) => {
-              console.error('Call error:', err);
-              endFriendCall();
-              els.endFriendCallBtn.style.display = 'none';
-              els.connectBtn.style.display = 'inline-block';
-              els.connectBtn.disabled = false;
-              els.connectBtn.textContent = 'Connect';
-              els.friendCallStatus.textContent = '❌ Call error: ' + err.message;
-            });
+            call.on('close', () => { console.log('📞 Call closed for:', state.currentCallId); endFriendCall(); els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
+            call.on('error', (err) => { console.error('Call error:', err); endFriendCall(); els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.friendCallStatus.textContent = '❌ Call error: ' + err.message; });
           })
           .catch((err) => {
             console.error('❌ Microphone access denied:', err);
@@ -1689,39 +1490,18 @@
       }
 
       // ==========================================================
-      // END FRIEND CALL
+      // END FRIEND CALL - COMPLETE CLEANUP
       // ==========================================================
       function endFriendCall() {
-        console.log('📞 Ending friend call');
-
-        if (state.currentCall) {
-          state.currentCall.close();
-          state.currentCall = null;
-        }
-
-        if (state.localStream) {
-          state.localStream.getTracks().forEach(t => t.stop());
-          state.localStream = null;
-        }
-
-        if (state.remoteStream) {
-          state.remoteStream = null;
-        }
-
-        if (state.socket && state.socket.connected) {
-          state.socket.emit('end-call', state.currentCallId);
-        }
-
-        state.isCallActive = false;
-        state.isFriendCall = false;
-        state.isCalling = false;
-        state.currentCallId = null;
-
-        els.endFriendCallBtn.style.display = 'none';
-        els.connectBtn.style.display = 'inline-block';
-        els.connectBtn.disabled = false;
-        els.connectBtn.textContent = 'Connect';
-        els.friendCallStatus.textContent = '📞 Call ended';
+        console.log('📞 Ending friend call - cleanup started');
+        if (state.currentCall) { try { state.currentCall.close(); console.log('✅ Peer connection closed'); } catch (e) { console.error('Error closing peer connection:', e); } state.currentCall = null; }
+        if (state.localStream) { try { state.localStream.getTracks().forEach(t => t.stop()); console.log('🎤 Stopped tracks'); } catch (e) { console.error('Error stopping tracks:', e); } state.localStream = null; }
+        if (state.remoteStream) { state.remoteStream = null; }
+        const audioEl = document.getElementById('remoteAudio');
+        if (audioEl) { try { audioEl.pause(); audioEl.srcObject = null; audioEl.remove(); console.log('🔊 Audio element cleaned up'); } catch (e) { console.error('Error cleaning audio element:', e); } }
+        state.isCallActive = false; state.isFriendCall = false; state.isCalling = false; state.currentCallId = null;
+        els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.friendCallStatus.textContent = '📞 Call ended';
+        console.log('📞 Friend call cleanup complete');
       }
 
       // ==========================================================
@@ -1729,44 +1509,24 @@
       // ==========================================================
       function setupTabs() {
         const tabs = document.querySelectorAll('.tab-btn');
-        const panels = {
-          text: document.getElementById('tab-text'),
-          voice: document.getElementById('tab-voice'),
-          friend: document.getElementById('tab-friend')
-        };
+        const panels = { text: document.getElementById('tab-text'), voice: document.getElementById('tab-voice'), friend: document.getElementById('tab-friend') };
         tabs.forEach(btn => {
           btn.addEventListener('click', () => {
             tabs.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             state.activeTab = btn.dataset.tab;
-            Object.keys(panels).forEach(k => {
-              panels[k].classList.toggle('active', k === btn.dataset.tab);
-            });
-
-            // When switching to voice tab, start voice greeting if not started
-            if (btn.dataset.tab === 'voice' && !state.isConversationStarted) {
-              state.isConversationStarted = true;
-              setTimeout(() => {
-                startVoiceChatGreeting();
-              }, 500);
-            }
-
-            // When switching to text tab, ensure text greeting already happened (onboarding time)
-            if (btn.dataset.tab === 'text') {
-              // Text greeting already triggered in onboarding
-            }
+            Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === btn.dataset.tab));
+            if (btn.dataset.tab === 'voice' && !state.isConversationStarted) { state.isConversationStarted = true; setTimeout(() => startVoiceChatGreeting(), 500); }
           });
         });
       }
 
       // ==========================================================
-      // TEXT CHAT - COMPLETELY INDEPENDENT
+      // TEXT CHAT
       // ==========================================================
       function setupTextChat() {
         els.textSend.addEventListener('click', sendTextMessage);
-        els.textInput.addEventListener('keydown', e => {
-          if (e.key === 'Enter') sendTextMessage();
-        });
+        els.textInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendTextMessage(); });
       }
 
       function addTextChatMessage(text, type, extra = {}) {
@@ -1779,31 +1539,18 @@
           html += `<div class="section"><div class="section-label">🗣️ You Said</div><div class="section-content you-said">${extra.original || ''}</div></div>`;
           if (extra.correction) {
             let correctedHighlighted = extra.correction;
-            if (extra.wordChanges && extra.wordChanges.length > 0) {
-              extra.wordChanges.forEach(change => {
-                const regex = new RegExp(change.correct, 'gi');
-                correctedHighlighted = correctedHighlighted.replace(regex, `<span class="correct-part">$&</span>`);
-              });
-            }
+            if (extra.wordChanges && extra.wordChanges.length > 0) { extra.wordChanges.forEach(change => { const regex = new RegExp(change.correct, 'gi'); correctedHighlighted = correctedHighlighted.replace(regex, `<span class="correct-part">$&</span>`); }); }
             html += `<div class="section"><div class="section-label">✏️ Corrected Version</div><div class="section-content corrected">${correctedHighlighted}</div></div>`;
           }
-          if (extra.naturalVersion) {
-            html += `<div class="section"><div class="section-label">⭐ More Natural</div><div class="section-content natural">${extra.naturalVersion}</div></div>`;
-          }
+          if (extra.naturalVersion) { html += `<div class="section"><div class="section-label">⭐ More Natural</div><div class="section-content natural">${extra.naturalVersion}</div></div>`; }
           if (extra.wordChanges && extra.wordChanges.length > 0) {
             html += `<div class="section"><div class="section-label">🔍 What Changed</div><div style="padding:6px 10px;background:rgba(255,213,79,0.04);border-radius:6px;margin-top:2px;">`;
-            extra.wordChanges.forEach(change => {
-              html += `<div class="word-change"><span class="wrong">${change.wrong}</span><span class="arrow">→</span><span class="correct">${change.correct}</span><span class="reason">(${change.reason || ''})</span></div>`;
-            });
+            extra.wordChanges.forEach(change => { html += `<div class="word-change"><span class="wrong">${change.wrong}</span><span class="arrow">→</span><span class="correct">${change.correct}</span><span class="reason">(${change.reason || ''})</span></div>`; });
             html += `</div></div>`;
           }
-          if (extra.explanation) {
-            html += `<div class="explanation">💡 ${extra.explanation}</div>`;
-          }
+          if (extra.explanation) { html += `<div class="explanation">💡 ${extra.explanation}</div>`; }
           div.innerHTML = html;
-        } else {
-          div.textContent = text;
-        }
+        } else { div.textContent = text; }
         els.textChatBox.appendChild(div);
         els.textChatBox.scrollTop = els.textChatBox.scrollHeight;
         return div;
@@ -1814,7 +1561,6 @@
         if (!msg) return;
         els.textInput.value = '';
         addTextChatMessage(msg, 'user');
-
         try {
           const res = await fetch('/api/text-chat', {
             method: 'POST',
@@ -1850,15 +1596,10 @@
       }
 
       // ==========================================================
-      // AI VOICE UI - COMPLETELY INDEPENDENT
+      // AI VOICE UI
       // ==========================================================
       function setupVoiceUI() {
-        els.voiceSelectCompact.addEventListener('change', (e) => {
-          state.selectedVoice = e.target.value;
-          if (state.socket && state.socket.connected) {
-            state.socket.emit('set-voice-preference', state.selectedVoice);
-          }
-        });
+        els.voiceSelectCompact.addEventListener('change', (e) => { state.selectedVoice = e.target.value; if (state.socket && state.socket.connected) state.socket.emit('set-voice-preference', state.selectedVoice); });
 
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
           const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1904,16 +1645,10 @@
           };
 
           state.recognition.onresult = (e) => {
-            let final = '';
-            let interim = '';
+            let final = '', interim = '';
             for (let i = 0; i < e.results.length; i++) {
-              if (e.results[i].isFinal) {
-                final += e.results[i][0].transcript;
-              } else {
-                interim += e.results[i][0].transcript;
-              }
+              if (e.results[i].isFinal) { final += e.results[i][0].transcript; } else { interim += e.results[i][0].transcript; }
             }
-
             if (final) {
               const existingUserMsg = els.conversationArea.querySelector('.conv-msg.user:last-child');
               if (existingUserMsg && existingUserMsg.dataset.final !== 'true') {
@@ -1928,11 +1663,7 @@
                 els.conversationArea.scrollTop = els.conversationArea.scrollHeight;
               }
               clearTimeout(state._stopTimeout);
-              state._stopTimeout = setTimeout(() => {
-                if (state.recognition && state.isRecording) {
-                  state.recognition.stop();
-                }
-              }, 1500);
+              state._stopTimeout = setTimeout(() => { if (state.recognition && state.isRecording) state.recognition.stop(); }, 1200);
             } else if (interim) {
               let interimMsg = els.conversationArea.querySelector('.conv-msg.user:last-child');
               if (interimMsg && interimMsg.dataset.final !== 'true') {
@@ -1955,9 +1686,8 @@
         }
 
         els.micBtn.addEventListener('click', () => {
-          if (state.isRecording) {
-            state.recognition.stop();
-          } else if (!state.isProcessing && !state.isSpeaking) {
+          if (state.isRecording) { state.recognition.stop(); }
+          else if (!state.isProcessing && !state.isSpeaking) {
             const emptyState = els.conversationArea.querySelector('.empty-state');
             if (emptyState) emptyState.remove();
             state.recognition.start();
@@ -1974,44 +1704,28 @@
       function addConversationMessage(type, content, extra = {}) {
         const emptyState = els.conversationArea.querySelector('.empty-state');
         if (emptyState) emptyState.remove();
-
         const div = document.createElement('div');
         div.className = 'conv-msg ' + type;
-
-        if (type === 'ai') {
-          div.innerHTML = `<span class="ai-name">🤖 Madhu</span>${content}`;
-        } else if (type === 'user') {
-          div.textContent = 'You: ' + content;
-        } else if (type === 'correction') {
+        if (type === 'ai') { div.innerHTML = `<span class="ai-name">🤖 Madhu</span>${content}`; }
+        else if (type === 'user') { div.textContent = 'You: ' + content; }
+        else if (type === 'correction') {
           let html = `<div class="corr-label">✏️ Correction</div>`;
           html += `<div class="section"><div class="section-label">🗣️ You Said</div><div class="section-content you-said">${extra.original || ''}</div></div>`;
           if (extra.correction) {
             let correctedHighlighted = extra.correction;
-            if (extra.wordChanges && extra.wordChanges.length > 0) {
-              extra.wordChanges.forEach(change => {
-                const regex = new RegExp(change.correct, 'gi');
-                correctedHighlighted = correctedHighlighted.replace(regex, `<span class="correct-part">$&</span>`);
-              });
-            }
+            if (extra.wordChanges && extra.wordChanges.length > 0) { extra.wordChanges.forEach(change => { const regex = new RegExp(change.correct, 'gi'); correctedHighlighted = correctedHighlighted.replace(regex, `<span class="correct-part">$&</span>`); }); }
             html += `<div class="section"><div class="section-label">✏️ Corrected Version</div><div class="section-content corrected">${correctedHighlighted}</div></div>`;
           }
-          if (extra.naturalVersion) {
-            html += `<div class="section"><div class="section-label">⭐ More Natural</div><div class="section-content natural">${extra.naturalVersion}</div></div>`;
-          }
+          if (extra.naturalVersion) { html += `<div class="section"><div class="section-label">⭐ More Natural</div><div class="section-content natural">${extra.naturalVersion}</div></div>`; }
           if (extra.wordChanges && extra.wordChanges.length > 0) {
             html += `<div class="section"><div class="section-label">🔍 What Changed</div><div style="padding:6px 10px;background:rgba(255,213,79,0.04);border-radius:6px;margin-top:2px;">`;
-            extra.wordChanges.forEach(change => {
-              html += `<div class="word-change"><span class="wrong">${change.wrong}</span><span class="arrow">→</span><span class="correct">${change.correct}</span><span class="reason">(${change.reason || ''})</span></div>`;
-            });
+            extra.wordChanges.forEach(change => { html += `<div class="word-change"><span class="wrong">${change.wrong}</span><span class="arrow">→</span><span class="correct">${change.correct}</span><span class="reason">(${change.reason || ''})</span></div>`; });
             html += `</div></div>`;
           }
-          if (extra.explanation) {
-            html += `<div class="explanation">💡 ${extra.explanation}</div>`;
-          }
+          if (extra.explanation) { html += `<div class="explanation">💡 ${extra.explanation}</div>`; }
           div.innerHTML = html;
-        } else if (type === 'listening-indicator') {
-          div.innerHTML = `<span>${content}</span><span class="dots"><span></span><span></span><span></span></span>`;
-        } else if (type === 'system') {
+        } else if (type === 'listening-indicator') { div.innerHTML = `<span>${content}</span><span class="dots"><span></span><span></span><span></span></span>`; }
+        else if (type === 'system') {
           div.textContent = '📢 ' + content;
           div.style.opacity = '0.7';
           div.style.fontSize = '12px';
@@ -2023,7 +1737,6 @@
           div.style.padding = '4px 14px';
           div.style.borderRadius = '20px';
         }
-
         els.conversationArea.appendChild(div);
         els.conversationArea.scrollTop = els.conversationArea.scrollHeight;
         return div;
@@ -2039,19 +1752,16 @@
       }
 
       // ==========================================================
-      // SEND VOICE TO AI - INDEPENDENT
+      // SEND VOICE TO AI
       // ==========================================================
       async function sendVoiceToAI(userText) {
         if (state.isProcessing) return;
         state.isProcessing = true;
-
         updateCallStatus('thinking', '⏳ Thinking...');
         els.aiAvatar.className = 'ai-avatar-small thinking';
 
         const lastMsg = els.conversationArea.querySelector('.conv-msg.user:last-child');
-        if (!lastMsg || lastMsg.dataset.final !== 'true') {
-          addConversationMessage('user', userText);
-        }
+        if (!lastMsg || lastMsg.dataset.final !== 'true') { addConversationMessage('user', userText); }
 
         try {
           const res = await fetch('/api/voice-chat', {
@@ -2066,10 +1776,7 @@
               userName: state.userName
             })
           });
-
           const data = await res.json();
-          console.log('📥 AI Voice Response:', data);
-
           if (data.reply) {
             if (data.correction && data.correction !== userText) {
               addConversationMessage('correction', data.correction, {
@@ -2080,19 +1787,12 @@
                 explanation: data.explanation
               });
             }
-
             addConversationMessage('ai', data.reply);
             await speakText(data.reply, data.emotion || 'neutral');
-
-            if (data.nextQuestion) {
-              state.currentQuestion = data.nextQuestion;
-              els.replayBtn.disabled = false;
-            }
-
+            if (data.nextQuestion) { state.currentQuestion = data.nextQuestion; els.replayBtn.disabled = false; }
           } else {
             addConversationMessage('system', '⚠️ Error: ' + (data.error || 'No response'));
           }
-
         } catch (err) {
           console.error('❌ AI Voice API Error:', err);
           addConversationMessage('system', '⚠️ Network error. Please try again.');
@@ -2106,12 +1806,11 @@
       }
 
       // ==========================================================
-      // SPEAK TEXT - NATURAL HUMAN-LIKE VOICE
+      // SPEAK TEXT
       // ==========================================================
       async function speakText(text, emotion = 'neutral') {
         if (state.isSpeaking) return;
         state.isSpeaking = true;
-
         els.aiAvatar.className = 'ai-avatar-small speaking';
         updateCallStatus('speaking', '🗣️ Speaking...');
 
@@ -2119,25 +1818,14 @@
           const res = await fetch('/api/tts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              text: text,
-              voice: state.selectedVoice,
-              emotion: emotion
-            })
+            body: JSON.stringify({ text, voice: state.selectedVoice, emotion })
           });
-
           if (!res.ok) throw new Error('TTS failed');
-
           const blob = await res.blob();
           const url = URL.createObjectURL(blob);
           const audio = new Audio(url);
           audio.play();
-
-          await new Promise((resolve, reject) => {
-            audio.onended = resolve;
-            audio.onerror = reject;
-          });
-
+          await new Promise((resolve, reject) => { audio.onended = resolve; audio.onerror = reject; });
         } catch (err) {
           console.error('TTS error:', err);
           const fallback = new SpeechSynthesisUtterance(text);
@@ -2158,22 +1846,15 @@
       // REPLAY
       // ==========================================================
       function replayQuestion() {
-        if (state.currentQuestion && !state.isSpeaking) {
-          speakText(state.currentQuestion, 'neutral');
-        }
+        if (state.currentQuestion && !state.isSpeaking) { speakText(state.currentQuestion, 'neutral'); }
       }
 
       // ==========================================================
       // END AI CALL
       // ==========================================================
       function endAICall() {
-        if (state.isRecording && state.recognition) {
-          state.recognition.stop();
-        }
-        if (state.isSpeaking) {
-          window.speechSynthesis && window.speechSynthesis.cancel();
-          state.isSpeaking = false;
-        }
+        if (state.isRecording && state.recognition) state.recognition.stop();
+        if (state.isSpeaking) { window.speechSynthesis && window.speechSynthesis.cancel(); state.isSpeaking = false; }
         state.isProcessing = false;
         state.currentQuestion = '';
         els.aiAvatar.className = 'ai-avatar-small';
@@ -2189,10 +1870,7 @@
       // ==========================================================
       function loadVoices() {
         if (state.socket && state.socket.connected) {
-          state.socket.emit('get-voices', (voices) => {
-            state.voiceList = voices;
-            populateVoiceSelect();
-          });
+          state.socket.emit('get-voices', (voices) => { state.voiceList = voices; populateVoiceSelect(); });
         }
       }
 
@@ -2208,17 +1886,8 @@
           select.appendChild(opt);
         });
         if (allVoices.length === 0) {
-          const defaults = [
-            { id: 'en-IN-NeerjaNeural', name: 'Neerja', style: 'Warm' },
-            { id: 'en-IN-PrabhatNeural', name: 'Prabhat', style: 'Professional' }
-          ];
-          defaults.forEach(v => {
-            const opt = document.createElement('option');
-            opt.value = v.id;
-            opt.textContent = v.name + ' (' + v.style + ')';
-            if (v.id === state.selectedVoice) opt.selected = true;
-            select.appendChild(opt);
-          });
+          const defaults = [{ id: 'en-IN-NeerjaNeural', name: 'Neerja', style: 'Warm' }, { id: 'en-IN-PrabhatNeural', name: 'Prabhat', style: 'Professional' }];
+          defaults.forEach(v => { const opt = document.createElement('option'); opt.value = v.id; opt.textContent = v.name + ' (' + v.style + ')'; if (v.id === state.selectedVoice) opt.selected = true; select.appendChild(opt); });
         }
       }
 
@@ -2228,42 +1897,16 @@
       function setupFriendCall() {
         els.connectBtn.addEventListener('click', () => {
           const targetId = els.friendIdInput.value.trim();
-          if (!targetId || targetId.length !== 4) {
-            els.friendCallStatus.textContent = '⚠️ Enter a valid 4-digit ID';
-            return;
-          }
-          if (targetId === state.userId) {
-            els.friendCallStatus.textContent = '⚠️ You cannot call yourself';
-            return;
-          }
-
+          if (!targetId || targetId.length !== 4) { els.friendCallStatus.textContent = '⚠️ Enter a valid 4-digit ID'; return; }
+          if (targetId === state.userId) { els.friendCallStatus.textContent = '⚠️ You cannot call yourself'; return; }
           els.friendCallStatus.textContent = '🔍 Looking for user ' + targetId + '...';
           els.connectBtn.disabled = true;
           els.connectBtn.textContent = 'Calling...';
           state.isCalling = true;
-
           state.socket.emit('find-user', targetId, (result) => {
-            if (!result.exists) {
-              els.friendCallStatus.textContent = '❌ User not found';
-              els.connectBtn.disabled = false;
-              els.connectBtn.textContent = 'Connect';
-              state.isCalling = false;
-              return;
-            }
-            if (!result.online) {
-              els.friendCallStatus.textContent = '❌ User is offline';
-              els.connectBtn.disabled = false;
-              els.connectBtn.textContent = 'Connect';
-              state.isCalling = false;
-              return;
-            }
-            if (result.busy) {
-              els.friendCallStatus.textContent = '❌ User is in a call';
-              els.connectBtn.disabled = false;
-              els.connectBtn.textContent = 'Connect';
-              state.isCalling = false;
-              return;
-            }
+            if (!result.exists) { els.friendCallStatus.textContent = '❌ User not found'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; state.isCalling = false; return; }
+            if (!result.online) { els.friendCallStatus.textContent = '❌ User is offline'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; state.isCalling = false; return; }
+            if (result.busy) { els.friendCallStatus.textContent = '❌ User is in a call'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; state.isCalling = false; return; }
             els.friendCallStatus.textContent = '📞 Calling ' + targetId + '...';
             state.socket.emit('call-request', targetId);
           });
@@ -2290,19 +1933,10 @@
       function renderOnlineUsers(users) {
         const online = users.filter(u => !u.busy);
         const busy = users.filter(u => u.busy);
-
         let html = '';
-        if (online.length === 0 && busy.length === 0) {
-          html = '<div class="empty">No users online</div>';
-        } else {
-          online.forEach(u => {
-            const name = u.userName || u.userId;
-            html += `<span class="chip"><span class="dot"></span> ${u.userId} <span class="name-label">(${name})</span></span>`;
-          });
-          busy.forEach(u => {
-            const name = u.userName || u.userId;
-            html += `<span class="chip"><span class="dot busy"></span> ${u.userId} <span class="name-label">(${name})</span></span>`;
-          });
+        if (online.length === 0 && busy.length === 0) { html = '<div class="empty">No users online</div>'; } else {
+          online.forEach(u => { const name = u.userName || u.userId; html += `<span class="chip"><span class="dot"></span> ${u.userId} <span class="name-label">(${name})</span></span>`; });
+          busy.forEach(u => { const name = u.userName || u.userId; html += `<span class="chip"><span class="dot busy"></span> ${u.userId} <span class="name-label">(${name})</span></span>`; });
         }
         els.onlineUsersList.innerHTML = html;
       }
@@ -2312,6 +1946,8 @@
       console.log('✅ Separate histories for Text and Voice');
       console.log('✅ User Name System Active');
       console.log('✅ 20 Indian Voices available');
+      console.log('✅ Fast AI Voice Response');
+      console.log('✅ Friend Call with Multi-Call Audio Fix');
     })();
   </script>
 

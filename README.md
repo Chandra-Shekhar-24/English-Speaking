@@ -1,17 +1,17 @@
-<<<<<<< HEAD
 # 🇮🇳 English Passport Pro
 
 **Premium AI English Conversation Practice with 20 Indian Voices + Real-time Friend Calls**
 
 ## Features
+- **User Name System** – Enter your name, AI addresses you personally
 - **AI Voice Call** – Speak naturally with AI, get real-time corrections
 - **20 Indian Voices** – 10 Male + 10 Female, natural Indian accents
 - **Live Conversation** – See every message on the same voice call screen
 - **Grammar Correction** – 3-tier comparison: You Said → Corrected → Natural
 - **Word-level Changes** – See exactly what words were wrong and why
-- **Friend Call** – Real-time voice calls with 4-digit User ID
+- **Friend Call** – Real-time voice calls with 4-digit User ID + Name display
 - **Random Match** – Connect with random online users
-- **Real-time Presence** – See who's online and available
+- **Real-time Presence** – See who's online and available with names
 
 ## Setup
 1. Install Node.js 18+
@@ -21,9 +21,9 @@
 5. Open `http://localhost:3000` in **Chrome**
 
 ## How It Works
-1. **Onboarding** – Select your English level, profession, and practice goal
-2. **AI Voice** – Tap mic, speak naturally, AI responds with voice + text + corrections
-3. **Friend Call** – Get a 4-digit User ID, connect with friends or random users
+1. **Onboarding** – Enter your name, select level, profession, and practice goal
+2. **AI Voice** – Tap mic, speak naturally, AI responds with voice + text + corrections, uses your name
+3. **Friend Call** – Get a 4-digit User ID, connect with friends or random users (shows names)
 
 ## Technologies
 - Node.js + Express
@@ -36,6 +36,3 @@
 ## Note
 - Use **Chrome** for voice features
 - All features are **100% free** (Groq has free tier)
-=======
-# English-Speaking
->>>>>>> dd31b988dc1fa1e381acfa2545f851da97f3a5ee
