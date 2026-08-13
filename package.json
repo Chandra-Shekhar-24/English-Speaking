@@ -1,0 +1,22 @@
+{
+  "name": "english-passport-pro",
+  "version": "3.0.0",
+  "description": "Premium AI English Conversation Practice with 20 Voices + Real-time Chat",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
