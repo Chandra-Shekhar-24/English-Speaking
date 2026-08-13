@@ -21,7 +21,7 @@ const API_KEY = process.env.GROQ_API_KEY || "your_api_key_here";
 const MODEL = "llama-3.1-8b-instant";
 
 // ============================================================
-// STORES - SEPARATE FOR TEXT AND VOICE
+// STORES
 // ============================================================
 const textChatMemory = new Map();
 const voiceChatMemory = new Map();
@@ -60,14 +60,16 @@ function getVoiceConversation(userId) {
 
 function addTextMessage(userId, role, content) {
   const conv = getTextConversation(userId);
-  conv.messages.push({ role, content });
+  conv.messages.push({ role, content, timestamp: Date.now() });
   if (conv.messages.length > 50) conv.messages = conv.messages.slice(-50);
+  return conv.messages.length - 1;
 }
 
 function addVoiceMessage(userId, role, content) {
   const conv = getVoiceConversation(userId);
-  conv.messages.push({ role, content });
+  conv.messages.push({ role, content, timestamp: Date.now() });
   if (conv.messages.length > 50) conv.messages = conv.messages.slice(-50);
+  return conv.messages.length - 1;
 }
 
 function getTextMessages(userId, count = 20) {
@@ -137,7 +139,7 @@ function detectEmotion(userMessage) {
 }
 
 // ============================================================
-// SSML GENERATOR - FAST SPEED
+// SSML GENERATOR
 // ============================================================
 function generateSSML(text, emotion = 'neutral', voiceId = 'en-IN-NeerjaNeural') {
   const emotionSettings = {
@@ -220,11 +222,11 @@ io.on("connection", (socket) => {
     if (!user) callback({ exists: false, message: "User not found" });
     else if (!user.connected) callback({ exists: true, online: false, message: "User is offline" });
     else if (user.busy) callback({ exists: true, online: true, busy: true, message: "User is in a call" });
-    else callback({
-      exists: true,
-      online: true,
-      busy: false,
-      peerId: user.peerId,
+    else callback({ 
+      exists: true, 
+      online: true, 
+      busy: false, 
+      peerId: user.peerId, 
       userId: targetUserId,
       userName: user.userName || targetUserId
     });
@@ -258,9 +260,9 @@ io.on("connection", (socket) => {
     });
     const callerName = caller.userName || `User ${userId}`;
     io.to(target.socketId).emit("incoming-call", {
-      callId,
-      from: userId,
-      fromPeerId: caller.peerId,
+      callId, 
+      from: userId, 
+      fromPeerId: caller.peerId, 
       fromName: callerName
     });
     broadcastOnlineUsers();
@@ -286,16 +288,16 @@ io.on("connection", (socket) => {
       activeCalls.set(callId, { userA: pendingCall.caller, userB: pendingCall.target, status: 'connected', startedAt: Date.now() });
       pendingCallRequests.delete(callId);
       const responderName = responder.userName || `User ${pendingCall.target}`;
-      io.to(caller.socketId).emit("call-accepted", {
-        callId,
-        peerId: responder.peerId,
+      io.to(caller.socketId).emit("call-accepted", { 
+        callId, 
+        peerId: responder.peerId, 
         userId: pendingCall.target,
         userName: responderName
       });
       const callerName = caller.userName || `User ${pendingCall.caller}`;
-      io.to(responder.socketId).emit("call-connected", {
-        callId,
-        peerId: caller.peerId,
+      io.to(responder.socketId).emit("call-connected", { 
+        callId, 
+        peerId: caller.peerId, 
         userId: pendingCall.caller,
         userName: callerName
       });
@@ -322,11 +324,11 @@ io.on("connection", (socket) => {
 
   socket.on("end-call", (callId) => {
     const user = users.get(userId);
-    if (user) {
-      user.busy = false;
-      user.currentCallId = null;
+    if (user) { 
+      user.busy = false; 
+      user.currentCallId = null; 
     }
-
+    
     if (callId && activeCalls.has(callId)) {
       const call = activeCalls.get(callId);
       const otherId = call.userA === userId ? call.userB : call.userA;
@@ -358,9 +360,9 @@ io.on("connection", (socket) => {
     const availableUsers = [];
     users.forEach((user, id) => {
       if (id !== userId && user.connected && !user.busy && user.peerId) {
-        availableUsers.push({
-          userId: id,
-          peerId: user.peerId,
+        availableUsers.push({ 
+          userId: id, 
+          peerId: user.peerId, 
           socketId: user.socketId,
           userName: user.userName || id
         });
@@ -374,13 +376,13 @@ io.on("connection", (socket) => {
     if (user2) { user2.busy = true; user2.currentCallId = `random_${Date.now()}`; }
     const callId = `call_${Date.now()}_${userId}_${match.userId}`;
     activeCalls.set(callId, { userA: userId, userB: match.userId, status: 'connected', startedAt: Date.now() });
-    socket.emit("random-match", {
-      peerId: match.peerId,
+    socket.emit("random-match", { 
+      peerId: match.peerId, 
       userId: match.userId,
       userName: match.userName
     });
-    io.to(match.socketId).emit("random-match", {
-      peerId: user1.peerId,
+    io.to(match.socketId).emit("random-match", { 
+      peerId: user1.peerId, 
       userId: userId,
       userName: user1.userName || userId
     });
@@ -422,8 +424,8 @@ function broadcastOnlineUsers() {
   const onlineUsers = [];
   users.forEach((user, id) => {
     if (user.connected) {
-      onlineUsers.push({
-        userId: id,
+      onlineUsers.push({ 
+        userId: id, 
         busy: user.busy || false,
         userName: user.userName || id
       });
@@ -442,7 +444,7 @@ app.post("/api/text-chat", async (req, res) => {
     }
 
     const { message, userLevel, userProfession, userGoal, conversationId, userName } = req.body || {};
-
+    
     if (!message) {
       return res.status(400).json({ error: "'message' is required." });
     }
@@ -504,7 +506,6 @@ RESPONSE FORMAT (JSON only):
 {
   "reply": "Your natural text response (2-3 sentences, use the user's name, include a question)",
   "correction": "FULL corrected version of the user's entire sentence (preserve meaning) or null if perfect",
-  "naturalVersion": "More natural way to say the same thing, or null",
   "wordChanges": [{"wrong": "word", "correct": "word", "reason": "why"}],
   "explanation": "Brief explanation of the main mistake"
 }`;
@@ -535,14 +536,22 @@ RESPONSE FORMAT (JSON only):
     }
 
     const aiContent = data.choices?.[0]?.message?.content ||
-      '{"reply":"I understand. Could you tell me more about that?","correction":null,"naturalVersion":null,"wordChanges":[],"explanation":""}';
+      '{"reply":"I understand. Could you tell me more about that?","correction":null,"wordChanges":[],"explanation":""}';
 
     let parsed;
     try { parsed = JSON.parse(aiContent); } catch (e) {
-      parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, naturalVersion: null, wordChanges: [], explanation: "" };
+      parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, wordChanges: [], explanation: "" };
     }
 
-    addTextMessage(conversationId, 'assistant', parsed.reply);
+    // Store the AI response with correction data embedded
+    const msgIndex = addTextMessage(conversationId, 'assistant', parsed.reply);
+    textConv.messages[msgIndex].correctionData = {
+      original: message,
+      corrected: parsed.correction || null,
+      wordChanges: parsed.wordChanges || [],
+      explanation: parsed.explanation || ""
+    };
+
     textConv.conversationStarted = true;
     if (message.toLowerCase().includes('my name is') || message.toLowerCase().includes('call me')) {
       const nameMatch = message.match(/(?:my name is|call me|i am)\s+(\w+)/i);
@@ -553,7 +562,6 @@ RESPONSE FORMAT (JSON only):
     res.json({
       reply: parsed.reply || "I understand what you mean.",
       correction: parsed.correction || null,
-      naturalVersion: parsed.naturalVersion || null,
       wordChanges: parsed.wordChanges || [],
       explanation: parsed.explanation || "",
       emotion: detectEmotion(message)
@@ -575,7 +583,7 @@ app.post("/api/voice-chat", async (req, res) => {
     }
 
     const { message, userLevel, userProfession, userGoal, conversationId, userName } = req.body || {};
-
+    
     if (!message) {
       return res.status(400).json({ error: "'message' is required." });
     }
@@ -637,7 +645,6 @@ RESPONSE FORMAT (JSON only):
 {
   "reply": "Your natural spoken response (2-3 sentences, use the user's name, include a question)",
   "correction": "FULL corrected version of the user's entire sentence (preserve meaning) or null if perfect",
-  "naturalVersion": "More natural way to say the same thing, or null",
   "wordChanges": [{"wrong": "word", "correct": "word", "reason": "why"}],
   "explanation": "Brief explanation of the main mistake"
 }`;
@@ -668,14 +675,21 @@ RESPONSE FORMAT (JSON only):
     }
 
     const aiContent = data.choices?.[0]?.message?.content ||
-      '{"reply":"I understand. Could you tell me more about that?","correction":null,"naturalVersion":null,"wordChanges":[],"explanation":""}';
+      '{"reply":"I understand. Could you tell me more about that?","correction":null,"wordChanges":[],"explanation":""}';
 
     let parsed;
     try { parsed = JSON.parse(aiContent); } catch (e) {
-      parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, naturalVersion: null, wordChanges: [], explanation: "" };
+      parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, wordChanges: [], explanation: "" };
     }
 
-    addVoiceMessage(conversationId, 'assistant', parsed.reply);
+    const msgIndex = addVoiceMessage(conversationId, 'assistant', parsed.reply);
+    voiceConv.messages[msgIndex].correctionData = {
+      original: message,
+      corrected: parsed.correction || null,
+      wordChanges: parsed.wordChanges || [],
+      explanation: parsed.explanation || ""
+    };
+
     voiceConv.conversationStarted = true;
     if (message.toLowerCase().includes('my name is') || message.toLowerCase().includes('call me')) {
       const nameMatch = message.match(/(?:my name is|call me|i am)\s+(\w+)/i);
@@ -686,7 +700,6 @@ RESPONSE FORMAT (JSON only):
     res.json({
       reply: parsed.reply || "I understand what you mean.",
       correction: parsed.correction || null,
-      naturalVersion: parsed.naturalVersion || null,
       wordChanges: parsed.wordChanges || [],
       explanation: parsed.explanation || "",
       emotion: detectEmotion(message)
@@ -699,7 +712,7 @@ RESPONSE FORMAT (JSON only):
 });
 
 // ============================================================
-// TTS ENDPOINT - FAST RESPONSE
+// TTS ENDPOINT
 // ============================================================
 app.post('/api/tts', async (req, res) => {
   try {
@@ -707,15 +720,15 @@ app.post('/api/tts', async (req, res) => {
     if (!text) return res.status(400).json({ error: 'Text is required' });
 
     const ssml = generateSSML(text, emotion, voice);
-
+    
     const response = await fetch('https://edge-tts-api.vercel.app/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text: ssml,
-        voice,
+      body: JSON.stringify({ 
+        text: ssml, 
+        voice, 
         rate: '+15%',
-        pitch: 0
+        pitch: 0 
       })
     });
 

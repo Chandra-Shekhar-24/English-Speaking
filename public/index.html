@@ -376,6 +376,7 @@
       color: var(--text-secondary);
       border-bottom-left-radius: 4px;
       border: 1px solid rgba(255, 255, 255, 0.04);
+      position: relative;
     }
 
     .conv-msg.ai .ai-name {
@@ -384,6 +385,30 @@
       font-weight: 600;
       display: block;
       margin-bottom: 2px;
+    }
+
+    .conv-msg.ai .ai-content {
+      display: inline;
+    }
+
+    .conv-msg.ai .correction-star {
+      cursor: pointer;
+      color: var(--yellow);
+      font-size: 16px;
+      margin-left: 8px;
+      opacity: 0.5;
+      transition: opacity 0.3s, transform 0.2s;
+      display: inline-block;
+      user-select: none;
+    }
+
+    .conv-msg.ai .correction-star:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    .conv-msg.ai .correction-star.active {
+      opacity: 1;
     }
 
     .conv-msg.user {
@@ -412,103 +437,82 @@
       border-radius: 20px;
     }
 
-    .conv-msg.correction {
-      align-self: flex-start;
+    /* Correction Detail Box */
+    .correction-detail-box {
+      margin-top: 8px;
+      padding: 12px 14px;
       background: rgba(255, 107, 107, 0.04);
       border-left: 3px solid var(--red);
-      max-width: 95%;
-      padding: 12px 14px;
+      border-radius: 8px;
       width: 100%;
+      font-size: 14px;
+      line-height: 1.6;
+      animation: fadeIn 0.3s ease;
     }
 
-    .conv-msg.correction .corr-label {
-      font-size: 10px;
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .correction-detail-box .section-label {
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    .conv-msg.correction .section {
-      margin-top: 6px;
-    }
-
-    .conv-msg.correction .section-label {
-      color: var(--text-muted);
-      font-size: 10px;
-      text-transform: uppercase;
       letter-spacing: 0.5px;
-      font-weight: 600;
+      margin-bottom: 4px;
     }
 
-    .conv-msg.correction .section-content {
+    .correction-detail-box .you-said {
       padding: 6px 10px;
-      border-radius: 6px;
-      margin-top: 2px;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .conv-msg.correction .you-said {
       background: rgba(255, 107, 107, 0.06);
+      border-radius: 6px;
       border-left: 3px solid var(--red);
+      margin-bottom: 8px;
     }
 
-    .conv-msg.correction .corrected {
+    .correction-detail-box .corrected-version {
+      padding: 6px 10px;
       background: rgba(79, 195, 247, 0.06);
+      border-radius: 6px;
       border-left: 3px solid var(--blue);
+      margin-bottom: 8px;
     }
 
-    .conv-msg.correction .natural {
-      background: rgba(102, 187, 106, 0.06);
-      border-left: 3px solid var(--green);
-    }
-
-    .conv-msg.correction .wrong-part {
-      color: var(--red);
-      text-decoration: underline wavy var(--red);
-      font-weight: 600;
-    }
-
-    .conv-msg.correction .correct-part {
-      color: var(--green);
-      font-weight: 600;
-    }
-
-    .conv-msg.correction .word-change {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      padding: 2px 0;
-    }
-
-    .conv-msg.correction .word-change .wrong {
-      color: var(--red);
-      text-decoration: underline wavy var(--red);
-    }
-
-    .conv-msg.correction .word-change .arrow {
-      color: var(--text-muted);
-    }
-
-    .conv-msg.correction .word-change .correct {
-      color: var(--green);
-      font-weight: 600;
-    }
-
-    .conv-msg.correction .word-change .reason {
-      color: var(--text-muted);
-      font-size: 11px;
-      margin-left: 4px;
-    }
-
-    .conv-msg.correction .explanation {
+    .correction-detail-box .explanation-text {
+      margin-top: 6px;
       font-size: 12px;
       color: var(--text-muted);
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 4px 8px;
+      background: rgba(255, 213, 79, 0.04);
+      border-radius: 4px;
+    }
+
+    .correction-detail-box .word-changes {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      background: rgba(255, 213, 79, 0.04);
+      border-radius: 4px;
+    }
+
+    .correction-detail-box .wrong-word {
+      color: var(--red);
+      text-decoration: underline wavy var(--red);
+    }
+
+    .correction-detail-box .correct-word {
+      color: var(--green);
+      font-weight: 600;
     }
 
     .conv-msg.listening-indicator {
@@ -1030,6 +1034,17 @@
       transform: scale(1.02);
     }
 
+    /* Call Timer */
+    .call-timer {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--blue);
+      text-align: center;
+      padding: 4px 0;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
+    }
+
     @media (max-width: 480px) {
       body {
         padding: 0;
@@ -1086,6 +1101,10 @@
       .friend-row button {
         padding: 10px 14px;
         font-size: 12px;
+      }
+
+      .call-timer {
+        font-size: 17px;
       }
     }
 
@@ -1169,7 +1188,7 @@
       <div class="conversation-area" id="textChatBox">
         <div class="empty-state">
           <div class="icon">💬</div>
-          <div>Type your message here.<br>AI will reply with corrections.</div>
+          <div>Type your message here.<br>AI will reply with corrections.<br>Click ★ to see correction.</div>
         </div>
       </div>
       <div class="input-row">
@@ -1197,7 +1216,7 @@
         <div class="conversation-area" id="conversationArea">
           <div class="empty-state">
             <div class="icon">🎤</div>
-            <div>Tap the microphone and start speaking!</div>
+            <div>Tap the microphone and start speaking!<br>Click ★ to see correction.</div>
           </div>
         </div>
         <div class="bottom-controls">
@@ -1230,6 +1249,7 @@
           </div>
         </div>
         <div class="friend-status" id="friendCallStatus">Not connected</div>
+        <div class="call-timer" id="callTimerDisplay">00:00</div>
       </div>
     </div>
   </div>
@@ -1248,7 +1268,9 @@
         userProfile: { level: 'intermediate', profession: 'college student', goal: 'daily conversation' },
         isCallActive: false, _stopTimeout: null, isAICallActive: false,
         currentCallId: null, isCalling: false, userName: '', activeTab: 'text',
-        isConversationStarted: false
+        isConversationStarted: false,
+        callTimerInterval: null,
+        callStartTime: null
       };
 
       const $ = id => document.getElementById(id);
@@ -1259,7 +1281,7 @@
         'friendIdInput', 'connectBtn', 'randomMatchBtn', 'friendStatus',
         'textChatBox', 'textInput', 'textSend', 'voiceSelectCompact',
         'levelSelect', 'professionSelect', 'goalSelect', 'startBtn',
-        'onboarding', 'mainApp', 'endFriendCallBtn', 'nameInput'
+        'onboarding', 'mainApp', 'endFriendCallBtn', 'nameInput', 'callTimerDisplay'
       ].forEach(id => { els[id] = $(id); });
 
       // ==========================================================
@@ -1299,16 +1321,14 @@
           });
           const data = await res.json();
           if (data.reply) {
-            addTextChatMessage(data.reply, 'ai');
-            if (data.correction) {
-              addTextChatMessage(data.correction, 'correction', {
+            addTextChatMessage(data.reply, 'ai', {
+              correctionData: {
                 original: 'Hello! I am ready to practice English with you through text chat. Please start the conversation.',
-                correction: data.correction,
-                naturalVersion: data.naturalVersion,
+                corrected: data.correction,
                 wordChanges: data.wordChanges || [],
-                explanation: data.explanation
-              });
-            }
+                explanation: data.explanation || ''
+              }
+            });
           }
         } catch (e) { console.error('Text chat greeting error:', e); }
       }
@@ -1329,17 +1349,15 @@
           });
           const data = await res.json();
           if (data.reply) {
-            addConversationMessage('ai', data.reply);
-            speakText(data.reply, data.emotion || 'friendly');
-            if (data.correction) {
-              addConversationMessage('correction', data.correction, {
+            addConversationMessage('ai', data.reply, {
+              correctionData: {
                 original: 'Hello! I am ready to practice English with you through voice conversation. Please start the conversation.',
-                correction: data.correction,
-                naturalVersion: data.naturalVersion,
+                corrected: data.correction,
                 wordChanges: data.wordChanges || [],
-                explanation: data.explanation
-              });
-            }
+                explanation: data.explanation || ''
+              }
+            });
+            speakText(data.reply, data.emotion || 'friendly');
           }
         } catch (e) { console.error('Voice chat greeting error:', e); }
       }
@@ -1392,6 +1410,7 @@
           els.connectBtn.style.display = 'none';
           els.connectBtn.disabled = false;
           els.connectBtn.textContent = 'Connect';
+          startCallTimer();
         });
 
         state.socket.on('call-connected', (data) => {
@@ -1401,14 +1420,38 @@
           els.connectBtn.style.display = 'none';
           els.connectBtn.disabled = false;
           els.connectBtn.textContent = 'Connect';
+          startCallTimer();
         });
 
-        state.socket.on('call-declined', () => { els.friendCallStatus.textContent = '❌ Call declined'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
-        state.socket.on('call-timeout', () => { els.friendCallStatus.textContent = '⏰ No response from user'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
-        state.socket.on('call-ended', () => { endFriendCall(); els.friendCallStatus.textContent = '📞 Call ended'; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
+        state.socket.on('call-declined', () => { els.friendCallStatus.textContent = '❌ Call declined'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
+        state.socket.on('call-timeout', () => { els.friendCallStatus.textContent = '⏰ No response from user'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
+        state.socket.on('call-ended', () => { endFriendCall(); els.friendCallStatus.textContent = '📞 Call ended'; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
         state.socket.on('no-users-available', () => { els.friendCallStatus.textContent = '❌ No users available. Try later.'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
-        state.socket.on('random-match', (data) => { els.friendCallStatus.textContent = '✅ Matched with ' + data.userName; state.isFriendCall = true; connectToPeer(data.peerId, data.userId); els.endFriendCallBtn.style.display = 'inline-block'; els.connectBtn.style.display = 'none'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
-        state.socket.on('call-error', (msg) => { els.friendCallStatus.textContent = '❌ ' + msg; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
+        state.socket.on('random-match', (data) => { els.friendCallStatus.textContent = '✅ Matched with ' + data.userName; state.isFriendCall = true; connectToPeer(data.peerId, data.userId); els.endFriendCallBtn.style.display = 'inline-block'; els.connectBtn.style.display = 'none'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; startCallTimer(); });
+        state.socket.on('call-error', (msg) => { els.friendCallStatus.textContent = '❌ ' + msg; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
+      }
+
+      // ==========================================================
+      // CALL TIMER
+      // ==========================================================
+      function startCallTimer() {
+        state.callStartTime = Date.now();
+        if (state.callTimerInterval) clearInterval(state.callTimerInterval);
+        state.callTimerInterval = setInterval(() => {
+          const elapsed = Date.now() - state.callStartTime;
+          const minutes = String(Math.floor(elapsed / 60000)).padStart(2, '0');
+          const seconds = String(Math.floor((elapsed % 60000) / 1000)).padStart(2, '0');
+          els.callTimerDisplay.textContent = `${minutes}:${seconds}`;
+        }, 1000);
+      }
+
+      function stopCallTimer() {
+        if (state.callTimerInterval) {
+          clearInterval(state.callTimerInterval);
+          state.callTimerInterval = null;
+        }
+        state.callStartTime = null;
+        els.callTimerDisplay.textContent = '00:00';
       }
 
       // ==========================================================
@@ -1444,7 +1487,7 @@
       }
 
       // ==========================================================
-      // CONNECT TO PEER - FIXED FOR MULTIPLE CALLS
+      // CONNECT TO PEER
       // ==========================================================
       function connectToPeer(peerId, friendId) {
         console.log('🔗 Connecting to peer:', peerId);
@@ -1475,8 +1518,8 @@
                 document.addEventListener('click', () => { audioEl.play().catch(() => { }); }, { once: true });
               });
             });
-            call.on('close', () => { console.log('📞 Call closed for:', state.currentCallId); endFriendCall(); els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
-            call.on('error', (err) => { console.error('Call error:', err); endFriendCall(); els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.friendCallStatus.textContent = '❌ Call error: ' + err.message; });
+            call.on('close', () => { console.log('📞 Call closed for:', state.currentCallId); endFriendCall(); els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
+            call.on('error', (err) => { console.error('Call error:', err); endFriendCall(); els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.friendCallStatus.textContent = '❌ Call error: ' + err.message; stopCallTimer(); });
           })
           .catch((err) => {
             console.error('❌ Microphone access denied:', err);
@@ -1486,11 +1529,12 @@
             els.connectBtn.style.display = 'inline-block';
             els.connectBtn.disabled = false;
             els.connectBtn.textContent = 'Connect';
+            stopCallTimer();
           });
       }
 
       // ==========================================================
-      // END FRIEND CALL - COMPLETE CLEANUP
+      // END FRIEND CALL
       // ==========================================================
       function endFriendCall() {
         console.log('📞 Ending friend call - cleanup started');
@@ -1501,6 +1545,7 @@
         if (audioEl) { try { audioEl.pause(); audioEl.srcObject = null; audioEl.remove(); console.log('🔊 Audio element cleaned up'); } catch (e) { console.error('Error cleaning audio element:', e); } }
         state.isCallActive = false; state.isFriendCall = false; state.isCalling = false; state.currentCallId = null;
         els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.friendCallStatus.textContent = '📞 Call ended';
+        stopCallTimer();
         console.log('📞 Friend call cleanup complete');
       }
 
@@ -1534,26 +1579,79 @@
         if (emptyState) emptyState.remove();
         const div = document.createElement('div');
         div.className = 'conv-msg ' + type;
-        if (type === 'correction') {
-          let html = `<div class="corr-label">✏️ Correction</div>`;
-          html += `<div class="section"><div class="section-label">🗣️ You Said</div><div class="section-content you-said">${extra.original || ''}</div></div>`;
-          if (extra.correction) {
-            let correctedHighlighted = extra.correction;
-            if (extra.wordChanges && extra.wordChanges.length > 0) { extra.wordChanges.forEach(change => { const regex = new RegExp(change.correct, 'gi'); correctedHighlighted = correctedHighlighted.replace(regex, `<span class="correct-part">$&</span>`); }); }
-            html += `<div class="section"><div class="section-label">✏️ Corrected Version</div><div class="section-content corrected">${correctedHighlighted}</div></div>`;
+        if (type === 'ai') {
+          const contentSpan = document.createElement('span');
+          contentSpan.className = 'ai-content';
+          contentSpan.textContent = text;
+          div.appendChild(contentSpan);
+
+          if (extra.correctionData) {
+            const star = document.createElement('span');
+            star.className = 'correction-star';
+            star.textContent = ' ★';
+            star.dataset.correction = JSON.stringify(extra.correctionData);
+            star.addEventListener('click', toggleCorrection);
+            div.appendChild(star);
           }
-          if (extra.naturalVersion) { html += `<div class="section"><div class="section-label">⭐ More Natural</div><div class="section-content natural">${extra.naturalVersion}</div></div>`; }
-          if (extra.wordChanges && extra.wordChanges.length > 0) {
-            html += `<div class="section"><div class="section-label">🔍 What Changed</div><div style="padding:6px 10px;background:rgba(255,213,79,0.04);border-radius:6px;margin-top:2px;">`;
-            extra.wordChanges.forEach(change => { html += `<div class="word-change"><span class="wrong">${change.wrong}</span><span class="arrow">→</span><span class="correct">${change.correct}</span><span class="reason">(${change.reason || ''})</span></div>`; });
-            html += `</div></div>`;
-          }
-          if (extra.explanation) { html += `<div class="explanation">💡 ${extra.explanation}</div>`; }
-          div.innerHTML = html;
-        } else { div.textContent = text; }
+        } else {
+          div.textContent = text;
+        }
         els.textChatBox.appendChild(div);
         els.textChatBox.scrollTop = els.textChatBox.scrollHeight;
         return div;
+      }
+
+      function toggleCorrection(e) {
+        const star = e.currentTarget;
+        const isActive = star.classList.contains('active');
+
+        document.querySelectorAll('.correction-detail-box').forEach(el => el.remove());
+        document.querySelectorAll('.correction-star').forEach(s => s.classList.remove('active'));
+
+        if (isActive) { return; }
+
+        star.classList.add('active');
+
+        try {
+          const data = JSON.parse(star.dataset.correction);
+          if (!data || !data.original) return;
+
+          const parentMsg = star.closest('.conv-msg.ai');
+          if (!parentMsg) return;
+
+          const box = document.createElement('div');
+          box.className = 'correction-detail-box';
+
+          let html = `
+            <div class="section-label">🗣️ You said</div>
+            <div class="you-said">${data.original}</div>
+            <div class="section-label">✏️ Corrected version</div>
+            <div class="corrected-version">${data.corrected || 'No correction needed'}</div>
+          `;
+
+          if (data.explanation) {
+            html += `<div class="explanation-text">💡 ${data.explanation}</div>`;
+          }
+
+          if (data.wordChanges && data.wordChanges.length > 0) {
+            html += `<div class="word-changes">${data.wordChanges.map(w => `<span class="wrong-word">${w.wrong}</span> → <span class="correct-word">${w.correct}</span> (${w.reason || ''})`).join(' | ')}</div>`;
+          }
+
+          box.innerHTML = html;
+          parentMsg.appendChild(box);
+
+          const closeHandler = (e) => {
+            if (!parentMsg.contains(e.target)) {
+              box.remove();
+              star.classList.remove('active');
+              document.removeEventListener('click', closeHandler);
+            }
+          };
+          setTimeout(() => document.addEventListener('click', closeHandler), 100);
+
+        } catch (e) {
+          console.error('Error showing correction:', e);
+        }
       }
 
       async function sendTextMessage() {
@@ -1576,16 +1674,14 @@
           });
           const data = await res.json();
           if (data.reply) {
-            addTextChatMessage(data.reply, 'ai');
-            if (data.correction) {
-              addTextChatMessage(data.correction, 'correction', {
+            addTextChatMessage(data.reply, 'ai', {
+              correctionData: {
                 original: msg,
-                correction: data.correction,
-                naturalVersion: data.naturalVersion,
+                corrected: data.correction,
                 wordChanges: data.wordChanges || [],
-                explanation: data.explanation
-              });
-            }
+                explanation: data.explanation || ''
+              }
+            });
           } else {
             addTextChatMessage('❌ Error: ' + (data.error || 'No response'), 'system');
           }
@@ -1706,26 +1802,25 @@
         if (emptyState) emptyState.remove();
         const div = document.createElement('div');
         div.className = 'conv-msg ' + type;
-        if (type === 'ai') { div.innerHTML = `<span class="ai-name">🤖 Madhu</span>${content}`; }
-        else if (type === 'user') { div.textContent = 'You: ' + content; }
-        else if (type === 'correction') {
-          let html = `<div class="corr-label">✏️ Correction</div>`;
-          html += `<div class="section"><div class="section-label">🗣️ You Said</div><div class="section-content you-said">${extra.original || ''}</div></div>`;
-          if (extra.correction) {
-            let correctedHighlighted = extra.correction;
-            if (extra.wordChanges && extra.wordChanges.length > 0) { extra.wordChanges.forEach(change => { const regex = new RegExp(change.correct, 'gi'); correctedHighlighted = correctedHighlighted.replace(regex, `<span class="correct-part">$&</span>`); }); }
-            html += `<div class="section"><div class="section-label">✏️ Corrected Version</div><div class="section-content corrected">${correctedHighlighted}</div></div>`;
+        if (type === 'ai') {
+          const contentSpan = document.createElement('span');
+          contentSpan.className = 'ai-content';
+          contentSpan.textContent = content;
+          div.appendChild(contentSpan);
+
+          if (extra.correctionData) {
+            const star = document.createElement('span');
+            star.className = 'correction-star';
+            star.textContent = ' ★';
+            star.dataset.correction = JSON.stringify(extra.correctionData);
+            star.addEventListener('click', toggleCorrection);
+            div.appendChild(star);
           }
-          if (extra.naturalVersion) { html += `<div class="section"><div class="section-label">⭐ More Natural</div><div class="section-content natural">${extra.naturalVersion}</div></div>`; }
-          if (extra.wordChanges && extra.wordChanges.length > 0) {
-            html += `<div class="section"><div class="section-label">🔍 What Changed</div><div style="padding:6px 10px;background:rgba(255,213,79,0.04);border-radius:6px;margin-top:2px;">`;
-            extra.wordChanges.forEach(change => { html += `<div class="word-change"><span class="wrong">${change.wrong}</span><span class="arrow">→</span><span class="correct">${change.correct}</span><span class="reason">(${change.reason || ''})</span></div>`; });
-            html += `</div></div>`;
-          }
-          if (extra.explanation) { html += `<div class="explanation">💡 ${extra.explanation}</div>`; }
-          div.innerHTML = html;
-        } else if (type === 'listening-indicator') { div.innerHTML = `<span>${content}</span><span class="dots"><span></span><span></span><span></span></span>`; }
-        else if (type === 'system') {
+        } else if (type === 'user') {
+          div.textContent = 'You: ' + content;
+        } else if (type === 'listening-indicator') {
+          div.innerHTML = `<span>${content}</span><span class="dots"><span></span><span></span><span></span></span>`;
+        } else if (type === 'system') {
           div.textContent = '📢 ' + content;
           div.style.opacity = '0.7';
           div.style.fontSize = '12px';
@@ -1778,16 +1873,14 @@
           });
           const data = await res.json();
           if (data.reply) {
-            if (data.correction && data.correction !== userText) {
-              addConversationMessage('correction', data.correction, {
+            addConversationMessage('ai', data.reply, {
+              correctionData: {
                 original: userText,
-                correction: data.correction,
-                naturalVersion: data.naturalVersion,
+                corrected: data.correction,
                 wordChanges: data.wordChanges || [],
-                explanation: data.explanation
-              });
-            }
-            addConversationMessage('ai', data.reply);
+                explanation: data.explanation || ''
+              }
+            });
             await speakText(data.reply, data.emotion || 'neutral');
             if (data.nextQuestion) { state.currentQuestion = data.nextQuestion; els.replayBtn.disabled = false; }
           } else {
@@ -1924,6 +2017,7 @@
           els.connectBtn.style.display = 'inline-block';
           els.connectBtn.disabled = false;
           els.connectBtn.textContent = 'Connect';
+          stopCallTimer();
         });
       }
 
@@ -1943,11 +2037,12 @@
 
       console.log('🚀 English Passport Pro loaded successfully!');
       console.log('✅ Text Chat & Voice Conversation - COMPLETELY INDEPENDENT');
-      console.log('✅ Separate histories for Text and Voice');
+      console.log('✅ Correction Star - Click ★ to see correction');
       console.log('✅ User Name System Active');
       console.log('✅ 20 Indian Voices available');
       console.log('✅ Fast AI Voice Response');
       console.log('✅ Friend Call with Multi-Call Audio Fix');
+      console.log('✅ Call Timer Active');
     })();
   </script>
 
