@@ -1268,7 +1268,9 @@
         currentCallId: null, isCalling: false, userName: '', activeTab: 'text',
         isConversationStarted: false,
         callTimerInterval: null,
-        callStartTime: null
+        callStartTime: null,
+        // Store corrections by message ID
+        correctionCache: {}
       };
 
       const $ = id => document.getElementById(id);
@@ -1319,14 +1321,16 @@
           });
           const data = await res.json();
           if (data.reply) {
-            addTextChatMessage(data.reply, 'ai', {
-              correctionData: {
-                original: 'Hello! I am ready to practice English with you through text chat. Please start the conversation.',
-                corrected: data.correction,
-                wordChanges: data.wordChanges || [],
-                explanation: data.explanation || ''
-              }
-            });
+            const correctionData = {
+              original: 'Hello! I am ready to practice English with you through text chat. Please start the conversation.',
+              corrected: data.correction,
+              wordChanges: data.wordChanges || [],
+              explanation: data.explanation || ''
+            };
+            if (data.correctionIndex !== undefined) {
+              state.correctionCache[data.correctionIndex] = correctionData;
+            }
+            addTextChatMessage(data.reply, 'ai', data.correctionIndex);
           }
         } catch (e) { console.error('Text chat greeting error:', e); }
       }
@@ -1347,14 +1351,16 @@
           });
           const data = await res.json();
           if (data.reply) {
-            addConversationMessage('ai', data.reply, {
-              correctionData: {
-                original: 'Hello! I am ready to practice English with you through voice conversation. Please start the conversation.',
-                corrected: data.correction,
-                wordChanges: data.wordChanges || [],
-                explanation: data.explanation || ''
-              }
-            });
+            const correctionData = {
+              original: 'Hello! I am ready to practice English with you through voice conversation. Please start the conversation.',
+              corrected: data.correction,
+              wordChanges: data.wordChanges || [],
+              explanation: data.explanation || ''
+            };
+            if (data.correctionIndex !== undefined) {
+              state.correctionCache[data.correctionIndex] = correctionData;
+            }
+            addConversationMessage('ai', data.reply, data.correctionIndex);
             speakText(data.reply, data.emotion || 'friendly');
           }
         } catch (e) { console.error('Voice chat greeting error:', e); }
@@ -1572,7 +1578,7 @@
         els.textInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendTextMessage(); });
       }
 
-      function addTextChatMessage(text, type, extra = {}) {
+      function addTextChatMessage(text, type, correctionIndex) {
         const emptyState = els.textChatBox.querySelector('.empty-state');
         if (emptyState) emptyState.remove();
         const div = document.createElement('div');
@@ -1583,11 +1589,12 @@
           contentSpan.textContent = text;
           div.appendChild(contentSpan);
 
-          if (extra.correctionData) {
+          if (correctionIndex !== undefined && correctionIndex !== null) {
             const star = document.createElement('span');
             star.className = 'correction-star';
             star.textContent = ' ★';
-            star.dataset.correction = JSON.stringify(extra.correctionData);
+            star.dataset.correctionIndex = correctionIndex;
+            star.dataset.type = 'text';
             star.addEventListener('click', toggleCorrection);
             div.appendChild(star);
           }
@@ -1610,46 +1617,71 @@
 
         star.classList.add('active');
 
-        try {
-          const data = JSON.parse(star.dataset.correction);
-          if (!data || !data.original) return;
+        const correctionIndex = star.dataset.correctionIndex;
+        const type = star.dataset.type || 'text';
 
-          const parentMsg = star.closest('.conv-msg.ai');
-          if (!parentMsg) return;
+        // Get correction from cache or server
+        let correctionData = state.correctionCache[correctionIndex];
 
-          const box = document.createElement('div');
-          box.className = 'correction-detail-box';
-
-          let html = `
-            <div class="section-label">🗣️ You said</div>
-            <div class="you-said">${data.original}</div>
-            <div class="section-label">✏️ Corrected version</div>
-            <div class="corrected-version">${data.corrected || 'No correction needed'}</div>
-          `;
-
-          if (data.explanation) {
-            html += `<div class="explanation-text">💡 ${data.explanation}</div>`;
-          }
-
-          if (data.wordChanges && data.wordChanges.length > 0) {
-            html += `<div class="word-changes">${data.wordChanges.map(w => `<span class="wrong-word">${w.wrong}</span> → <span class="correct-word">${w.correct}</span> (${w.reason || ''})`).join(' | ')}</div>`;
-          }
-
-          box.innerHTML = html;
-          parentMsg.appendChild(box);
-
-          const closeHandler = (e) => {
-            if (!parentMsg.contains(e.target)) {
-              box.remove();
-              star.classList.remove('active');
-              document.removeEventListener('click', closeHandler);
-            }
-          };
-          setTimeout(() => document.addEventListener('click', closeHandler), 100);
-
-        } catch (e) {
-          console.error('Error showing correction:', e);
+        if (!correctionData) {
+          // Fetch from server
+          fetch('/api/get-correction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              conversationId: state.userId,
+              messageIndex: parseInt(correctionIndex),
+              type: type
+            })
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success && data.data) {
+                state.correctionCache[correctionIndex] = data.data;
+                showCorrectionBox(star, data.data);
+              }
+            })
+            .catch(err => console.error('Error fetching correction:', err));
+        } else {
+          showCorrectionBox(star, correctionData);
         }
+      }
+
+      function showCorrectionBox(star, data) {
+        if (!data || !data.original) return;
+
+        const parentMsg = star.closest('.conv-msg.ai');
+        if (!parentMsg) return;
+
+        const box = document.createElement('div');
+        box.className = 'correction-detail-box';
+
+        let html = `
+          <div class="section-label">🗣️ You said</div>
+          <div class="you-said">${data.original}</div>
+          <div class="section-label">✏️ Corrected version</div>
+          <div class="corrected-version">${data.corrected || 'No correction needed'}</div>
+        `;
+
+        if (data.explanation) {
+          html += `<div class="explanation-text">💡 ${data.explanation}</div>`;
+        }
+
+        if (data.wordChanges && data.wordChanges.length > 0) {
+          html += `<div class="word-changes">${data.wordChanges.map(w => `<span class="wrong-word">${w.wrong}</span> → <span class="correct-word">${w.correct}</span> (${w.reason || ''})`).join(' | ')}</div>`;
+        }
+
+        box.innerHTML = html;
+        parentMsg.appendChild(box);
+
+        const closeHandler = (e) => {
+          if (!parentMsg.contains(e.target)) {
+            box.remove();
+            star.classList.remove('active');
+            document.removeEventListener('click', closeHandler);
+          }
+        };
+        setTimeout(() => document.addEventListener('click', closeHandler), 100);
       }
 
       async function sendTextMessage() {
@@ -1672,14 +1704,15 @@
           });
           const data = await res.json();
           if (data.reply) {
-            addTextChatMessage(data.reply, 'ai', {
-              correctionData: {
+            if (data.correctionIndex !== undefined) {
+              state.correctionCache[data.correctionIndex] = {
                 original: msg,
                 corrected: data.correction,
                 wordChanges: data.wordChanges || [],
                 explanation: data.explanation || ''
-              }
-            });
+              };
+            }
+            addTextChatMessage(data.reply, 'ai', data.correctionIndex);
           } else {
             addTextChatMessage('❌ Error: ' + (data.error || 'No response'), 'system');
           }
@@ -1795,7 +1828,7 @@
       // ==========================================================
       // CONVERSATION MESSAGES - VOICE
       // ==========================================================
-      function addConversationMessage(type, content, extra = {}) {
+      function addConversationMessage(type, content, correctionIndex) {
         const emptyState = els.conversationArea.querySelector('.empty-state');
         if (emptyState) emptyState.remove();
         const div = document.createElement('div');
@@ -1806,11 +1839,12 @@
           contentSpan.textContent = content;
           div.appendChild(contentSpan);
 
-          if (extra.correctionData) {
+          if (correctionIndex !== undefined && correctionIndex !== null) {
             const star = document.createElement('span');
             star.className = 'correction-star';
             star.textContent = ' ★';
-            star.dataset.correction = JSON.stringify(extra.correctionData);
+            star.dataset.correctionIndex = correctionIndex;
+            star.dataset.type = 'voice';
             star.addEventListener('click', toggleCorrection);
             div.appendChild(star);
           }
@@ -1871,14 +1905,15 @@
           });
           const data = await res.json();
           if (data.reply) {
-            addConversationMessage('ai', data.reply, {
-              correctionData: {
+            if (data.correctionIndex !== undefined) {
+              state.correctionCache[data.correctionIndex] = {
                 original: userText,
                 corrected: data.correction,
                 wordChanges: data.wordChanges || [],
                 explanation: data.explanation || ''
-              }
-            });
+              };
+            }
+            addConversationMessage('ai', data.reply, data.correctionIndex);
             await speakText(data.reply, data.emotion || 'neutral');
             if (data.nextQuestion) { state.currentQuestion = data.nextQuestion; els.replayBtn.disabled = false; }
           } else {
@@ -2036,6 +2071,7 @@
       console.log('🚀 English Passport Pro loaded successfully!');
       console.log('✅ Text Chat & Voice Conversation - COMPLETELY INDEPENDENT');
       console.log('✅ Correction Star - Click ★ to see correction');
+      console.log('✅ Corrections stored separately - No API errors');
       console.log('✅ User Name System Active');
       console.log('✅ 20 Indian Voices available');
       console.log('✅ Fast AI Voice Response');

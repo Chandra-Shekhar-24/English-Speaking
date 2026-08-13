@@ -23,17 +23,21 @@ const MODEL = "llama-3.1-8b-instant";
 // ============================================================
 // STORES
 // ============================================================
-const textChatMemory = new Map();
-const voiceChatMemory = new Map();
+const textChatMemory = new Map();      // userId -> { messages: [], corrections: {} }
+const voiceChatMemory = new Map();     // userId -> { messages: [], corrections: {} }
 const users = new Map();
 const userIdPool = new Set();
 const activeCalls = new Map();
 const pendingCallRequests = new Map();
 
+// ============================================================
+// CONVERSATION FUNCTIONS - messages WITHOUT extra properties
+// ============================================================
 function getTextConversation(userId) {
   if (!textChatMemory.has(userId)) {
     textChatMemory.set(userId, {
-      messages: [],
+      messages: [],        // Only { role, content }
+      corrections: {},     // { messageIndex: { original, corrected, wordChanges, explanation } }
       context: {},
       topic: null,
       facts: {},
@@ -48,6 +52,7 @@ function getVoiceConversation(userId) {
   if (!voiceChatMemory.has(userId)) {
     voiceChatMemory.set(userId, {
       messages: [],
+      corrections: {},
       context: {},
       topic: null,
       facts: {},
@@ -58,20 +63,42 @@ function getVoiceConversation(userId) {
   return voiceChatMemory.get(userId);
 }
 
-// FIXED: Store messages WITHOUT timestamp for API
+// Add message WITHOUT extra properties
 function addTextMessage(userId, role, content) {
   const conv = getTextConversation(userId);
-  // Store without timestamp - only role and content
+  const index = conv.messages.length;
   conv.messages.push({ role, content });
   if (conv.messages.length > 50) conv.messages = conv.messages.slice(-50);
-  return conv.messages.length - 1;
+  return index;
 }
 
 function addVoiceMessage(userId, role, content) {
   const conv = getVoiceConversation(userId);
+  const index = conv.messages.length;
   conv.messages.push({ role, content });
   if (conv.messages.length > 50) conv.messages = conv.messages.slice(-50);
-  return conv.messages.length - 1;
+  return index;
+}
+
+// Store correction separately
+function storeTextCorrection(userId, messageIndex, correctionData) {
+  const conv = getTextConversation(userId);
+  conv.corrections[messageIndex] = correctionData;
+}
+
+function storeVoiceCorrection(userId, messageIndex, correctionData) {
+  const conv = getVoiceConversation(userId);
+  conv.corrections[messageIndex] = correctionData;
+}
+
+function getTextCorrection(userId, messageIndex) {
+  const conv = getTextConversation(userId);
+  return conv.corrections[messageIndex] || null;
+}
+
+function getVoiceCorrection(userId, messageIndex) {
+  const conv = getVoiceConversation(userId);
+  return conv.corrections[messageIndex] || null;
 }
 
 function getTextMessages(userId, count = 20) {
@@ -437,7 +464,7 @@ function broadcastOnlineUsers() {
 }
 
 // ============================================================
-// AI TEXT CHAT ENDPOINT - FIXED (NO TIMESTAMP)
+// AI TEXT CHAT ENDPOINT - FIXED
 // ============================================================
 app.post("/api/text-chat", async (req, res) => {
   try {
@@ -452,7 +479,7 @@ app.post("/api/text-chat", async (req, res) => {
     }
 
     const textConv = getTextConversation(conversationId);
-    addTextMessage(conversationId, 'user', message);
+    const userMsgIndex = addTextMessage(conversationId, 'user', message);
 
     if (userName && !textConv.userName) {
       textConv.userName = userName;
@@ -471,7 +498,6 @@ app.post("/api/text-chat", async (req, res) => {
 
     let historyText = '';
     if (recentMessages.length > 1) {
-      // FIXED: Only include role and content, NO timestamp
       historyText = recentMessages.map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
     }
 
@@ -513,10 +539,9 @@ RESPONSE FORMAT (JSON only):
   "explanation": "Brief explanation of the main mistake"
 }`;
 
-    // FIXED: Build API messages WITHOUT timestamp
+    // Build API messages WITHOUT extra properties
     const apiMessages = [{ role: "system", content: systemPrompt }];
     const historyToSend = recentMessages.slice(-10);
-    // Only add role and content, no timestamp
     apiMessages.push(...historyToSend);
     if (!apiMessages.some(m => m.role === 'user' && m.content === message)) {
       apiMessages.push({ role: 'user', content: message });
@@ -548,14 +573,16 @@ RESPONSE FORMAT (JSON only):
       parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, wordChanges: [], explanation: "" };
     }
 
-    // Store the AI response with correction data embedded
-    const msgIndex = addTextMessage(conversationId, 'assistant', parsed.reply);
-    textConv.messages[msgIndex].correctionData = {
+    // Store AI message WITHOUT correction data
+    const aiMsgIndex = addTextMessage(conversationId, 'assistant', parsed.reply);
+
+    // Store correction data SEPARATELY
+    storeTextCorrection(conversationId, aiMsgIndex, {
       original: message,
       corrected: parsed.correction || null,
       wordChanges: parsed.wordChanges || [],
       explanation: parsed.explanation || ""
-    };
+    });
 
     textConv.conversationStarted = true;
     if (message.toLowerCase().includes('my name is') || message.toLowerCase().includes('call me')) {
@@ -569,7 +596,8 @@ RESPONSE FORMAT (JSON only):
       correction: parsed.correction || null,
       wordChanges: parsed.wordChanges || [],
       explanation: parsed.explanation || "",
-      emotion: detectEmotion(message)
+      emotion: detectEmotion(message),
+      correctionIndex: aiMsgIndex  // Send correction index to frontend
     });
 
   } catch (err) {
@@ -579,7 +607,7 @@ RESPONSE FORMAT (JSON only):
 });
 
 // ============================================================
-// AI VOICE CHAT ENDPOINT - FIXED (NO TIMESTAMP)
+// AI VOICE CHAT ENDPOINT - FIXED
 // ============================================================
 app.post("/api/voice-chat", async (req, res) => {
   try {
@@ -613,7 +641,6 @@ app.post("/api/voice-chat", async (req, res) => {
 
     let historyText = '';
     if (recentMessages.length > 1) {
-      // FIXED: Only include role and content, NO timestamp
       historyText = recentMessages.map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
     }
 
@@ -655,7 +682,7 @@ RESPONSE FORMAT (JSON only):
   "explanation": "Brief explanation of the main mistake"
 }`;
 
-    // FIXED: Build API messages WITHOUT timestamp
+    // Build API messages WITHOUT extra properties
     const apiMessages = [{ role: "system", content: systemPrompt }];
     const historyToSend = recentMessages.slice(-10);
     apiMessages.push(...historyToSend);
@@ -689,13 +716,16 @@ RESPONSE FORMAT (JSON only):
       parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, wordChanges: [], explanation: "" };
     }
 
-    const msgIndex = addVoiceMessage(conversationId, 'assistant', parsed.reply);
-    voiceConv.messages[msgIndex].correctionData = {
+    // Store AI message WITHOUT correction data
+    const aiMsgIndex = addVoiceMessage(conversationId, 'assistant', parsed.reply);
+
+    // Store correction data SEPARATELY
+    storeVoiceCorrection(conversationId, aiMsgIndex, {
       original: message,
       corrected: parsed.correction || null,
       wordChanges: parsed.wordChanges || [],
       explanation: parsed.explanation || ""
-    };
+    });
 
     voiceConv.conversationStarted = true;
     if (message.toLowerCase().includes('my name is') || message.toLowerCase().includes('call me')) {
@@ -709,12 +739,37 @@ RESPONSE FORMAT (JSON only):
       correction: parsed.correction || null,
       wordChanges: parsed.wordChanges || [],
       explanation: parsed.explanation || "",
-      emotion: detectEmotion(message)
+      emotion: detectEmotion(message),
+      correctionIndex: aiMsgIndex
     });
 
   } catch (err) {
     console.error("Voice Chat error:", err);
     res.status(500).json({ error: err.message || "Server error." });
+  }
+});
+
+// ============================================================
+// GET CORRECTION ENDPOINT
+// ============================================================
+app.post("/api/get-correction", (req, res) => {
+  const { conversationId, messageIndex, type = 'text' } = req.body;
+  
+  if (!conversationId || messageIndex === undefined) {
+    return res.status(400).json({ error: "conversationId and messageIndex required" });
+  }
+
+  let correctionData;
+  if (type === 'text') {
+    correctionData = getTextCorrection(conversationId, messageIndex);
+  } else {
+    correctionData = getVoiceCorrection(conversationId, messageIndex);
+  }
+
+  if (correctionData) {
+    res.json({ success: true, data: correctionData });
+  } else {
+    res.json({ success: false, data: null });
   }
 });
 
@@ -785,6 +840,7 @@ server.listen(PORT, () => {
   }
   console.log(`  ✅ ${VOICES.male.length + VOICES.female.length} Voice Options Available`);
   console.log(`  ✅ Text Chat & Voice Conversation - COMPLETELY INDEPENDENT`);
+  console.log(`  ✅ Corrections stored separately (not in messages)`);
   console.log(`  ✅ FAST TTS Response (+15% speed, reduced pauses)`);
   console.log(`  ✅ Friend Call with Multi-Call Audio Fix`);
   console.log(`  ✅ Features: AI Text Chat, AI Voice, Friend Call\n`);
