@@ -386,6 +386,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("find-random", () => {
+    const requester = users.get(userId);
+    if (requester && requester.busy) { socket.emit("call-error", "You are already in a call"); return; }
     const availableUsers = [];
     users.forEach((user, id) => {
       if (id !== userId && user.connected && !user.busy && user.peerId) {
@@ -401,19 +403,24 @@ io.on("connection", (socket) => {
     const match = availableUsers[Math.floor(Math.random() * availableUsers.length)];
     const user1 = users.get(userId);
     const user2 = users.get(match.userId);
-    if (user1) { user1.busy = true; user1.currentCallId = `random_${Date.now()}`; }
-    if (user2) { user2.busy = true; user2.currentCallId = `random_${Date.now()}`; }
+    // Re-check match hasn't gone busy between building the list and matching (e.g. two
+    // find-random calls racing at the same moment)
+    if (!user1 || !user2 || user1.busy || user2.busy) { socket.emit("call-error", "User just became unavailable, try again"); return; }
     const callId = `call_${Date.now()}_${userId}_${match.userId}`;
+    if (user1) { user1.busy = true; user1.currentCallId = callId; }
+    if (user2) { user2.busy = true; user2.currentCallId = callId; }
     activeCalls.set(callId, { userA: userId, userB: match.userId, status: 'connected', startedAt: Date.now() });
     socket.emit("random-match", { 
       peerId: match.peerId, 
       userId: match.userId,
-      userName: match.userName
+      userName: match.userName,
+      callId
     });
     io.to(match.socketId).emit("random-match", { 
       peerId: user1.peerId, 
       userId: userId,
-      userName: user1.userName || userId
+      userName: user1.userName || userId,
+      callId
     });
     broadcastOnlineUsers();
   });

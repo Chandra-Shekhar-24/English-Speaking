@@ -1429,12 +1429,13 @@
           startCallTimer();
         });
 
-        state.socket.on('call-declined', () => { els.friendCallStatus.textContent = '❌ Call declined'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
-        state.socket.on('call-timeout', () => { els.friendCallStatus.textContent = '⏰ No response from user'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
-        state.socket.on('call-ended', () => { endFriendCall(); els.friendCallStatus.textContent = '📞 Call ended'; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
-        state.socket.on('no-users-available', () => { els.friendCallStatus.textContent = '❌ No users available. Try later.'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; });
+        state.socket.on('call-declined', () => { els.friendCallStatus.textContent = '❌ Call declined'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
+        state.socket.on('call-timeout', () => { els.friendCallStatus.textContent = '⏰ No response from user'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
+        state.socket.on('call-ended', () => { endFriendCall(); els.friendCallStatus.textContent = '📞 Call ended'; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
+        state.socket.on('no-users-available', () => { els.friendCallStatus.textContent = '❌ No users available. Try later.'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; });
         state.socket.on('random-match', (data) => {
           state.isFriendCall = true;
+          state.currentCallId = data.callId || null;
           els.endFriendCallBtn.style.display = 'inline-block';
           els.connectBtn.style.display = 'none';
           els.connectBtn.disabled = false;
@@ -1449,7 +1450,7 @@
             els.friendCallStatus.textContent = '🔊 Connecting with ' + data.userName + '...';
           }
         });
-        state.socket.on('call-error', (msg) => { els.friendCallStatus.textContent = '❌ ' + msg; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
+        state.socket.on('call-error', (msg) => { els.friendCallStatus.textContent = '❌ ' + msg; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
       }
 
       // ==========================================================
@@ -1550,6 +1551,7 @@
             els.connectBtn.style.display = 'inline-block';
             els.connectBtn.disabled = false;
             els.connectBtn.textContent = 'Connect';
+            els.randomMatchBtn.disabled = false;
             stopCallTimer();
           });
       }
@@ -1572,7 +1574,7 @@
         const audioEl = document.getElementById('remoteAudio');
         if (audioEl) { try { audioEl.pause(); audioEl.srcObject = null; audioEl.remove(); console.log('🔊 Audio element cleaned up'); } catch (e) { console.error('Error cleaning audio element:', e); } }
         state.isCallActive = false; state.isFriendCall = false; state.isCalling = false; state.currentCallId = null;
-        els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.friendCallStatus.textContent = '📞 Call ended';
+        els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; els.friendCallStatus.textContent = '📞 Call ended';
         stopCallTimer();
         console.log('📞 Friend call cleanup complete');
       }
@@ -2063,7 +2065,9 @@
         });
 
         els.randomMatchBtn.addEventListener('click', () => {
+          if (state.isFriendCall || state.isCallActive || state.isCalling) { return; }
           els.friendCallStatus.textContent = '🔍 Finding a random user...';
+          els.randomMatchBtn.disabled = true;
           state.socket.emit('find-random');
         });
 
