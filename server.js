@@ -261,7 +261,9 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("call-request", (targetUserId) => {
+  socket.on("call-request", (data) => {
+    const targetUserId = typeof data === 'string' ? data : data.targetUserId;
+    const isVideo = typeof data === 'object' && data.isVideo === true;
     const caller = users.get(userId);
     const target = users.get(targetUserId);
     if (!caller || !target || !target.connected) { socket.emit("call-error", "User not available"); return; }
@@ -271,7 +273,7 @@ io.on("connection", (socket) => {
     const callId = `call_${Date.now()}_${userId}_${targetUserId}`;
     caller.currentCallId = callId;
     pendingCallRequests.set(callId, {
-      caller: userId, target: targetUserId, status: 'pending', timestamp: Date.now(),
+      caller: userId, target: targetUserId, status: 'pending', timestamp: Date.now(), isVideo,
       timeout: setTimeout(() => {
         const pending = pendingCallRequests.get(callId);
         if (pending && pending.status === 'pending') {
@@ -292,7 +294,8 @@ io.on("connection", (socket) => {
       callId, 
       from: userId, 
       fromPeerId: caller.peerId, 
-      fromName: callerName
+      fromName: callerName,
+      isVideo
     });
     broadcastOnlineUsers();
   });
@@ -321,14 +324,16 @@ io.on("connection", (socket) => {
         callId, 
         peerId: responder.peerId, 
         userId: pendingCall.target,
-        userName: responderName
+        userName: responderName,
+        isVideo: !!pendingCall.isVideo
       });
       const callerName = caller.userName || `User ${pendingCall.caller}`;
       io.to(responder.socketId).emit("call-connected", { 
         callId, 
         peerId: caller.peerId, 
         userId: pendingCall.caller,
-        userName: callerName
+        userName: callerName,
+        isVideo: !!pendingCall.isVideo
       });
       broadcastOnlineUsers();
     } else {

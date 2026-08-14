@@ -913,6 +913,79 @@
       opacity: 0.85;
     }
 
+    .friend-row button.mute-btn,
+    .friend-row button.camera-btn {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    .friend-row button.mute-btn:hover,
+    .friend-row button.camera-btn:hover {
+      background: var(--border-color);
+    }
+
+    .friend-row button.mute-btn.active {
+      background: var(--red);
+      color: white;
+    }
+
+    .friend-row button.camera-btn.active {
+      background: var(--red);
+      color: white;
+    }
+
+    .video-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .video-toggle input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--blue);
+    }
+
+    .video-call-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #000;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .video-call-container video#remoteVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .video-call-container video#localVideo {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      width: 30%;
+      max-width: 120px;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.8);
+      background: #000;
+    }
+
+    #inCallControls {
+      align-items: center;
+    }
+
     .online-users {
       background: var(--bg-input);
       border-radius: var(--radius);
@@ -1232,9 +1305,20 @@
           <div class="value" id="friendUserId">----</div>
           <div class="status" id="friendStatus">🟢 Online</div>
         </div>
+        <div class="video-call-container" id="videoCallContainer" style="display:none;">
+          <video id="remoteVideo" autoplay playsinline></video>
+          <video id="localVideo" autoplay playsinline muted></video>
+        </div>
+        <label class="video-toggle" id="videoToggleLabel">
+          <input type="checkbox" id="videoCallToggle" /> 🎥 Video Call
+        </label>
         <div class="friend-row">
           <input id="friendIdInput" placeholder="Enter 4-digit ID" maxlength="4" />
           <button class="connect-btn" id="connectBtn">Connect</button>
+        </div>
+        <div class="friend-row" id="inCallControls" style="display:none;">
+          <button class="mute-btn" id="muteFriendBtn">🎤 Mute</button>
+          <button class="camera-btn" id="cameraToggleBtn" style="display:none;">📷 Camera Off</button>
           <button class="end-friend-call-btn" id="endFriendCallBtn">📞 End Call</button>
         </div>
         <div class="friend-row">
@@ -1269,6 +1353,7 @@
         isConversationStarted: false,
         callTimerInterval: null,
         callStartTime: null,
+        isMuted: false, isCameraOff: false, isVideoCall: false,
         // Store corrections by message ID
         correctionCache: {}
       };
@@ -1281,7 +1366,9 @@
         'friendIdInput', 'connectBtn', 'randomMatchBtn', 'friendStatus',
         'textChatBox', 'textInput', 'textSend', 'voiceSelectCompact',
         'levelSelect', 'professionSelect', 'goalSelect', 'startBtn',
-        'onboarding', 'mainApp', 'endFriendCallBtn', 'nameInput', 'callTimerDisplay'
+        'onboarding', 'mainApp', 'endFriendCallBtn', 'nameInput', 'callTimerDisplay',
+        'videoCallToggle', 'videoCallContainer', 'remoteVideo', 'localVideo',
+        'muteFriendBtn', 'cameraToggleBtn', 'inCallControls', 'videoToggleLabel'
       ].forEach(id => { els[id] = $(id); });
 
       // ==========================================================
@@ -1391,15 +1478,16 @@
 
         state.socket.on('incoming-call', (data) => {
           if (state.isCallActive || state.isFriendCall) { state.socket.emit('call-response', { callId: data.callId, accepted: false }); return; }
-          const accept = confirm(`📞 ${data.fromName} is calling you!\n\nAccept?`);
+          const accept = confirm(`📞 ${data.fromName} is calling you${data.isVideo ? ' (Video Call)' : ''}!\n\nAccept?`);
           if (accept) {
             state.socket.emit('call-response', { callId: data.callId, accepted: true });
             state.isFriendCall = true;
             state.currentCallId = data.callId;
+            state.isVideoCall = !!data.isVideo;
             // IMPORTANT: do NOT call connectToPeer() here. Only the caller initiates the
             // actual PeerJS media call (peer.call). We just wait for it — it will arrive
             // via the peer.on('call', ...) handler in initPeer(), which answers automatically.
-            els.endFriendCallBtn.style.display = 'inline-block';
+            showInCallControls();
             els.connectBtn.style.display = 'none';
             els.friendCallStatus.textContent = '🔊 Connecting with ' + data.fromName + '...';
           } else {
@@ -1411,8 +1499,9 @@
           els.friendCallStatus.textContent = '✅ Connected with ' + data.userName;
           state.isFriendCall = true;
           state.currentCallId = data.callId;
-          connectToPeer(data.peerId, data.userId);
-          els.endFriendCallBtn.style.display = 'inline-block';
+          state.isVideoCall = !!data.isVideo;
+          connectToPeer(data.peerId, data.userId, state.isVideoCall);
+          showInCallControls();
           els.connectBtn.style.display = 'none';
           els.connectBtn.disabled = false;
           els.connectBtn.textContent = 'Connect';
@@ -1422,21 +1511,23 @@
         state.socket.on('call-connected', (data) => {
           els.friendCallStatus.textContent = '✅ Connected with ' + data.userName;
           state.isFriendCall = true;
-          els.endFriendCallBtn.style.display = 'inline-block';
+          state.isVideoCall = !!data.isVideo;
+          showInCallControls();
           els.connectBtn.style.display = 'none';
           els.connectBtn.disabled = false;
           els.connectBtn.textContent = 'Connect';
           startCallTimer();
         });
 
-        state.socket.on('call-declined', () => { els.friendCallStatus.textContent = '❌ Call declined'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
-        state.socket.on('call-timeout', () => { els.friendCallStatus.textContent = '⏰ No response from user'; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
-        state.socket.on('call-ended', () => { endFriendCall(); els.friendCallStatus.textContent = '📞 Call ended'; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
+        state.socket.on('call-declined', () => { els.friendCallStatus.textContent = '❌ Call declined'; state.isFriendCall = false; state.isCalling = false; hideInCallControls(); els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
+        state.socket.on('call-timeout', () => { els.friendCallStatus.textContent = '⏰ No response from user'; state.isFriendCall = false; state.isCalling = false; hideInCallControls(); els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
+        state.socket.on('call-ended', () => { endFriendCall(); els.friendCallStatus.textContent = '📞 Call ended'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
         state.socket.on('no-users-available', () => { els.friendCallStatus.textContent = '❌ No users available. Try later.'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; });
         state.socket.on('random-match', (data) => {
           state.isFriendCall = true;
           state.currentCallId = data.callId || null;
-          els.endFriendCallBtn.style.display = 'inline-block';
+          state.isVideoCall = false;
+          showInCallControls();
           els.connectBtn.style.display = 'none';
           els.connectBtn.disabled = false;
           els.connectBtn.textContent = 'Connect';
@@ -1445,12 +1536,32 @@
           // create separate connections that close each other out. Higher userId calls,
           // the other side just waits for the incoming call.
           if (Number(state.userId) > Number(data.userId)) {
-            connectToPeer(data.peerId, data.userId);
+            connectToPeer(data.peerId, data.userId, false);
           } else {
             els.friendCallStatus.textContent = '🔊 Connecting with ' + data.userName + '...';
           }
         });
-        state.socket.on('call-error', (msg) => { els.friendCallStatus.textContent = '❌ ' + msg; state.isFriendCall = false; state.isCalling = false; els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
+        state.socket.on('call-error', (msg) => { els.friendCallStatus.textContent = '❌ ' + msg; state.isFriendCall = false; state.isCalling = false; hideInCallControls(); els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
+      }
+
+      // ==========================================================
+      // IN-CALL CONTROLS (mute / camera / end call) VISIBILITY
+      // ==========================================================
+      function showInCallControls() {
+        els.inCallControls.style.display = 'flex';
+        els.endFriendCallBtn.style.display = 'inline-block';
+        els.muteFriendBtn.style.display = 'inline-block';
+        els.cameraToggleBtn.style.display = state.isVideoCall ? 'inline-block' : 'none';
+        els.videoToggleLabel.style.display = 'none';
+        if (state.isVideoCall) { els.videoCallContainer.style.display = 'block'; }
+      }
+
+      function hideInCallControls() {
+        els.inCallControls.style.display = 'none';
+        els.videoToggleLabel.style.display = 'flex';
+        els.videoCallContainer.style.display = 'none';
+        if (els.remoteVideo) els.remoteVideo.srcObject = null;
+        if (els.localVideo) els.localVideo.srcObject = null;
       }
 
       // ==========================================================
@@ -1485,25 +1596,26 @@
         state.peer.on('open', (id) => { state.userPeerId = id; state.socket.emit('set-peer-id', id); console.log('PeerJS ID:', id); });
         state.peer.on('call', (incomingCall) => {
           if (state.currentCall || state.isCallActive) { incomingCall.answer(); incomingCall.close(); return; }
-          navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false })
+          const wantsVideo = !!(incomingCall.metadata && incomingCall.metadata.isVideo);
+          state.isVideoCall = wantsVideo;
+          state.isMuted = false; state.isCameraOff = false;
+          navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: wantsVideo ? { width: 320, height: 240 } : false })
             .then((stream) => {
               state.localStream = stream;
               incomingCall.answer(stream);
               state.currentCall = incomingCall;
               state.isCallActive = true;
+              applyMuteState();
+              if (wantsVideo) { els.videoCallContainer.style.display = 'block'; els.localVideo.srcObject = stream; }
               els.friendCallStatus.textContent = '🔊 Connected';
               incomingCall.on('stream', (remoteStream) => {
                 state.remoteStream = remoteStream;
-                const audio = new Audio();
-                audio.srcObject = remoteStream;
-                audio.autoplay = true;
-                audio.volume = 1.0;
-                document.body.appendChild(audio);
-                audio.play().catch(err => { console.error('Audio play error:', err); document.addEventListener('click', () => { audio.play().catch(() => { }); }, { once: true }); });
+                els.remoteVideo.srcObject = remoteStream;
+                els.remoteVideo.play().catch(err => { console.error('Media play error:', err); document.addEventListener('click', () => { els.remoteVideo.play().catch(() => { }); }, { once: true }); });
               });
               incomingCall.on('close', () => { endFriendCall(); });
             })
-            .catch(() => { els.friendCallStatus.textContent = '❌ Mic access denied'; });
+            .catch(() => { els.friendCallStatus.textContent = wantsVideo ? '❌ Camera/Mic access denied' : '❌ Mic access denied'; });
         });
         state.peer.on('error', (err) => { console.error('Peer error:', err); });
       }
@@ -1511,49 +1623,64 @@
       // ==========================================================
       // CONNECT TO PEER
       // ==========================================================
-      function connectToPeer(peerId, friendId) {
-        console.log('🔗 Connecting to peer:', peerId);
+      function connectToPeer(peerId, friendId, isVideo) {
+        console.log('🔗 Connecting to peer:', peerId, 'video:', !!isVideo);
         if (state.currentCall) { endFriendCall(); }
-        navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false })
+        state.isVideoCall = !!isVideo;
+        state.isMuted = false; state.isCameraOff = false;
+        navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: isVideo ? { width: 320, height: 240 } : false })
           .then((stream) => {
-            console.log('🎤 Fresh microphone stream obtained');
+            console.log('🎤 Fresh media stream obtained');
             state.localStream = stream;
-            const call = state.peer.call(peerId, stream);
+            const call = state.peer.call(peerId, stream, { metadata: { isVideo: !!isVideo } });
             state.currentCall = call;
             state.isCallActive = true;
             if (!state.currentCallId) { state.currentCallId = Date.now().toString(); }
+            applyMuteState();
+            if (isVideo) { els.videoCallContainer.style.display = 'block'; els.localVideo.srcObject = stream; }
             els.friendCallStatus.textContent = '📞 Calling ' + friendId + '...';
             call.on('stream', (remoteStream) => {
               console.log('📡 Remote stream received for call:', state.currentCallId);
               state.remoteStream = remoteStream;
-              const audioEl = document.createElement('audio');
-              audioEl.id = 'remoteAudio_' + state.currentCallId;
-              audioEl.autoplay = true;
-              audioEl.volume = 1.0;
-              audioEl.srcObject = remoteStream;
-              const oldAudio = document.getElementById('remoteAudio');
-              if (oldAudio) { oldAudio.pause(); oldAudio.srcObject = null; oldAudio.remove(); }
-              audioEl.id = 'remoteAudio';
-              document.body.appendChild(audioEl);
-              audioEl.play().then(() => { console.log('🔊 Remote audio playing'); els.friendCallStatus.textContent = '🔊 Connected with ' + friendId; }).catch(err => {
-                console.error('Audio play error:', err);
-                document.addEventListener('click', () => { audioEl.play().catch(() => { }); }, { once: true });
+              els.remoteVideo.srcObject = remoteStream;
+              els.remoteVideo.play().then(() => { console.log('🔊 Remote media playing'); els.friendCallStatus.textContent = '🔊 Connected with ' + friendId; }).catch(err => {
+                console.error('Media play error:', err);
+                document.addEventListener('click', () => { els.remoteVideo.play().catch(() => { }); }, { once: true });
               });
             });
-            call.on('close', () => { console.log('📞 Call closed for:', state.currentCallId); endFriendCall(); els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
-            call.on('error', (err) => { console.error('Call error:', err); endFriendCall(); els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.friendCallStatus.textContent = '❌ Call error: ' + err.message; stopCallTimer(); });
+            call.on('close', () => { console.log('📞 Call closed for:', state.currentCallId); endFriendCall(); els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; stopCallTimer(); });
+            call.on('error', (err) => { console.error('Call error:', err); endFriendCall(); els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.friendCallStatus.textContent = '❌ Call error: ' + err.message; stopCallTimer(); });
           })
           .catch((err) => {
-            console.error('❌ Microphone access denied:', err);
-            els.friendCallStatus.textContent = '❌ Mic access denied. Please allow microphone.';
+            console.error('❌ Media access denied:', err);
+            els.friendCallStatus.textContent = isVideo ? '❌ Camera/Mic access denied. Please allow permissions.' : '❌ Mic access denied. Please allow microphone.';
             state.isFriendCall = false;
-            els.endFriendCallBtn.style.display = 'none';
+            hideInCallControls();
             els.connectBtn.style.display = 'inline-block';
             els.connectBtn.disabled = false;
             els.connectBtn.textContent = 'Connect';
             els.randomMatchBtn.disabled = false;
             stopCallTimer();
           });
+      }
+
+      // ==========================================================
+      // MUTE / CAMERA CONTROLS
+      // ==========================================================
+      function applyMuteState() {
+        if (state.localStream) { state.localStream.getAudioTracks().forEach(t => { t.enabled = !state.isMuted; }); }
+        if (els.muteFriendBtn) {
+          els.muteFriendBtn.textContent = state.isMuted ? '🔇 Unmute' : '🎤 Mute';
+          els.muteFriendBtn.classList.toggle('active', state.isMuted);
+        }
+      }
+
+      function applyCameraState() {
+        if (state.localStream) { state.localStream.getVideoTracks().forEach(t => { t.enabled = !state.isCameraOff; }); }
+        if (els.cameraToggleBtn) {
+          els.cameraToggleBtn.textContent = state.isCameraOff ? '📷 Camera On' : '📷 Camera Off';
+          els.cameraToggleBtn.classList.toggle('active', state.isCameraOff);
+        }
       }
 
       // ==========================================================
@@ -1573,8 +1700,12 @@
         if (state.remoteStream) { state.remoteStream = null; }
         const audioEl = document.getElementById('remoteAudio');
         if (audioEl) { try { audioEl.pause(); audioEl.srcObject = null; audioEl.remove(); console.log('🔊 Audio element cleaned up'); } catch (e) { console.error('Error cleaning audio element:', e); } }
+        if (els.remoteVideo) { try { els.remoteVideo.pause(); els.remoteVideo.srcObject = null; } catch (e) { } }
+        if (els.localVideo) { try { els.localVideo.pause(); els.localVideo.srcObject = null; } catch (e) { } }
         state.isCallActive = false; state.isFriendCall = false; state.isCalling = false; state.currentCallId = null;
-        els.endFriendCallBtn.style.display = 'none'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; els.friendCallStatus.textContent = '📞 Call ended';
+        state.isVideoCall = false; state.isMuted = false; state.isCameraOff = false;
+        hideInCallControls();
+        els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; els.friendCallStatus.textContent = '📞 Call ended';
         stopCallTimer();
         console.log('📞 Friend call cleanup complete');
       }
@@ -2051,6 +2182,7 @@
           const targetId = els.friendIdInput.value.trim();
           if (!targetId || targetId.length !== 4) { els.friendCallStatus.textContent = '⚠️ Enter a valid 4-digit ID'; return; }
           if (targetId === state.userId) { els.friendCallStatus.textContent = '⚠️ You cannot call yourself'; return; }
+          const wantsVideo = !!(els.videoCallToggle && els.videoCallToggle.checked);
           els.friendCallStatus.textContent = '🔍 Looking for user ' + targetId + '...';
           els.connectBtn.disabled = true;
           els.connectBtn.textContent = 'Calling...';
@@ -2060,7 +2192,7 @@
             if (!result.online) { els.friendCallStatus.textContent = '❌ User is offline'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; state.isCalling = false; return; }
             if (result.busy) { els.friendCallStatus.textContent = '❌ User is in a call'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; state.isCalling = false; return; }
             els.friendCallStatus.textContent = '📞 Calling ' + targetId + '...';
-            state.socket.emit('call-request', targetId);
+            state.socket.emit('call-request', { targetUserId: targetId, isVideo: wantsVideo });
           });
         });
 
@@ -2073,6 +2205,16 @@
 
         els.endFriendCallBtn.addEventListener('click', () => {
           endFriendCall();
+        });
+
+        els.muteFriendBtn.addEventListener('click', () => {
+          state.isMuted = !state.isMuted;
+          applyMuteState();
+        });
+
+        els.cameraToggleBtn.addEventListener('click', () => {
+          state.isCameraOff = !state.isCameraOff;
+          applyCameraState();
         });
       }
 
