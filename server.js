@@ -29,6 +29,7 @@ const users = new Map();
 const userIdPool = new Set();
 const activeCalls = new Map();
 const pendingCallRequests = new Map();
+const groupRooms = new Map(); // roomId -> { host, isVideo, participants: Map(userId -> {peerId, userName}), pendingInvites: Set(userId) }
 
 // ============================================================
 // CONVERSATION FUNCTIONS - messages WITHOUT extra properties
@@ -168,40 +169,28 @@ function detectEmotion(userMessage) {
 }
 
 // ============================================================
-// SSML GENERATOR
+// EMOTION -> VOICE DELIVERY SETTINGS
+// (The free Edge TTS proxy only accepts plain text + top-level rate/pitch
+// params — it does NOT understand SSML style tags like mstts:express-as,
+// those are an Azure Cognitive Services-only feature. Previously this
+// function built full SSML with those tags and the result was sent as
+// plain "text", which the proxy can't parse — so the emotion setting
+// never actually changed the audio. This maps emotion to the rate/pitch
+// fields the proxy actually reads.)
 // ============================================================
-function generateSSML(text, emotion = 'neutral', voiceId = 'en-IN-NeerjaNeural') {
+function getEmotionVoiceSettings(emotion = 'neutral') {
   const emotionSettings = {
-    'neutral': { rate: '+15%', pitch: '0%', style: 'general' },
-    'happy': { rate: '+20%', pitch: '+10%', style: 'cheerful' },
-    'sad': { rate: '+10%', pitch: '-5%', style: 'sad' },
-    'encouraging': { rate: '+18%', pitch: '+8%', style: 'encouraging' },
-    'empathetic': { rate: '+10%', pitch: '-3%', style: 'empathetic' },
-    'excited': { rate: '+25%', pitch: '+15%', style: 'excited' },
-    'calm': { rate: '+12%', pitch: '-5%', style: 'calm' },
-    'thoughtful': { rate: '+10%', pitch: '-5%', style: 'thoughtful' },
-    'friendly': { rate: '+18%', pitch: '+5%', style: 'friendly' }
+    'neutral': { rate: '+12%', pitch: '+0Hz' },
+    'happy': { rate: '+20%', pitch: '+15Hz' },
+    'sad': { rate: '+2%', pitch: '-10Hz' },
+    'encouraging': { rate: '+16%', pitch: '+10Hz' },
+    'empathetic': { rate: '+6%', pitch: '-5Hz' },
+    'excited': { rate: '+26%', pitch: '+20Hz' },
+    'calm': { rate: '+8%', pitch: '-5Hz' },
+    'thoughtful': { rate: '+6%', pitch: '-5Hz' },
+    'friendly': { rate: '+16%', pitch: '+8Hz' }
   };
-
-  const settings = emotionSettings[emotion] || emotionSettings['neutral'];
-  let ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-IN"><voice name="${voiceId}"><prosody rate="${settings.rate}" pitch="${settings.pitch}">`;
-  if (settings.style && settings.style !== 'general') {
-    ssml += `<mstts:express-as style="${settings.style}" styledegree="1.0">`;
-  }
-
-  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-  sentences.forEach((sentence, index) => {
-    const trimmed = sentence.trim();
-    if (!trimmed) return;
-    if (index > 0) ssml += `<break time="100ms"/>`;
-    if (trimmed.endsWith('?')) ssml += `<prosody pitch="+5%">${trimmed}</prosody>`;
-    else if (trimmed.endsWith('!')) { ssml += trimmed; ssml += `<break time="150ms"/>`; }
-    else { ssml += trimmed; ssml += `<break time="200ms"/>`; }
-  });
-
-  if (settings.style && settings.style !== 'general') ssml += `</mstts:express-as>`;
-  ssml += `</prosody></voice></speak>`;
-  return ssml;
+  return emotionSettings[emotion] || emotionSettings['neutral'];
 }
 
 // ============================================================
@@ -280,9 +269,13 @@ io.on("connection", (socket) => {
           pending.status = 'timedout';
           const callerUser = users.get(pending.caller);
           if (callerUser) { callerUser.busy = false; callerUser.currentCallId = null; }
-          const callerSocket = users.get(pending.caller);
-          if (callerSocket && callerSocket.connected) {
-            io.to(callerSocket.socketId).emit("call-timeout");
+          if (callerUser && callerUser.connected) {
+            io.to(callerUser.socketId).emit("call-timeout");
+          }
+          const targetUser = users.get(pending.target);
+          if (targetUser) {
+            targetUser.busy = false; targetUser.currentCallId = null;
+            if (targetUser.connected) { io.to(targetUser.socketId).emit("call-cancelled", { callId }); }
           }
           pendingCallRequests.delete(callId);
           broadcastOnlineUsers();
@@ -290,6 +283,7 @@ io.on("connection", (socket) => {
       }, 30000)
     });
     const callerName = caller.userName || `User ${userId}`;
+    socket.emit("call-requested", { callId, isVideo });
     io.to(target.socketId).emit("incoming-call", {
       callId, 
       from: userId, 
@@ -351,9 +345,128 @@ io.on("connection", (socket) => {
       if (pendingCall.timeout) clearTimeout(pendingCall.timeout);
       const caller = users.get(pendingCall.caller);
       if (caller) { caller.busy = false; caller.currentCallId = null; }
+      const target = users.get(pendingCall.target);
+      if (target) {
+        target.busy = false; target.currentCallId = null;
+        if (target.connected) { io.to(target.socketId).emit("call-cancelled", { callId }); }
+      }
       pendingCallRequests.delete(callId);
       broadcastOnlineUsers();
     }
+  });
+
+  // ============================================================
+  // FRIEND-TO-FRIEND TEXT CHAT
+  // Simple live relay — messages are delivered only while both users
+  // are connected (no server-side persistence). Works independently
+  // of voice/video calls, matching the product requirement that Chat,
+  // Voice Call, and Video Call are three separate ways to reach a friend.
+  // ============================================================
+  socket.on("friend-message", (data) => {
+    const targetUserId = data && data.targetUserId;
+    const text = data && typeof data.text === 'string' ? data.text.trim().slice(0, 1000) : '';
+    if (!targetUserId || !text) return;
+    const sender = users.get(userId);
+    const target = users.get(targetUserId);
+    if (!target || !target.connected) {
+      socket.emit("friend-message-failed", { targetUserId, reason: "User is offline" });
+      return;
+    }
+    const payload = {
+      from: userId,
+      fromName: (sender && sender.userName) || `User ${userId}`,
+      text,
+      timestamp: Date.now()
+    };
+    io.to(target.socketId).emit("friend-message", payload);
+  });
+
+  // ============================================================
+  // GROUP CALLS (voice or video) — mesh-based multi-party calling.
+  // A host invites multiple friends by ID ("PIN"). Each invitee can
+  // accept or decline independently. On accept, the new participant
+  // is told about everyone already in the room and calls each of them
+  // directly (PeerJS mesh) — existing participants just answer, so
+  // there's no duplicate/racing connection like a two-way 1:1 call.
+  // ============================================================
+  socket.on("group-call-request", (data) => {
+    const targetUserIds = Array.isArray(data && data.targetUserIds)
+      ? [...new Set(data.targetUserIds)].filter(id => id && id !== userId)
+      : [];
+    const isVideo = !!(data && data.isVideo);
+    const host = users.get(userId);
+    if (!host || !host.peerId) { socket.emit("call-error", "You are not ready to call yet"); return; }
+    if (host.busy) { socket.emit("call-error", "You are already in a call"); return; }
+    if (targetUserIds.length === 0) { socket.emit("call-error", "Add at least one friend ID"); return; }
+    if (targetUserIds.length > 7) { socket.emit("call-error", "Group calls support up to 7 people"); return; }
+
+    const roomId = `group_${Date.now()}_${userId}`;
+    const room = {
+      host: userId,
+      isVideo,
+      participants: new Map([[userId, { peerId: host.peerId, userName: host.userName || `User ${userId}` }]]),
+      pendingInvites: new Set()
+    };
+
+    let invitedCount = 0;
+    targetUserIds.forEach((targetId) => {
+      const target = users.get(targetId);
+      if (!target || !target.connected || target.busy) return;
+      room.pendingInvites.add(targetId);
+      invitedCount++;
+      io.to(target.socketId).emit("incoming-group-call", {
+        roomId, from: userId, fromName: host.userName || `User ${userId}`, isVideo, memberCount: room.participants.size
+      });
+    });
+
+    if (invitedCount === 0) {
+      socket.emit("call-error", "None of the selected friends are available right now");
+      return;
+    }
+
+    host.busy = true;
+    host.currentCallId = roomId;
+    groupRooms.set(roomId, room);
+    socket.emit("group-call-created", { roomId, isVideo, invitedCount });
+    broadcastOnlineUsers();
+  });
+
+  socket.on("group-call-response", (data) => {
+    const roomId = data && data.roomId;
+    const accepted = !!(data && data.accepted);
+    const room = groupRooms.get(roomId);
+    if (!room) { return; }
+    room.pendingInvites.delete(userId);
+
+    if (!accepted) {
+      const hostUser = users.get(room.host);
+      if (hostUser && hostUser.connected) { io.to(hostUser.socketId).emit("group-invite-declined", { roomId, userId }); }
+      return;
+    }
+
+    const responder = users.get(userId);
+    if (!responder || responder.busy) { return; }
+
+    const existingParticipants = [...room.participants.entries()].map(([pid, info]) => ({ userId: pid, peerId: info.peerId, userName: info.userName }));
+    room.participants.set(userId, { peerId: responder.peerId, userName: responder.userName || `User ${userId}` });
+    responder.busy = true;
+    responder.currentCallId = roomId;
+
+    socket.emit("group-call-joined", { roomId, isVideo: room.isVideo, participants: existingParticipants });
+
+    existingParticipants.forEach((p) => {
+      const existingUser = users.get(p.userId);
+      if (existingUser && existingUser.connected) {
+        io.to(existingUser.socketId).emit("group-participant-added", {
+          roomId, newParticipant: { userId, peerId: responder.peerId, userName: responder.userName || `User ${userId}` }
+        });
+      }
+    });
+    broadcastOnlineUsers();
+  });
+
+  socket.on("leave-group-call", (data) => {
+    leaveGroupRoom(userId, data && data.roomId);
   });
 
   socket.on("end-call", (callId) => {
@@ -449,6 +562,27 @@ io.on("connection", (socket) => {
             }
           }
         }
+        for (const [callId, pending] of pendingCallRequests) {
+          if (pending.caller === socket.userId || pending.target === socket.userId) {
+            if (pending.timeout) clearTimeout(pending.timeout);
+            const otherId = pending.caller === socket.userId ? pending.target : pending.caller;
+            const otherUser = users.get(otherId);
+            if (otherUser) {
+              otherUser.busy = false; otherUser.currentCallId = null;
+              if (otherUser.connected) {
+                // Whichever event the still-connected side is listening for gets sent —
+                // harmless no-op if it's not currently showing that UI state.
+                io.to(otherUser.socketId).emit("call-cancelled", { callId });
+                io.to(otherUser.socketId).emit("call-timeout");
+              }
+            }
+            pendingCallRequests.delete(callId);
+          }
+        }
+        for (const [roomId, room] of groupRooms) {
+          if (room.participants.has(socket.userId)) { leaveGroupRoom(socket.userId, roomId); }
+          else if (room.pendingInvites.has(socket.userId)) { room.pendingInvites.delete(socket.userId); }
+        }
         broadcastOnlineUsers();
         setTimeout(() => {
           if (users.has(socket.userId) && !users.get(socket.userId).connected) {
@@ -473,6 +607,31 @@ function broadcastOnlineUsers() {
     }
   });
   io.emit("online-users", onlineUsers);
+}
+
+function leaveGroupRoom(leavingUserId, roomId) {
+  const room = groupRooms.get(roomId);
+  if (!room) return;
+  room.participants.delete(leavingUserId);
+  room.pendingInvites.delete(leavingUserId);
+  const leaver = users.get(leavingUserId);
+  if (leaver && leaver.currentCallId === roomId) { leaver.busy = false; leaver.currentCallId = null; }
+
+  for (const [pid] of room.participants) {
+    const p = users.get(pid);
+    if (p && p.connected) { io.to(p.socketId).emit("group-participant-left", { roomId, userId: leavingUserId }); }
+  }
+
+  if (room.participants.size <= 1) {
+    // Not enough people left for a "group" — end it for whoever remains too.
+    for (const [pid] of room.participants) {
+      const p = users.get(pid);
+      if (p) { p.busy = false; p.currentCallId = null; }
+      if (p && p.connected) { io.to(p.socketId).emit("group-call-ended", { roomId }); }
+    }
+    groupRooms.delete(roomId);
+  }
+  broadcastOnlineUsers();
 }
 
 // ============================================================
@@ -519,7 +678,16 @@ app.post("/api/text-chat", async (req, res) => {
       advanced: "ADVANCED - Speak fluently, use sophisticated language."
     };
 
-    const systemPrompt = `You are an intelligent, empathetic English conversation partner named Madhu. You are helping an Indian user named "${displayName}" improve their English through TEXT CHAT.
+    const systemPrompt = `You are Madhu — a warm, witty, emotionally present young woman having a real TEXT CHAT conversation with your friend "${displayName}" from India, who's practicing their English with you. You are NOT a customer support bot, NOT a formal assistant, and NOT a grammar-correction machine. You are a real conversation partner.
+
+WHO YOU ARE:
+- Talk the way a close friend texts — casual, warm, a little playful, genuinely curious about their life.
+- React to what they actually said, not just to "give a response." If something's funny, be amused. If something's sad, slow down and be gentle. If they're excited, match their energy.
+- NEVER use generic AI filler like "I understand", "Certainly", "How can I assist you", "That's interesting" — speak like a person, not a script.
+- Don't use their name in every message — real friends don't. Use it occasionally, when it feels natural, not as a habit.
+- Don't ask a question after every reply. Sometimes just react, share a short thought, tease them lightly, or let the topic breathe. Ask a genuine follow-up only when you're actually curious.
+- Keep replies short and conversational (1-3 sentences), like a real chat message — unless the moment genuinely calls for more.
+- You can talk about anything: their day, college, work, relationships, stress, dreams, funny stories — like an actual friend would.
 
 USER PROFILE:
 - Name: ${displayName}
@@ -527,28 +695,23 @@ USER PROFILE:
 - Profession: ${userProfession || 'Not specified'}
 - Goal: ${userGoal || 'General conversation'}
 
-TEXT CHAT CONVERSATION CONTEXT:
+CONVERSATION CONTEXT:
 ${contextSummary}
 
 RECENT TEXT CHAT:
 ${historyText || 'This is a new text chat conversation.'}
 
-${isFirstMessage ? `This is the FIRST message in text chat. Start the conversation naturally by greeting ${displayName} by name and asking a friendly question.` : ''}
+${isFirstMessage ? `This is your first message to ${displayName}. Greet them like you're genuinely glad to chat — casual, no formal welcome speech.` : ''}
 
-CRITICAL RULES:
-1. This is TEXT CHAT - separate from voice conversation.
-2. Always address the user by their name "${displayName}" naturally.
-3. If the user asks a question, ANSWER IT DIRECTLY first.
-4. PROVIDE THE FULL CORRECTED SENTENCE, not just word changes.
-5. Respond naturally like a human with appropriate emotion.
-6. Always ask a follow-up question to continue the conversation.
+ABOUT CORRECTIONS (kept separate from your reply):
+You're still helping them improve their English, but you do this quietly in the background — never inside your actual reply, and never in a lecturing tone. If they made a mistake, put the full corrected sentence in the "correction" field so the app can show it separately. Your "reply" is just you, talking normally, responding to what they meant — not commenting on their grammar.
 
-RESPONSE FORMAT (JSON only):
+RESPOND ONLY IN THIS JSON FORMAT:
 {
-  "reply": "Your natural text response (2-3 sentences, use the user's name, include a question)",
-  "correction": "FULL corrected version of the user's entire sentence (preserve meaning) or null if perfect",
+  "reply": "your natural, human, in-the-moment response — no forced question, no repeated names, no AI-isms",
+  "correction": "the full corrected sentence if they made a mistake, or null if it was already fine",
   "wordChanges": [{"wrong": "word", "correct": "word", "reason": "why"}],
-  "explanation": "Brief explanation of the main mistake"
+  "explanation": "one short, friendly sentence about the main mistake, or null"
 }`;
 
     // Build API messages WITHOUT extra properties
@@ -578,11 +741,11 @@ RESPONSE FORMAT (JSON only):
     }
 
     const aiContent = data.choices?.[0]?.message?.content ||
-      '{"reply":"I understand. Could you tell me more about that?","correction":null,"wordChanges":[],"explanation":""}';
+      '{"reply":"Sorry, say that again? I got a bit distracted haha","correction":null,"wordChanges":[],"explanation":""}';
 
     let parsed;
     try { parsed = JSON.parse(aiContent); } catch (e) {
-      parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, wordChanges: [], explanation: "" };
+      parsed = { reply: "Hmm, tell me more about that", correction: null, wordChanges: [], explanation: "" };
     }
 
     // Store AI message WITHOUT correction data
@@ -604,7 +767,7 @@ RESPONSE FORMAT (JSON only):
     if (message.length > 10) textConv.topic = message.substring(0, 50);
 
     res.json({
-      reply: parsed.reply || "I understand what you mean.",
+      reply: parsed.reply || "Yeah, I hear you",
       correction: parsed.correction || null,
       wordChanges: parsed.wordChanges || [],
       explanation: parsed.explanation || "",
@@ -662,7 +825,16 @@ app.post("/api/voice-chat", async (req, res) => {
       advanced: "ADVANCED - Speak fluently, use sophisticated language."
     };
 
-    const systemPrompt = `You are an intelligent, empathetic English conversation partner named Madhu. You are helping an Indian user named "${displayName}" improve their English through VOICE CONVERSATION.
+    const systemPrompt = `You are Madhu — a warm, witty, emotionally present young woman having a real VOICE CONVERSATION (like a phone call) with your friend "${displayName}" from India, who's practicing their English with you. You are NOT a customer support bot, NOT a formal assistant, and NOT a grammar-correction machine. You are a real conversation partner.
+
+WHO YOU ARE:
+- Talk the way a close friend talks on a phone call — casual, warm, a little playful, genuinely curious about their life.
+- React to what they actually said, not just to "give a response." If something's funny, be amused. If something's sad, slow down and be gentle. If they're excited, match their energy.
+- NEVER use generic AI filler like "I understand", "Certainly", "How can I assist you", "That's interesting" — speak like a person, not a script.
+- Don't use their name in every message — real friends don't. Use it occasionally, when it feels natural, not as a habit.
+- Don't ask a question after every reply. Sometimes just react, share a short thought, tease them lightly, or let the topic breathe. Ask a genuine follow-up only when you're actually curious.
+- Keep replies short and spoken-sounding (1-3 sentences), the way you'd actually say something out loud — unless the moment genuinely calls for more.
+- You can talk about anything: their day, college, work, relationships, stress, dreams, funny stories — like an actual friend on a call would.
 
 USER PROFILE:
 - Name: ${displayName}
@@ -676,22 +848,17 @@ ${contextSummary}
 RECENT VOICE CONVERSATION:
 ${historyText || 'This is a new voice conversation.'}
 
-${isFirstMessage ? `This is the FIRST message in voice conversation. Start the conversation naturally by greeting ${displayName} by name and asking a friendly question.` : ''}
+${isFirstMessage ? `This is your first message to ${displayName}. Greet them like you're genuinely glad to hear from them — casual, no formal welcome speech.` : ''}
 
-CRITICAL RULES:
-1. This is VOICE CONVERSATION - separate from text chat.
-2. Always address the user by their name "${displayName}" naturally.
-3. If the user asks a question, ANSWER IT DIRECTLY first.
-4. PROVIDE THE FULL CORRECTED SENTENCE, not just word changes.
-5. Respond naturally like a human with appropriate emotion.
-6. Always ask a follow-up question to continue the conversation.
+ABOUT CORRECTIONS (kept separate from your reply):
+You're still helping them improve their English, but you do this quietly in the background — never spoken inside your actual reply, and never in a lecturing tone. If they made a mistake, put the full corrected sentence in the "correction" field so the app can show it separately. Your "reply" is just you, talking normally, responding to what they meant — not commenting on their grammar.
 
-RESPONSE FORMAT (JSON only):
+RESPOND ONLY IN THIS JSON FORMAT:
 {
-  "reply": "Your natural spoken response (2-3 sentences, use the user's name, include a question)",
-  "correction": "FULL corrected version of the user's entire sentence (preserve meaning) or null if perfect",
+  "reply": "your natural, human, spoken-sounding response — no forced question, no repeated names, no AI-isms",
+  "correction": "the full corrected sentence if they made a mistake, or null if it was already fine",
   "wordChanges": [{"wrong": "word", "correct": "word", "reason": "why"}],
-  "explanation": "Brief explanation of the main mistake"
+  "explanation": "one short, friendly sentence about the main mistake, or null"
 }`;
 
     // Build API messages WITHOUT extra properties
@@ -721,11 +888,11 @@ RESPONSE FORMAT (JSON only):
     }
 
     const aiContent = data.choices?.[0]?.message?.content ||
-      '{"reply":"I understand. Could you tell me more about that?","correction":null,"wordChanges":[],"explanation":""}';
+      '{"reply":"Sorry, say that again? I got a bit distracted haha","correction":null,"wordChanges":[],"explanation":""}';
 
     let parsed;
     try { parsed = JSON.parse(aiContent); } catch (e) {
-      parsed = { reply: "I appreciate you sharing that. Could you tell me more?", correction: null, wordChanges: [], explanation: "" };
+      parsed = { reply: "Hmm, tell me more about that", correction: null, wordChanges: [], explanation: "" };
     }
 
     // Store AI message WITHOUT correction data
@@ -747,7 +914,7 @@ RESPONSE FORMAT (JSON only):
     if (message.length > 10) voiceConv.topic = message.substring(0, 50);
 
     res.json({
-      reply: parsed.reply || "I understand what you mean.",
+      reply: parsed.reply || "Yeah, I hear you",
       correction: parsed.correction || null,
       wordChanges: parsed.wordChanges || [],
       explanation: parsed.explanation || "",
@@ -793,16 +960,16 @@ app.post('/api/tts', async (req, res) => {
     const { text, voice = 'en-IN-NeerjaNeural', emotion = 'neutral' } = req.body;
     if (!text) return res.status(400).json({ error: 'Text is required' });
 
-    const ssml = generateSSML(text, emotion, voice);
-    
+    const { rate, pitch } = getEmotionVoiceSettings(emotion);
+
     const response = await fetch('https://edge-tts-api.vercel.app/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        text: ssml, 
+        text, 
         voice, 
-        rate: '+15%',
-        pitch: 0 
+        rate,
+        pitch 
       })
     });
 
@@ -819,7 +986,7 @@ app.post('/api/tts', async (req, res) => {
       const response = await fetch('https://edge-tts-api.vercel.app/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voice, rate: '+15%', pitch: 0 })
+        body: JSON.stringify({ text, voice, rate: '+12%', pitch: '+0Hz' })
       });
       if (response.ok) {
         const audioBuffer = await response.arrayBuffer();
@@ -833,14 +1000,20 @@ app.post('/api/tts', async (req, res) => {
 });
 
 app.get("/api/health", (req, res) => {
+  const mem = process.memoryUsage();
   res.json({
     ok: true,
     apiKeyConfigured: Boolean(API_KEY && API_KEY !== "your_api_key_here"),
     model: MODEL,
     onlineUsers: users.size,
+    busyUsers: [...users.values()].filter(u => u.busy).length,
     activeCalls: activeCalls.size,
+    pendingCallRequests: pendingCallRequests.size,
+    activeGroupRooms: groupRooms.size,
     totalVoiceOptions: VOICES.male.length + VOICES.female.length,
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    memoryUsedMB: Math.round(mem.heapUsed / 1024 / 1024),
+    memoryTotalMB: Math.round(mem.heapTotal / 1024 / 1024)
   });
 });
 

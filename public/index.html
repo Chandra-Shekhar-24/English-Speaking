@@ -909,8 +909,410 @@
       display: none;
     }
 
+    .incoming-call-modal {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, #1e2a4a 0%, #0a0a14 75%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 60px 24px 50px;
+    }
+
+    .incoming-call-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 340px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .incoming-call-avatar {
+      width: 128px;
+      height: 128px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+      color: white;
+      font-size: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 26px;
+      animation: incoming-call-pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes incoming-call-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(79,195,247,0.5); }
+      70% { box-shadow: 0 0 0 28px rgba(79,195,247,0); }
+      100% { box-shadow: 0 0 0 0 rgba(79,195,247,0); }
+    }
+
+    .incoming-call-type {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .incoming-call-name {
+      font-size: 26px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 6px;
+    }
+
+    .incoming-call-sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .incoming-call-actions {
+      display: flex;
+      justify-content: center;
+      gap: 56px;
+      width: 100%;
+    }
+
+    .incoming-call-actions button {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: none;
+      font-size: 26px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    }
+
+    .incoming-call-actions .btn-label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .incoming-call-action-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .decline-call-btn {
+      background: var(--red);
+      color: white;
+      transform: rotate(135deg);
+    }
+
+    .accept-call-btn {
+      background: #22c55e;
+      color: white;
+    }
+
+    .call-type-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .call-type-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 14px 0;
+      border: 2px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .call-type-btn .call-type-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .call-type-btn:hover {
+      border-color: var(--blue);
+      transform: translateY(-1px);
+    }
+
+    .call-type-btn.active {
+      border-color: var(--blue);
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+      color: white;
+      box-shadow: 0 4px 14px rgba(79,195,247,0.35);
+    }
+
+    .chat-entry-btn {
+      width: 100%;
+      padding: 12px 0;
+      border: none;
+      border-radius: 10px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .chat-entry-btn:hover {
+      background: var(--border-color);
+    }
+
+    .friend-chat-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      background: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .friend-chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-card);
+    }
+
+    .friend-chat-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .friend-chat-close {
+      border: none;
+      background: none;
+      font-size: 18px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .friend-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .friend-chat-bubble {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .friend-chat-bubble.sent {
+      align-self: flex-end;
+      background: var(--blue);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .friend-chat-bubble.received {
+      align-self: flex-start;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-bottom-left-radius: 4px;
+    }
+
+    .friend-chat-bubble.system {
+      align-self: center;
+      background: none;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .friend-chat-input-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-card);
+    }
+
+    .friend-chat-input-row input {
+      flex: 1;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .friend-chat-input-row button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      background: var(--blue);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .group-setup-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .group-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 20px;
+    }
+
+    .group-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(79,195,247,0.12);
+      color: var(--blue);
+      padding: 6px 10px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .group-chip button {
+      border: none;
+      background: none;
+      color: var(--blue);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0;
+    }
+
+    .group-start-btn {
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+      color: white;
+      border: none;
+      margin-top: auto;
+    }
+
+    .group-call-view {
+      position: fixed;
+      inset: 0;
+      z-index: 9985;
+      background: #0a0a14;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .group-call-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .group-call-grid {
+      flex: 1;
+      display: grid;
+      gap: 10px;
+      padding: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      align-content: center;
+      overflow-y: auto;
+    }
+
+    .group-tile {
+      position: relative;
+      background: #16162a;
+      border-radius: 14px;
+      overflow: hidden;
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .group-tile video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .group-tile-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .group-call-view.audio-only .group-tile video { display: none; }
+    .group-call-view:not(.audio-only) .group-tile-avatar { display: none; }
+
+    .group-tile-name {
+      position: absolute;
+      bottom: 6px;
+      left: 8px;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(0,0,0,0.5);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .group-call-controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .group-call-controls button {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: none;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     .friend-row button.end-friend-call-btn:hover {
       opacity: 0.85;
+    }
+
+    .accept-call-btn {
+      background: #22c55e;
+      color: white;
     }
 
     .friend-row button.mute-btn,
@@ -962,6 +1364,16 @@
       overflow: hidden;
     }
 
+    .video-call-container.fullscreen {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      aspect-ratio: unset;
+      border-radius: 0;
+      z-index: 9990;
+    }
+
     .video-call-container video#remoteVideo {
       width: 100%;
       height: 100%;
@@ -980,6 +1392,50 @@
       border-radius: 10px;
       border: 2px solid rgba(255,255,255,0.8);
       background: #000;
+    }
+
+    .video-call-container.fullscreen video#localVideo {
+      bottom: 110px;
+      right: 16px;
+      width: 26%;
+      max-width: 130px;
+      z-index: 9991;
+    }
+
+    body.video-fullscreen-active #inCallControls {
+      position: fixed;
+      bottom: 34px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9992;
+      background: rgba(15,15,26,0.65);
+      backdrop-filter: blur(8px);
+      padding: 10px 14px;
+      border-radius: 30px;
+      width: auto;
+    }
+
+    body.video-fullscreen-active #callTimerDisplay {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9992;
+      color: white;
+      background: rgba(15,15,26,0.55);
+      padding: 5px 16px;
+      border-radius: 20px;
+    }
+
+    body.video-fullscreen-active #friendCallStatus {
+      position: fixed;
+      top: 54px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9992;
+      color: white;
+      text-align: center;
+      width: 90%;
     }
 
     #inCallControls {
@@ -1013,13 +1469,19 @@
 
     .online-users .chip {
       background: rgba(79, 195, 247, 0.08);
-      padding: 2px 10px;
+      padding: 2px 6px 2px 10px;
       border-radius: 12px;
       font-size: 11px;
       color: var(--blue);
       display: flex;
       align-items: center;
       gap: 4px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .online-users .chip:hover {
+      background: rgba(79, 195, 247, 0.18);
     }
 
     .online-users .chip .dot {
@@ -1037,6 +1499,16 @@
     .online-users .chip .name-label {
       color: var(--text-muted);
       font-size: 10px;
+    }
+
+    .online-users .chip .chip-chat-btn {
+      border: none;
+      background: none;
+      color: var(--blue);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 2px 3px;
+      line-height: 1;
     }
 
     .online-users .empty {
@@ -1177,6 +1649,27 @@
       .call-timer {
         font-size: 17px;
       }
+
+      .call-type-btn {
+        font-size: 12px;
+        padding: 8px 0;
+      }
+
+      .incoming-call-card {
+        padding: 28px 20px;
+        max-width: 280px;
+      }
+
+      .incoming-call-avatar {
+        width: 64px;
+        height: 64px;
+        font-size: 26px;
+      }
+
+      .friend-chat-bubble {
+        max-width: 85%;
+        font-size: 13px;
+      }
     }
 
     @media (max-width: 380px) {
@@ -1201,6 +1694,88 @@
 </head>
 
 <body>
+
+  <div class="friend-chat-panel" id="groupSetupPanel" style="display:none;">
+    <div class="friend-chat-header">
+      <div class="friend-chat-title">👥 Start Group Call</div>
+      <button class="friend-chat-close" id="closeGroupSetupBtn">✖</button>
+    </div>
+    <div class="group-setup-body">
+      <div class="call-type-row">
+        <button type="button" class="call-type-btn active" id="groupVoiceTypeBtn"><span class="call-type-icon">📞</span>Voice</button>
+        <button type="button" class="call-type-btn" id="groupVideoTypeBtn"><span class="call-type-icon">🎥</span>Video</button>
+      </div>
+      <div class="friend-row">
+        <input id="groupIdInput" placeholder="Enter 4-digit ID" maxlength="4" />
+        <button class="connect-btn" id="addGroupIdBtn">+ Add</button>
+      </div>
+      <div class="group-chip-list" id="groupChipList"></div>
+      <button class="chat-entry-btn group-start-btn" id="startGroupCallBtn">🚀 Start Group Call</button>
+    </div>
+  </div>
+
+  <div class="incoming-call-modal" id="incomingGroupCallModal" style="display:none;">
+    <div class="incoming-call-card">
+      <div class="incoming-call-avatar">👥</div>
+      <div class="incoming-call-type" id="incomingGroupCallType">Group Voice Call</div>
+      <div class="incoming-call-name" id="incomingGroupCallerName">User</div>
+      <div class="incoming-call-sub">is inviting you to a group call</div>
+      <div class="incoming-call-actions">
+        <div class="incoming-call-action-col">
+          <button class="decline-call-btn" id="declineGroupCallBtn">📞</button>
+          <span class="btn-label">Decline</span>
+        </div>
+        <div class="incoming-call-action-col">
+          <button class="accept-call-btn" id="acceptGroupCallBtn">📞</button>
+          <span class="btn-label">Accept</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group-call-view" id="groupCallView" style="display:none;">
+    <div class="group-call-header">
+      <span id="groupCallTimer">00:00</span>
+      <span id="groupCallMemberCount">1 person</span>
+    </div>
+    <div class="group-call-grid" id="groupCallGrid"></div>
+    <div class="group-call-controls">
+      <button class="mute-btn" id="groupMuteBtn">🎤 Mute</button>
+      <button class="camera-btn" id="groupCameraBtn" style="display:none;">📷 Camera Off</button>
+      <button class="end-friend-call-btn" id="leaveGroupCallBtn">📞 Leave</button>
+    </div>
+  </div>
+
+  <div class="friend-chat-panel" id="friendChatPanel" style="display:none;">
+    <div class="friend-chat-header">
+      <div class="friend-chat-title">💬 Chat with <span id="friendChatTargetId">----</span></div>
+      <button class="friend-chat-close" id="closeFriendChatBtn">✖</button>
+    </div>
+    <div class="friend-chat-messages" id="friendChatMessages"></div>
+    <div class="friend-chat-input-row">
+      <input id="friendChatInput" placeholder="Type a message..." maxlength="1000" />
+      <button id="friendChatSendBtn">Send</button>
+    </div>
+  </div>
+
+  <div class="incoming-call-modal" id="incomingCallModal" style="display:none;">
+    <div class="incoming-call-card">
+      <div class="incoming-call-avatar" id="incomingCallAvatar">📞</div>
+      <div class="incoming-call-type" id="incomingCallType">Voice Call</div>
+      <div class="incoming-call-name" id="incomingCallerName">User</div>
+      <div class="incoming-call-sub">is calling you...</div>
+      <div class="incoming-call-actions">
+        <div class="incoming-call-action-col">
+          <button class="decline-call-btn" id="declineCallBtn">📞</button>
+          <span class="btn-label">Decline</span>
+        </div>
+        <div class="incoming-call-action-col">
+          <button class="accept-call-btn" id="acceptCallBtn">📞</button>
+          <span class="btn-label">Accept</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="onboarding-overlay" id="onboarding">
     <div class="onboarding-card">
@@ -1309,12 +1884,17 @@
           <video id="remoteVideo" autoplay playsinline></video>
           <video id="localVideo" autoplay playsinline muted></video>
         </div>
-        <label class="video-toggle" id="videoToggleLabel">
-          <input type="checkbox" id="videoCallToggle" /> 🎥 Video Call
-        </label>
+        <div class="call-type-row" id="callTypeRow">
+          <button type="button" class="call-type-btn active" id="voiceTypeBtn"><span class="call-type-icon">📞</span>Voice Call</button>
+          <button type="button" class="call-type-btn" id="videoTypeBtn"><span class="call-type-icon">🎥</span>Video Call</button>
+        </div>
         <div class="friend-row">
           <input id="friendIdInput" placeholder="Enter 4-digit ID" maxlength="4" />
           <button class="connect-btn" id="connectBtn">Connect</button>
+        </div>
+        <div class="friend-row" id="chatEntryRow">
+          <button class="chat-entry-btn" id="chatBtn">💬 Chat with this ID</button>
+          <button class="chat-entry-btn" id="groupCallBtn">👥 Group Call</button>
         </div>
         <div class="friend-row" id="inCallControls" style="display:none;">
           <button class="mute-btn" id="muteFriendBtn">🎤 Mute</button>
@@ -1353,7 +1933,10 @@
         isConversationStarted: false,
         callTimerInterval: null,
         callStartTime: null,
-        isMuted: false, isCameraOff: false, isVideoCall: false,
+        isMuted: false, isCameraOff: false, isVideoCall: false, ringingCallId: null, wantsVideo: false,
+        chatTargetId: null, chatHistories: {},
+        groupRoom: null, groupSetupIds: [], groupWantsVideo: false,
+        groupIsMuted: false, groupIsCameraOff: false, groupCallStartTime: null, groupCallTimerInterval: null,
         // Store corrections by message ID
         correctionCache: {}
       };
@@ -1367,8 +1950,19 @@
         'textChatBox', 'textInput', 'textSend', 'voiceSelectCompact',
         'levelSelect', 'professionSelect', 'goalSelect', 'startBtn',
         'onboarding', 'mainApp', 'endFriendCallBtn', 'nameInput', 'callTimerDisplay',
-        'videoCallToggle', 'videoCallContainer', 'remoteVideo', 'localVideo',
-        'muteFriendBtn', 'cameraToggleBtn', 'inCallControls', 'videoToggleLabel'
+        'videoCallContainer', 'remoteVideo', 'localVideo',
+        'muteFriendBtn', 'cameraToggleBtn', 'inCallControls', 'callTypeRow',
+        'voiceTypeBtn', 'videoTypeBtn', 'chatBtn', 'chatEntryRow',
+        'incomingCallModal', 'incomingCallAvatar', 'incomingCallType', 'incomingCallerName',
+        'declineCallBtn', 'acceptCallBtn',
+        'friendChatPanel', 'friendChatTargetId', 'friendChatMessages', 'friendChatInput',
+        'friendChatSendBtn', 'closeFriendChatBtn',
+        'groupCallBtn', 'groupSetupPanel', 'closeGroupSetupBtn', 'groupVoiceTypeBtn', 'groupVideoTypeBtn',
+        'groupIdInput', 'addGroupIdBtn', 'groupChipList', 'startGroupCallBtn',
+        'incomingGroupCallModal', 'incomingGroupCallType', 'incomingGroupCallerName',
+        'declineGroupCallBtn', 'acceptGroupCallBtn',
+        'groupCallView', 'groupCallTimer', 'groupCallMemberCount', 'groupCallGrid',
+        'groupMuteBtn', 'groupCameraBtn', 'leaveGroupCallBtn'
       ].forEach(id => { els[id] = $(id); });
 
       // ==========================================================
@@ -1462,6 +2056,7 @@
         setupTextChat();
         setupVoiceUI();
         setupFriendCall();
+        setupGroupCall();
         loadVoices();
         populateVoiceSelect();
       }
@@ -1478,24 +2073,28 @@
 
         state.socket.on('incoming-call', (data) => {
           if (state.isCallActive || state.isFriendCall) { state.socket.emit('call-response', { callId: data.callId, accepted: false }); return; }
-          const accept = confirm(`📞 ${data.fromName} is calling you${data.isVideo ? ' (Video Call)' : ''}!\n\nAccept?`);
-          if (accept) {
-            state.socket.emit('call-response', { callId: data.callId, accepted: true });
-            state.isFriendCall = true;
-            state.currentCallId = data.callId;
-            state.isVideoCall = !!data.isVideo;
-            // IMPORTANT: do NOT call connectToPeer() here. Only the caller initiates the
-            // actual PeerJS media call (peer.call). We just wait for it — it will arrive
-            // via the peer.on('call', ...) handler in initPeer(), which answers automatically.
-            showInCallControls();
-            els.connectBtn.style.display = 'none';
-            els.friendCallStatus.textContent = '🔊 Connecting with ' + data.fromName + '...';
-          } else {
-            state.socket.emit('call-response', { callId: data.callId, accepted: false });
+          showIncomingCallModal(data);
+        });
+
+        state.socket.on('call-requested', (data) => {
+          // Caller side: server has assigned the real callId while the call is ringing,
+          // so we can cancel it later if needed.
+          state.isCalling = true;
+          state.ringingCallId = data.callId;
+          playRingback();
+        });
+
+        state.socket.on('call-cancelled', (data) => {
+          if (currentIncomingCallData && currentIncomingCallData.callId === data.callId) {
+            hideIncomingCallModal();
+            els.friendCallStatus.textContent = '📞 Missed call';
           }
         });
 
         state.socket.on('call-accepted', (data) => {
+          stopRingback();
+          state.ringingCallId = null;
+          state.isCalling = false;
           els.friendCallStatus.textContent = '✅ Connected with ' + data.userName;
           state.isFriendCall = true;
           state.currentCallId = data.callId;
@@ -1519,8 +2118,8 @@
           startCallTimer();
         });
 
-        state.socket.on('call-declined', () => { els.friendCallStatus.textContent = '❌ Call declined'; state.isFriendCall = false; state.isCalling = false; hideInCallControls(); els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
-        state.socket.on('call-timeout', () => { els.friendCallStatus.textContent = '⏰ No response from user'; state.isFriendCall = false; state.isCalling = false; hideInCallControls(); els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
+        state.socket.on('call-declined', () => { stopRingback(); els.friendCallStatus.textContent = '❌ Call declined'; state.isFriendCall = false; state.isCalling = false; state.ringingCallId = null; hideInCallControls(); els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
+        state.socket.on('call-timeout', () => { stopRingback(); els.friendCallStatus.textContent = '⏰ No response from user'; state.isFriendCall = false; state.isCalling = false; state.ringingCallId = null; hideInCallControls(); els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
         state.socket.on('call-ended', () => { endFriendCall(); els.friendCallStatus.textContent = '📞 Call ended'; els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
         state.socket.on('no-users-available', () => { els.friendCallStatus.textContent = '❌ No users available. Try later.'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; });
         state.socket.on('random-match', (data) => {
@@ -1541,7 +2140,7 @@
             els.friendCallStatus.textContent = '🔊 Connecting with ' + data.userName + '...';
           }
         });
-        state.socket.on('call-error', (msg) => { els.friendCallStatus.textContent = '❌ ' + msg; state.isFriendCall = false; state.isCalling = false; hideInCallControls(); els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
+        state.socket.on('call-error', (msg) => { stopRingback(); els.friendCallStatus.textContent = '❌ ' + msg; state.isFriendCall = false; state.isCalling = false; state.ringingCallId = null; hideInCallControls(); els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; stopCallTimer(); });
       }
 
       // ==========================================================
@@ -1552,14 +2151,22 @@
         els.endFriendCallBtn.style.display = 'inline-block';
         els.muteFriendBtn.style.display = 'inline-block';
         els.cameraToggleBtn.style.display = state.isVideoCall ? 'inline-block' : 'none';
-        els.videoToggleLabel.style.display = 'none';
-        if (state.isVideoCall) { els.videoCallContainer.style.display = 'block'; }
+        els.callTypeRow.style.display = 'none';
+        els.chatEntryRow.style.display = 'none';
+        if (state.isVideoCall) {
+          els.videoCallContainer.style.display = 'block';
+          els.videoCallContainer.classList.add('fullscreen');
+          document.body.classList.add('video-fullscreen-active');
+        }
       }
 
       function hideInCallControls() {
         els.inCallControls.style.display = 'none';
-        els.videoToggleLabel.style.display = 'flex';
+        els.callTypeRow.style.display = 'flex';
+        els.chatEntryRow.style.display = 'flex';
         els.videoCallContainer.style.display = 'none';
+        els.videoCallContainer.classList.remove('fullscreen');
+        document.body.classList.remove('video-fullscreen-active');
         if (els.remoteVideo) els.remoteVideo.srcObject = null;
         if (els.localVideo) els.localVideo.srcObject = null;
       }
@@ -1588,6 +2195,102 @@
       }
 
       // ==========================================================
+      // RINGTONE (generated via Web Audio API — no audio file needed)
+      // ==========================================================
+      let ringtoneCtx = null;
+      let ringtoneTimer = null;
+
+      function playRingtone() {
+        stopRingtone();
+        try {
+          ringtoneCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const playBeepPair = () => {
+            if (!ringtoneCtx) return;
+            const now = ringtoneCtx.currentTime;
+            [523.25, 659.25].forEach((freq) => {
+              const osc = ringtoneCtx.createOscillator();
+              const gain = ringtoneCtx.createGain();
+              osc.type = 'sine';
+              osc.frequency.value = freq;
+              gain.gain.setValueAtTime(0, now);
+              gain.gain.linearRampToValueAtTime(0.15, now + 0.03);
+              gain.gain.linearRampToValueAtTime(0, now + 0.35);
+              osc.connect(gain);
+              gain.connect(ringtoneCtx.destination);
+              osc.start(now);
+              osc.stop(now + 0.4);
+            });
+          };
+          playBeepPair();
+          ringtoneTimer = setInterval(playBeepPair, 1000);
+        } catch (e) { console.error('Ringtone error:', e); }
+      }
+
+      function stopRingtone() {
+        if (ringtoneTimer) { clearInterval(ringtoneTimer); ringtoneTimer = null; }
+        if (ringtoneCtx) { try { ringtoneCtx.close(); } catch (e) { } ringtoneCtx = null; }
+      }
+
+      // Ringback tone — played on the CALLER's side while the other person's phone is
+      // "ringing" (before they accept/decline). Classic longer single-tone pattern, so
+      // it's clearly distinct from the shorter double-beep incoming ringtone.
+      let ringbackCtx = null;
+      let ringbackTimer = null;
+
+      function playRingback() {
+        stopRingback();
+        try {
+          ringbackCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const playTone = () => {
+            if (!ringbackCtx) return;
+            const now = ringbackCtx.currentTime;
+            const osc = ringbackCtx.createOscillator();
+            const gain = ringbackCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 425;
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.1, now + 0.05);
+            gain.gain.setValueAtTime(0.1, now + 1.8);
+            gain.gain.linearRampToValueAtTime(0, now + 2.0);
+            osc.connect(gain);
+            gain.connect(ringbackCtx.destination);
+            osc.start(now);
+            osc.stop(now + 2.0);
+          };
+          playTone();
+          ringbackTimer = setInterval(playTone, 4000);
+        } catch (e) { console.error('Ringback error:', e); }
+      }
+
+      function stopRingback() {
+        if (ringbackTimer) { clearInterval(ringbackTimer); ringbackTimer = null; }
+        if (ringbackCtx) { try { ringbackCtx.close(); } catch (e) { } ringbackCtx = null; }
+      }
+
+      function stopAllCallSounds() { stopRingtone(); stopRingback(); }
+
+      // ==========================================================
+      // INCOMING CALL MODAL
+      // ==========================================================
+      let currentIncomingCallData = null;
+      let currentIncomingGroupCallData = null;
+
+      function showIncomingCallModal(data) {
+        currentIncomingCallData = data;
+        els.incomingCallerName.textContent = data.fromName || ('User ' + data.from);
+        els.incomingCallType.textContent = data.isVideo ? '🎥 Video Call' : '📞 Voice Call';
+        els.incomingCallAvatar.textContent = data.isVideo ? '🎥' : '📞';
+        els.incomingCallModal.style.display = 'flex';
+        playRingtone();
+      }
+
+      function hideIncomingCallModal() {
+        els.incomingCallModal.style.display = 'none';
+        currentIncomingCallData = null;
+        stopRingtone();
+      }
+
+      // ==========================================================
       // PEERJS
       // ==========================================================
       function initPeer() {
@@ -1595,6 +2298,25 @@
         state.peer = new Peer(undefined, { config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] } });
         state.peer.on('open', (id) => { state.userPeerId = id; state.socket.emit('set-peer-id', id); console.log('PeerJS ID:', id); });
         state.peer.on('call', (incomingCall) => {
+          const meta = incomingCall.metadata || {};
+          if (meta.isGroup && state.groupRoom && state.groupRoom.roomId === meta.roomId) {
+            // Group call: a fellow participant is calling us as part of the mesh.
+            // Answer with our shared group stream (may still be loading if we only just
+            // joined — poll briefly rather than dropping the call).
+            const answerWhenReady = () => {
+              if (state.groupRoom && state.groupRoom.localStream) {
+                incomingCall.answer(state.groupRoom.localStream);
+              } else if (state.groupRoom) {
+                setTimeout(answerWhenReady, 200);
+              }
+            };
+            answerWhenReady();
+            const remoteUserId = meta.fromUserId;
+            state.groupRoom.peers.set(remoteUserId, { call: incomingCall });
+            incomingCall.on('stream', (remoteStream) => { updateGroupTileStream(remoteUserId, remoteStream); });
+            incomingCall.on('close', () => { if (state.groupRoom) { state.groupRoom.peers.delete(remoteUserId); } removeGroupTile(remoteUserId); });
+            return;
+          }
           if (state.currentCall || state.isCallActive) { incomingCall.answer(); incomingCall.close(); return; }
           const wantsVideo = !!(incomingCall.metadata && incomingCall.metadata.isVideo);
           state.isVideoCall = wantsVideo;
@@ -1618,6 +2340,101 @@
             .catch(() => { els.friendCallStatus.textContent = wantsVideo ? '❌ Camera/Mic access denied' : '❌ Mic access denied'; });
         });
         state.peer.on('error', (err) => { console.error('Peer error:', err); });
+      }
+
+      // ==========================================================
+      // GROUP CALL — tiles, mesh connections, lifecycle
+      // ==========================================================
+      function renderGroupTile(participantId, name, isSelf) {
+        let tile = document.getElementById('group-tile-' + participantId);
+        if (tile) return tile;
+        tile = document.createElement('div');
+        tile.className = 'group-tile';
+        tile.id = 'group-tile-' + participantId;
+        const initial = (name || '?').toString().charAt(0).toUpperCase();
+        tile.innerHTML = `<video autoplay playsinline${isSelf ? ' muted' : ''}></video><div class="group-tile-avatar">${escapeHtml(initial)}</div><div class="group-tile-name">${escapeHtml(name || participantId)}${isSelf ? ' (You)' : ''}</div>`;
+        els.groupCallGrid.appendChild(tile);
+        updateGroupMemberCount();
+        return tile;
+      }
+
+      function updateGroupTileStream(participantId, stream) {
+        const tile = renderGroupTile(participantId, participantId, false);
+        const video = tile.querySelector('video');
+        if (video) { video.srcObject = stream; video.play().catch(() => { }); }
+      }
+
+      function removeGroupTile(participantId) {
+        const tile = document.getElementById('group-tile-' + participantId);
+        if (tile) tile.remove();
+        updateGroupMemberCount();
+      }
+
+      function updateGroupMemberCount() {
+        const count = els.groupCallGrid.children.length;
+        els.groupCallMemberCount.textContent = count + (count === 1 ? ' person' : ' people');
+      }
+
+      function connectToGroupPeer(peerId, remoteUserId, userName) {
+        renderGroupTile(remoteUserId, userName, false);
+        const call = state.peer.call(peerId, state.groupRoom.localStream, { metadata: { isGroup: true, roomId: state.groupRoom.roomId, fromUserId: state.userId } });
+        state.groupRoom.peers.set(remoteUserId, { call });
+        call.on('stream', (remoteStream) => { updateGroupTileStream(remoteUserId, remoteStream); });
+        call.on('close', () => { if (state.groupRoom) { state.groupRoom.peers.delete(remoteUserId); } removeGroupTile(remoteUserId); });
+        call.on('error', (err) => { console.error('Group peer error:', err); if (state.groupRoom) { state.groupRoom.peers.delete(remoteUserId); } removeGroupTile(remoteUserId); });
+      }
+
+      function startGroupCallTimer() {
+        state.groupCallStartTime = Date.now();
+        if (state.groupCallTimerInterval) clearInterval(state.groupCallTimerInterval);
+        state.groupCallTimerInterval = setInterval(() => {
+          const elapsed = Math.floor((Date.now() - state.groupCallStartTime) / 1000);
+          const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+          const s = String(elapsed % 60).padStart(2, '0');
+          els.groupCallTimer.textContent = m + ':' + s;
+        }, 1000);
+      }
+
+      function stopGroupCallTimer() {
+        if (state.groupCallTimerInterval) { clearInterval(state.groupCallTimerInterval); state.groupCallTimerInterval = null; }
+        els.groupCallTimer.textContent = '00:00';
+      }
+
+      function enterGroupCall(roomId, isVideo, existingParticipants) {
+        state.groupRoom = { roomId, isVideo, localStream: null, peers: new Map() };
+        navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: isVideo ? { width: 320, height: 240 } : false })
+          .then((stream) => {
+            if (!state.groupRoom) { stream.getTracks().forEach(t => t.stop()); return; }
+            state.groupRoom.localStream = stream;
+            els.groupCallGrid.innerHTML = '';
+            els.groupCallView.style.display = 'flex';
+            els.groupCallView.classList.toggle('audio-only', !isVideo);
+            els.groupCameraBtn.style.display = isVideo ? 'inline-block' : 'none';
+            const selfTile = renderGroupTile('self', state.userName || ('User ' + state.userId), true);
+            const selfVideo = selfTile.querySelector('video');
+            if (selfVideo) selfVideo.srcObject = stream;
+            existingParticipants.forEach((p) => { connectToGroupPeer(p.peerId, p.userId, p.userName); });
+            startGroupCallTimer();
+          })
+          .catch(() => {
+            els.friendCallStatus.textContent = isVideo ? '❌ Camera/Mic access denied' : '❌ Mic access denied';
+            state.socket.emit('leave-group-call', { roomId });
+            state.groupRoom = null;
+          });
+      }
+
+      function leaveGroupCallCleanup(notifyServer) {
+        if (!state.groupRoom) return;
+        if (notifyServer) { state.socket.emit('leave-group-call', { roomId: state.groupRoom.roomId }); }
+        state.groupRoom.peers.forEach((p) => { try { p.call.close(); } catch (e) { } });
+        if (state.groupRoom.localStream) { state.groupRoom.localStream.getTracks().forEach(t => t.stop()); }
+        state.groupRoom = null;
+        els.groupCallGrid.innerHTML = '';
+        els.groupCallView.style.display = 'none';
+        stopGroupCallTimer();
+        state.groupIsMuted = false; state.groupIsCameraOff = false;
+        els.groupMuteBtn.textContent = '🎤 Mute'; els.groupMuteBtn.classList.remove('active');
+        els.groupCameraBtn.textContent = '📷 Camera Off'; els.groupCameraBtn.classList.remove('active');
       }
 
       // ==========================================================
@@ -1702,9 +2519,12 @@
         if (audioEl) { try { audioEl.pause(); audioEl.srcObject = null; audioEl.remove(); console.log('🔊 Audio element cleaned up'); } catch (e) { console.error('Error cleaning audio element:', e); } }
         if (els.remoteVideo) { try { els.remoteVideo.pause(); els.remoteVideo.srcObject = null; } catch (e) { } }
         if (els.localVideo) { try { els.localVideo.pause(); els.localVideo.srcObject = null; } catch (e) { } }
-        state.isCallActive = false; state.isFriendCall = false; state.isCalling = false; state.currentCallId = null;
+        state.isCallActive = false; state.isFriendCall = false; state.isCalling = false; state.currentCallId = null; state.ringingCallId = null;
         state.isVideoCall = false; state.isMuted = false; state.isCameraOff = false;
         hideInCallControls();
+        if (els.incomingCallModal.style.display !== 'none') { hideIncomingCallModal(); }
+        stopRingback();
+        stopRingtone();
         els.connectBtn.style.display = 'inline-block'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; els.randomMatchBtn.disabled = false; els.friendCallStatus.textContent = '📞 Call ended';
         stopCallTimer();
         console.log('📞 Friend call cleanup complete');
@@ -2178,11 +2998,34 @@
       // FRIEND CALL SETUP
       // ==========================================================
       function setupFriendCall() {
+        els.voiceTypeBtn.addEventListener('click', () => {
+          state.wantsVideo = false;
+          els.voiceTypeBtn.classList.add('active');
+          els.videoTypeBtn.classList.remove('active');
+        });
+
+        els.videoTypeBtn.addEventListener('click', () => {
+          state.wantsVideo = true;
+          els.videoTypeBtn.classList.add('active');
+          els.voiceTypeBtn.classList.remove('active');
+        });
+
         els.connectBtn.addEventListener('click', () => {
+          if (state.isCalling && state.ringingCallId) {
+            // Currently ringing (waiting for the other side to respond) — this click cancels it.
+            state.socket.emit('cancel-call', state.ringingCallId);
+            stopRingback();
+            state.isCalling = false;
+            state.ringingCallId = null;
+            els.friendCallStatus.textContent = '📞 Call cancelled';
+            els.connectBtn.disabled = false;
+            els.connectBtn.textContent = 'Connect';
+            return;
+          }
           const targetId = els.friendIdInput.value.trim();
           if (!targetId || targetId.length !== 4) { els.friendCallStatus.textContent = '⚠️ Enter a valid 4-digit ID'; return; }
           if (targetId === state.userId) { els.friendCallStatus.textContent = '⚠️ You cannot call yourself'; return; }
-          const wantsVideo = !!(els.videoCallToggle && els.videoCallToggle.checked);
+          const wantsVideo = !!state.wantsVideo;
           els.friendCallStatus.textContent = '🔍 Looking for user ' + targetId + '...';
           els.connectBtn.disabled = true;
           els.connectBtn.textContent = 'Calling...';
@@ -2192,6 +3035,8 @@
             if (!result.online) { els.friendCallStatus.textContent = '❌ User is offline'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; state.isCalling = false; return; }
             if (result.busy) { els.friendCallStatus.textContent = '❌ User is in a call'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; state.isCalling = false; return; }
             els.friendCallStatus.textContent = '📞 Calling ' + targetId + '...';
+            els.connectBtn.disabled = false;
+            els.connectBtn.textContent = '✖ Cancel';
             state.socket.emit('call-request', { targetUserId: targetId, isVideo: wantsVideo });
           });
         });
@@ -2216,6 +3061,277 @@
           state.isCameraOff = !state.isCameraOff;
           applyCameraState();
         });
+
+        els.acceptCallBtn.addEventListener('click', () => {
+          const data = currentIncomingCallData;
+          if (!data) return;
+          hideIncomingCallModal();
+          state.socket.emit('call-response', { callId: data.callId, accepted: true });
+          state.isFriendCall = true;
+          state.currentCallId = data.callId;
+          state.isVideoCall = !!data.isVideo;
+          // IMPORTANT: do NOT call connectToPeer() here. Only the caller initiates the
+          // actual PeerJS media call (peer.call). We just wait for it — it will arrive
+          // via the peer.on('call', ...) handler in initPeer(), which answers automatically.
+          showInCallControls();
+          els.connectBtn.style.display = 'none';
+          els.friendCallStatus.textContent = '🔊 Connecting with ' + data.fromName + '...';
+        });
+
+        els.declineCallBtn.addEventListener('click', () => {
+          const data = currentIncomingCallData;
+          if (!data) return;
+          hideIncomingCallModal();
+          state.socket.emit('call-response', { callId: data.callId, accepted: false });
+        });
+
+        els.chatBtn.addEventListener('click', () => {
+          const targetId = els.friendIdInput.value.trim();
+          if (!targetId || targetId.length !== 4) { els.friendCallStatus.textContent = '⚠️ Enter a valid 4-digit ID to chat'; return; }
+          if (targetId === state.userId) { els.friendCallStatus.textContent = '⚠️ You cannot chat with yourself'; return; }
+          openFriendChat(targetId);
+        });
+
+        els.closeFriendChatBtn.addEventListener('click', () => { closeFriendChat(); });
+
+        els.friendChatSendBtn.addEventListener('click', () => { sendFriendChatMessage(); });
+        els.friendChatInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); sendFriendChatMessage(); }
+        });
+
+        state.socket.on('friend-message', (data) => {
+          appendChatMessage(data.from, { text: data.text, self: false, fromName: data.fromName, timestamp: data.timestamp });
+          if (state.chatTargetId !== data.from) {
+            // Message from someone we're not currently viewing — surface a light notice.
+            els.friendCallStatus.textContent = '💬 New message from ' + (data.fromName || data.from);
+          }
+        });
+
+        state.socket.on('friend-message-failed', (data) => {
+          appendChatMessage(data.targetUserId, { text: '⚠️ Message not delivered — ' + (data.reason || 'user offline'), self: false, system: true, timestamp: Date.now() });
+        });
+
+        els.onlineUsersList.addEventListener('click', (e) => {
+          const chatIconBtn = e.target.closest('.chip-chat-btn');
+          if (chatIconBtn) {
+            e.stopPropagation();
+            const uid = chatIconBtn.getAttribute('data-userid');
+            if (uid && uid !== state.userId) { openFriendChat(uid); }
+            return;
+          }
+          const chip = e.target.closest('.chip');
+          if (chip) {
+            const uid = chip.getAttribute('data-userid');
+            if (uid) { els.friendIdInput.value = uid; }
+          }
+        });
+      }
+
+      // ==========================================================
+      // GROUP CALL SETUP + LIFECYCLE WIRING
+      // ==========================================================
+      function openGroupSetup() {
+        state.groupSetupIds = [];
+        renderGroupChips();
+        els.groupSetupPanel.style.display = 'flex';
+      }
+
+      function closeGroupSetup() {
+        els.groupSetupPanel.style.display = 'none';
+      }
+
+      function renderGroupChips() {
+        els.groupChipList.innerHTML = state.groupSetupIds.map(id =>
+          `<span class="group-chip">${escapeHtml(id)}<button data-id="${escapeHtml(id)}">✖</button></span>`
+        ).join('');
+      }
+
+      function showIncomingGroupCallModal(data) {
+        currentIncomingGroupCallData = data;
+        els.incomingGroupCallerName.textContent = data.fromName || ('User ' + data.from);
+        els.incomingGroupCallType.textContent = data.isVideo ? '🎥 Group Video Call' : '📞 Group Voice Call';
+        els.incomingGroupCallModal.style.display = 'flex';
+        playRingtone();
+      }
+
+      function hideIncomingGroupCallModal() {
+        els.incomingGroupCallModal.style.display = 'none';
+        currentIncomingGroupCallData = null;
+        stopRingtone();
+      }
+
+      function setupGroupCall() {
+        els.groupCallBtn.addEventListener('click', () => {
+          if (state.isFriendCall || state.isCallActive || state.groupRoom) { els.friendCallStatus.textContent = '⚠️ Finish your current call first'; return; }
+          openGroupSetup();
+        });
+
+        els.closeGroupSetupBtn.addEventListener('click', () => { closeGroupSetup(); });
+
+        els.groupVoiceTypeBtn.addEventListener('click', () => {
+          state.groupWantsVideo = false;
+          els.groupVoiceTypeBtn.classList.add('active');
+          els.groupVideoTypeBtn.classList.remove('active');
+        });
+
+        els.groupVideoTypeBtn.addEventListener('click', () => {
+          state.groupWantsVideo = true;
+          els.groupVideoTypeBtn.classList.add('active');
+          els.groupVoiceTypeBtn.classList.remove('active');
+        });
+
+        els.addGroupIdBtn.addEventListener('click', () => {
+          const id = els.groupIdInput.value.trim();
+          if (!id || id.length !== 4) { els.friendCallStatus.textContent = '⚠️ Enter a valid 4-digit ID'; return; }
+          if (id === state.userId) { els.friendCallStatus.textContent = '⚠️ You cannot add yourself'; return; }
+          if (state.groupSetupIds.includes(id)) { els.groupIdInput.value = ''; return; }
+          if (state.groupSetupIds.length >= 7) { els.friendCallStatus.textContent = '⚠️ Max 7 people per group call'; return; }
+          state.groupSetupIds.push(id);
+          els.groupIdInput.value = '';
+          renderGroupChips();
+        });
+
+        els.groupIdInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); els.addGroupIdBtn.click(); }
+        });
+
+        els.groupChipList.addEventListener('click', (e) => {
+          const btn = e.target.closest('button[data-id]');
+          if (btn) {
+            state.groupSetupIds = state.groupSetupIds.filter(x => x !== btn.getAttribute('data-id'));
+            renderGroupChips();
+          }
+        });
+
+        els.startGroupCallBtn.addEventListener('click', () => {
+          if (state.groupSetupIds.length === 0) { els.friendCallStatus.textContent = '⚠️ Add at least one friend ID'; return; }
+          state.socket.emit('group-call-request', { targetUserIds: state.groupSetupIds, isVideo: !!state.groupWantsVideo });
+          closeGroupSetup();
+          els.friendCallStatus.textContent = '👥 Starting group call...';
+        });
+
+        els.acceptGroupCallBtn.addEventListener('click', () => {
+          const data = currentIncomingGroupCallData;
+          if (!data) return;
+          hideIncomingGroupCallModal();
+          state.socket.emit('group-call-response', { roomId: data.roomId, accepted: true });
+        });
+
+        els.declineGroupCallBtn.addEventListener('click', () => {
+          const data = currentIncomingGroupCallData;
+          if (!data) return;
+          hideIncomingGroupCallModal();
+          state.socket.emit('group-call-response', { roomId: data.roomId, accepted: false });
+        });
+
+        els.groupMuteBtn.addEventListener('click', () => {
+          state.groupIsMuted = !state.groupIsMuted;
+          if (state.groupRoom && state.groupRoom.localStream) { state.groupRoom.localStream.getAudioTracks().forEach(t => { t.enabled = !state.groupIsMuted; }); }
+          els.groupMuteBtn.textContent = state.groupIsMuted ? '🔇 Unmute' : '🎤 Mute';
+          els.groupMuteBtn.classList.toggle('active', state.groupIsMuted);
+        });
+
+        els.groupCameraBtn.addEventListener('click', () => {
+          state.groupIsCameraOff = !state.groupIsCameraOff;
+          if (state.groupRoom && state.groupRoom.localStream) { state.groupRoom.localStream.getVideoTracks().forEach(t => { t.enabled = !state.groupIsCameraOff; }); }
+          els.groupCameraBtn.textContent = state.groupIsCameraOff ? '📷 Camera On' : '📷 Camera Off';
+          els.groupCameraBtn.classList.toggle('active', state.groupIsCameraOff);
+        });
+
+        els.leaveGroupCallBtn.addEventListener('click', () => {
+          leaveGroupCallCleanup(true);
+          els.friendCallStatus.textContent = '👥 Left group call';
+        });
+
+        state.socket.on('group-call-created', (data) => {
+          // We're the host — room exists on the server, invites are out.
+          // Enter the call view now; participants will connect TO us as they accept.
+          enterGroupCall(data.roomId, data.isVideo, []);
+        });
+
+        state.socket.on('incoming-group-call', (data) => {
+          if (state.isCallActive || state.isFriendCall || state.groupRoom) {
+            state.socket.emit('group-call-response', { roomId: data.roomId, accepted: false });
+            return;
+          }
+          showIncomingGroupCallModal(data);
+        });
+
+        state.socket.on('group-call-joined', (data) => {
+          hideIncomingGroupCallModal();
+          enterGroupCall(data.roomId, data.isVideo, data.participants);
+        });
+
+        state.socket.on('group-participant-added', (data) => {
+          if (!state.groupRoom || state.groupRoom.roomId !== data.roomId) return;
+          renderGroupTile(data.newParticipant.userId, data.newParticipant.userName, false);
+          // We wait for their incoming PeerJS call (they call everyone already in the
+          // room) — the tile gets live video/audio once that connection lands.
+        });
+
+        state.socket.on('group-participant-left', (data) => {
+          if (!state.groupRoom || state.groupRoom.roomId !== data.roomId) return;
+          const p = state.groupRoom.peers.get(data.userId);
+          if (p) { try { p.call.close(); } catch (e) { } state.groupRoom.peers.delete(data.userId); }
+          removeGroupTile(data.userId);
+        });
+
+        state.socket.on('group-call-ended', (data) => {
+          if (!state.groupRoom || state.groupRoom.roomId !== data.roomId) return;
+          leaveGroupCallCleanup(false);
+          els.friendCallStatus.textContent = '👥 Group call ended';
+        });
+
+        state.socket.on('group-invite-declined', () => {
+          els.friendCallStatus.textContent = '👥 A participant declined the group invite';
+        });
+      }
+
+      // ==========================================================
+      // FRIEND TEXT CHAT
+      // ==========================================================
+      function openFriendChat(targetId) {
+        state.chatTargetId = targetId;
+        if (!state.chatHistories[targetId]) { state.chatHistories[targetId] = []; }
+        els.friendChatTargetId.textContent = targetId;
+        renderChatMessages(targetId);
+        els.friendChatPanel.style.display = 'flex';
+        els.friendChatInput.focus();
+      }
+
+      function closeFriendChat() {
+        els.friendChatPanel.style.display = 'none';
+        state.chatTargetId = null;
+      }
+
+      function appendChatMessage(targetId, msg) {
+        if (!state.chatHistories[targetId]) { state.chatHistories[targetId] = []; }
+        state.chatHistories[targetId].push(msg);
+        if (state.chatTargetId === targetId) { renderChatMessages(targetId); }
+      }
+
+      function renderChatMessages(targetId) {
+        const history = state.chatHistories[targetId] || [];
+        els.friendChatMessages.innerHTML = history.map(m => {
+          if (m.system) { return `<div class="friend-chat-bubble system">${escapeHtml(m.text)}</div>`; }
+          const cls = m.self ? 'sent' : 'received';
+          return `<div class="friend-chat-bubble ${cls}">${escapeHtml(m.text)}</div>`;
+        }).join('');
+        els.friendChatMessages.scrollTop = els.friendChatMessages.scrollHeight;
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      function sendFriendChatMessage() {
+        const text = els.friendChatInput.value.trim();
+        if (!text || !state.chatTargetId) return;
+        state.socket.emit('friend-message', { targetUserId: state.chatTargetId, text });
+        appendChatMessage(state.chatTargetId, { text, self: true, timestamp: Date.now() });
+        els.friendChatInput.value = '';
       }
 
       // ==========================================================
@@ -2226,8 +3342,8 @@
         const busy = users.filter(u => u.busy);
         let html = '';
         if (online.length === 0 && busy.length === 0) { html = '<div class="empty">No users online</div>'; } else {
-          online.forEach(u => { const name = u.userName || u.userId; html += `<span class="chip"><span class="dot"></span> ${u.userId} <span class="name-label">(${name})</span></span>`; });
-          busy.forEach(u => { const name = u.userName || u.userId; html += `<span class="chip"><span class="dot busy"></span> ${u.userId} <span class="name-label">(${name})</span></span>`; });
+          online.forEach(u => { const name = u.userName || u.userId; html += `<span class="chip" data-userid="${u.userId}"><span class="dot"></span> ${u.userId} <span class="name-label">(${name})</span><button class="chip-chat-btn" data-userid="${u.userId}" title="Chat with ${name}">💬</button></span>`; });
+          busy.forEach(u => { const name = u.userName || u.userId; html += `<span class="chip" data-userid="${u.userId}"><span class="dot busy"></span> ${u.userId} <span class="name-label">(${name})</span><button class="chip-chat-btn" data-userid="${u.userId}" title="Chat with ${name}">💬</button></span>`; });
         }
         els.onlineUsersList.innerHTML = html;
       }
