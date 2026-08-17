@@ -3,3 +3,9 @@
 node_modules/
 package-lock.json
 .DS_Store
+
+# ============================================
+# DATABASE (local JSON data file)
+# ============================================
+english-passport-data.json
+english-passport-data.json.tmp

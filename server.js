@@ -5,6 +5,21 @@ const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
 
+let db;
+try {
+  db = require("./db");
+  console.log("💾 Database module loaded (english-passport-data.json)");
+} catch (e) {
+  console.warn("⚠️ Database module unavailable (run `npm install` to enable chat/call history persistence):", e.message);
+  // Fallback no-op implementation so the app still runs without persistence.
+  db = {
+    saveMessage: () => null, getConversation: () => [],
+    startCallRecord: () => null, endCallRecord: () => {},
+    startSession: () => null, endSession: () => {}, updateSessionName: () => {},
+    getStats: () => ({ totalMessages: 0, totalCalls: 0, sessionsLast24h: 0 })
+  };
+}
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
@@ -18,7 +33,7 @@ const io = new Server(server, {
 });
 
 const API_KEY = process.env.GROQ_API_KEY || "your_api_key_here";
-const MODEL = "llama-3.1-8b-instant";
+const MODEL = "openai/gpt-oss-20b"; // llama-3.1-8b-instant was retired by Groq (Aug 16, 2026) — this is Groq's official recommended replacement (same speed/cost tier)
 
 // ============================================================
 // STORES
@@ -199,6 +214,7 @@ function getEmotionVoiceSettings(emotion = 'neutral') {
 io.on("connection", (socket) => {
   console.log("🟢 Client connected:", socket.id);
   const userId = generateUniqueId();
+  const sessionRecordId = db.startSession(userId, null);
   users.set(userId, {
     socketId: socket.id,
     connected: true,
@@ -207,7 +223,8 @@ io.on("connection", (socket) => {
     voicePreference: 'en-IN-NeerjaNeural',
     joinedAt: Date.now(),
     userName: null,
-    currentCallId: null
+    currentCallId: null,
+    sessionRecordId
   });
   socket.userId = userId;
   socket.emit("user-id", userId);
@@ -217,6 +234,7 @@ io.on("connection", (socket) => {
   socket.on("set-user-name", (userName) => {
     const user = users.get(userId);
     if (user) {
+      db.updateSessionName(user.sessionRecordId, userName);
       user.userName = userName;
       console.log(`📝 User ${userId} set name: ${userName}`);
       broadcastOnlineUsers();
@@ -256,6 +274,7 @@ io.on("connection", (socket) => {
     const caller = users.get(userId);
     const target = users.get(targetUserId);
     if (!caller || !target || !target.connected) { socket.emit("call-error", "User not available"); return; }
+    if (!target.peerId) { socket.emit("call-error", "User is still connecting, try again in a moment"); return; }
     if (target.busy) { socket.emit("call-error", "User is in a call"); return; }
     if (caller.busy) { socket.emit("call-error", "You are already in a call"); return; }
     caller.busy = true;
@@ -311,7 +330,9 @@ io.on("connection", (socket) => {
     if (accepted) {
       if (caller) { caller.busy = true; caller.currentCallId = callId; }
       if (responder) { responder.busy = true; responder.currentCallId = callId; }
-      activeCalls.set(callId, { userA: pendingCall.caller, userB: pendingCall.target, status: 'connected', startedAt: Date.now() });
+      const callStartedAt = Date.now();
+      const dbRecordId = db.startCallRecord('1:1', pendingCall.isVideo ? 'video' : 'voice', [pendingCall.caller, pendingCall.target]);
+      activeCalls.set(callId, { userA: pendingCall.caller, userB: pendingCall.target, status: 'connected', startedAt: callStartedAt, dbRecordId });
       pendingCallRequests.delete(callId);
       const responderName = responder.userName || `User ${pendingCall.target}`;
       io.to(caller.socketId).emit("call-accepted", { 
@@ -365,20 +386,36 @@ io.on("connection", (socket) => {
   socket.on("friend-message", (data) => {
     const targetUserId = data && data.targetUserId;
     const text = data && typeof data.text === 'string' ? data.text.trim().slice(0, 1000) : '';
-    if (!targetUserId || !text) return;
+    if (!targetUserId) { console.warn(`⚠️ friend-message from ${userId}: missing targetUserId`); return; }
+    if (!text) { console.warn(`⚠️ friend-message from ${userId} to ${targetUserId}: empty text, ignored`); return; }
     const sender = users.get(userId);
+    const senderName = (sender && sender.userName) || `User ${userId}`;
+    db.saveMessage(userId, targetUserId, senderName, text);
     const target = users.get(targetUserId);
     if (!target || !target.connected) {
+      console.log(`💬 friend-message ${userId} -> ${targetUserId} FAILED: target offline (saved for later)`);
       socket.emit("friend-message-failed", { targetUserId, reason: "User is offline" });
       return;
     }
     const payload = {
       from: userId,
-      fromName: (sender && sender.userName) || `User ${userId}`,
+      fromName: senderName,
       text,
       timestamp: Date.now()
     };
     io.to(target.socketId).emit("friend-message", payload);
+    socket.emit("friend-message-sent", { targetUserId, timestamp: payload.timestamp });
+    console.log(`💬 friend-message ${userId} -> ${targetUserId}: delivered`);
+  });
+
+  socket.on("get-chat-history", (data, callback) => {
+    const otherUserId = data && data.withUserId;
+    if (!otherUserId || typeof callback !== 'function') return;
+    const rows = db.getConversation(userId, otherUserId, 200);
+    const messages = rows.map(r => ({
+      from: r.fromUser, to: r.toUser, fromName: r.fromName, text: r.text, timestamp: r.createdAt
+    }));
+    callback({ messages });
   });
 
   // ============================================================
@@ -401,17 +438,20 @@ io.on("connection", (socket) => {
     if (targetUserIds.length > 7) { socket.emit("call-error", "Group calls support up to 7 people"); return; }
 
     const roomId = `group_${Date.now()}_${userId}`;
+    const groupStartedAt = Date.now();
     const room = {
       host: userId,
       isVideo,
       participants: new Map([[userId, { peerId: host.peerId, userName: host.userName || `User ${userId}` }]]),
-      pendingInvites: new Set()
+      pendingInvites: new Set(),
+      startedAt: groupStartedAt,
+      dbRecordId: db.startCallRecord('group', isVideo ? 'video' : 'voice', [userId, ...targetUserIds])
     };
 
     let invitedCount = 0;
     targetUserIds.forEach((targetId) => {
       const target = users.get(targetId);
-      if (!target || !target.connected || target.busy) return;
+      if (!target || !target.connected || target.busy || !target.peerId) return;
       room.pendingInvites.add(targetId);
       invitedCount++;
       io.to(target.socketId).emit("incoming-group-call", {
@@ -435,7 +475,7 @@ io.on("connection", (socket) => {
     const roomId = data && data.roomId;
     const accepted = !!(data && data.accepted);
     const room = groupRooms.get(roomId);
-    if (!room) { return; }
+    if (!room) { socket.emit("call-error", "This group call is no longer available"); return; }
     room.pendingInvites.delete(userId);
 
     if (!accepted) {
@@ -445,12 +485,15 @@ io.on("connection", (socket) => {
     }
 
     const responder = users.get(userId);
-    if (!responder || responder.busy) { return; }
+    if (!responder) { return; }
+    if (responder.busy) { socket.emit("call-error", "You are already in a call"); return; }
+    if (!responder.peerId) { socket.emit("call-error", "Still connecting, please try accepting again in a moment"); return; }
 
     const existingParticipants = [...room.participants.entries()].map(([pid, info]) => ({ userId: pid, peerId: info.peerId, userName: info.userName }));
     room.participants.set(userId, { peerId: responder.peerId, userName: responder.userName || `User ${userId}` });
     responder.busy = true;
     responder.currentCallId = roomId;
+    console.log(`👥 Group call ${roomId}: ${userId} joined (now ${room.participants.size} participants)`);
 
     socket.emit("group-call-joined", { roomId, isVideo: room.isVideo, participants: existingParticipants });
 
@@ -469,6 +512,25 @@ io.on("connection", (socket) => {
     leaveGroupRoom(userId, data && data.roomId);
   });
 
+  socket.on("group-call-invite-more", (data) => {
+    const roomId = data && data.roomId;
+    const targetUserId = data && data.targetUserId;
+    const room = groupRooms.get(roomId);
+    if (!room) { socket.emit("call-error", "This group call no longer exists"); return; }
+    if (!room.participants.has(userId)) { socket.emit("call-error", "You are not part of this group call"); return; }
+    if (!targetUserId || targetUserId === userId) { return; }
+    if (room.participants.has(targetUserId) || room.pendingInvites.has(targetUserId)) { socket.emit("call-error", "Already in or already invited to this call"); return; }
+    if (room.participants.size >= 8) { socket.emit("call-error", "Group call is full (max 8 people)"); return; }
+    const target = users.get(targetUserId);
+    if (!target || !target.connected || target.busy || !target.peerId) { socket.emit("call-error", "That user is not available right now"); return; }
+    const inviter = users.get(userId);
+    room.pendingInvites.add(targetUserId);
+    io.to(target.socketId).emit("incoming-group-call", {
+      roomId, from: userId, fromName: (inviter && inviter.userName) || `User ${userId}`, isVideo: room.isVideo, memberCount: room.participants.size
+    });
+    console.log(`👥 Group call ${roomId}: ${userId} invited ${targetUserId} mid-call`);
+  });
+
   socket.on("end-call", (callId) => {
     const user = users.get(userId);
     if (user) { 
@@ -478,6 +540,7 @@ io.on("connection", (socket) => {
     
     if (callId && activeCalls.has(callId)) {
       const call = activeCalls.get(callId);
+      db.endCallRecord(call.dbRecordId, call.startedAt);
       const otherId = call.userA === userId ? call.userB : call.userA;
       const otherUser = users.get(otherId);
       if (otherUser && otherUser.connected) {
@@ -489,6 +552,7 @@ io.on("connection", (socket) => {
     } else {
       for (const [id, call] of activeCalls) {
         if (call.userA === userId || call.userB === userId) {
+          db.endCallRecord(call.dbRecordId, call.startedAt);
           const otherId = call.userA === userId ? call.userB : call.userA;
           const otherUser = users.get(otherId);
           if (otherUser && otherUser.connected) {
@@ -503,7 +567,8 @@ io.on("connection", (socket) => {
     broadcastOnlineUsers();
   });
 
-  socket.on("find-random", () => {
+  socket.on("find-random", (data) => {
+    const isVideo = !!(data && data.isVideo);
     const requester = users.get(userId);
     if (requester && requester.busy) { socket.emit("call-error", "You are already in a call"); return; }
     const availableUsers = [];
@@ -527,18 +592,22 @@ io.on("connection", (socket) => {
     const callId = `call_${Date.now()}_${userId}_${match.userId}`;
     if (user1) { user1.busy = true; user1.currentCallId = callId; }
     if (user2) { user2.busy = true; user2.currentCallId = callId; }
-    activeCalls.set(callId, { userA: userId, userB: match.userId, status: 'connected', startedAt: Date.now() });
+    const callStartedAt2 = Date.now();
+    const dbRecordId2 = db.startCallRecord('1:1', isVideo ? 'video' : 'voice', [userId, match.userId]);
+    activeCalls.set(callId, { userA: userId, userB: match.userId, status: 'connected', startedAt: callStartedAt2, dbRecordId: dbRecordId2 });
     socket.emit("random-match", { 
       peerId: match.peerId, 
       userId: match.userId,
       userName: match.userName,
-      callId
+      callId,
+      isVideo
     });
     io.to(match.socketId).emit("random-match", { 
       peerId: user1.peerId, 
       userId: userId,
       userName: user1.userName || userId,
-      callId
+      callId,
+      isVideo
     });
     broadcastOnlineUsers();
   });
@@ -547,11 +616,13 @@ io.on("connection", (socket) => {
     if (socket.userId) {
       const user = users.get(socket.userId);
       if (user) {
+        db.endSession(user.sessionRecordId);
         user.connected = false;
         user.busy = false;
         user.currentCallId = null;
         for (const [callId, call] of activeCalls) {
           if (call.userA === socket.userId || call.userB === socket.userId) {
+            db.endCallRecord(call.dbRecordId, call.startedAt);
             activeCalls.delete(callId);
             const otherId = call.userA === socket.userId ? call.userB : call.userA;
             const otherUser = users.get(otherId);
@@ -624,6 +695,7 @@ function leaveGroupRoom(leavingUserId, roomId) {
 
   if (room.participants.size <= 1) {
     // Not enough people left for a "group" — end it for whoever remains too.
+    db.endCallRecord(room.dbRecordId, room.startedAt);
     for (const [pid] of room.participants) {
       const p = users.get(pid);
       if (p) { p.busy = false; p.currentCallId = null; }
@@ -1001,6 +1073,7 @@ app.post('/api/tts', async (req, res) => {
 
 app.get("/api/health", (req, res) => {
   const mem = process.memoryUsage();
+  const dbStats = db.getStats();
   res.json({
     ok: true,
     apiKeyConfigured: Boolean(API_KEY && API_KEY !== "your_api_key_here"),
@@ -1013,7 +1086,12 @@ app.get("/api/health", (req, res) => {
     totalVoiceOptions: VOICES.male.length + VOICES.female.length,
     uptime: process.uptime(),
     memoryUsedMB: Math.round(mem.heapUsed / 1024 / 1024),
-    memoryTotalMB: Math.round(mem.heapTotal / 1024 / 1024)
+    memoryTotalMB: Math.round(mem.heapTotal / 1024 / 1024),
+    database: {
+      totalMessagesStored: dbStats.totalMessages,
+      totalCallsLogged: dbStats.totalCalls,
+      sessionsLast24h: dbStats.sessionsLast24h
+    }
   });
 });
 
@@ -1026,7 +1104,7 @@ server.listen(PORT, () => {
   console.log(`  ✅ ${VOICES.male.length + VOICES.female.length} Voice Options Available`);
   console.log(`  ✅ Text Chat & Voice Conversation - COMPLETELY INDEPENDENT`);
   console.log(`  ✅ Corrections stored separately (not in messages)`);
-  console.log(`  ✅ FAST TTS Response (+15% speed, reduced pauses)`);
-  console.log(`  ✅ Friend Call with Multi-Call Audio Fix`);
-  console.log(`  ✅ Features: AI Text Chat, AI Voice, Friend Call\n`);
+  console.log(`  ✅ AI Model: ${MODEL}`);
+  console.log(`  ✅ Friend Voice + Video Calls, Group Calls, Friend Chat`);
+  console.log(`  ✅ Chat + call history persisted to local database\n`);
 });
