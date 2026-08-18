@@ -206,6 +206,36 @@
       margin-top: 4px;
     }
 
+    .auth-error {
+      background: rgba(239, 83, 80, 0.12);
+      border: 1px solid var(--red);
+      color: var(--red);
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    .auth-links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .auth-links a {
+      color: var(--blue);
+      font-size: 12.5px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-links a:hover {
+      text-decoration: underline;
+    }
+
     .app-header {
       padding: 14px 20px 10px;
       background: var(--bg-secondary);
@@ -856,6 +886,56 @@
 
     .friend-info .status.offline {
       color: var(--red);
+    }
+
+    .account-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .account-link-btn {
+      border: none;
+      background: none;
+      color: var(--text-secondary);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 6px;
+    }
+
+    .account-link-btn:hover {
+      color: var(--blue);
+    }
+
+    .change-id-box {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .change-id-box input {
+      width: 110px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .change-id-box button {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      background: var(--blue);
+      color: white;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
     }
 
     .friend-row {
@@ -1918,7 +1998,58 @@
     </div>
   </div>
 
-  <div class="onboarding-overlay" id="onboarding">
+  <div class="onboarding-overlay" id="authOverlay" style="display:none;">
+    <div class="onboarding-card">
+      <h2>🇮🇳 English Passport</h2>
+      <p class="subtitle" id="authSubtitle">Sign in to continue</p>
+
+      <div id="authError" class="auth-error" style="display:none;"></div>
+
+      <!-- LOGIN -->
+      <div id="authLoginView">
+        <label>📧 Email</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="username" />
+        <label>🔒 Password</label>
+        <input type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password" />
+        <button class="start-btn" id="loginSubmitBtn">Sign In</button>
+        <div class="auth-links">
+          <a href="#" id="showForgotBtn">Forgot password?</a>
+          <a href="#" id="showSignupBtn">Create an account</a>
+        </div>
+      </div>
+
+      <!-- SIGN UP -->
+      <div id="authSignupView" style="display:none;">
+        <label>👤 Your Name</label>
+        <input type="text" id="signupName" placeholder="Enter your name" autocomplete="name" />
+        <label>📧 Email</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com" autocomplete="username" />
+        <label>🔢 Choose your 4-digit User ID</label>
+        <input type="text" id="signupUserCode" placeholder="e.g. 4821" maxlength="4" inputmode="numeric" />
+        <label>🔒 Password</label>
+        <input type="password" id="signupPassword" placeholder="At least 8 characters" autocomplete="new-password" />
+        <label>🔒 Confirm Password</label>
+        <input type="password" id="signupConfirmPassword" placeholder="Re-enter password" autocomplete="new-password" />
+        <button class="start-btn" id="signupSubmitBtn">Create Account</button>
+        <div class="auth-links">
+          <a href="#" id="showLoginFromSignupBtn">Already have an account? Sign In</a>
+        </div>
+      </div>
+
+      <!-- FORGOT PASSWORD -->
+      <div id="authForgotView" style="display:none;">
+        <p class="name-hint">Enter your account email — we'll send a reset link.</p>
+        <label>📧 Email</label>
+        <input type="email" id="forgotEmail" placeholder="you@example.com" autocomplete="username" />
+        <button class="start-btn" id="forgotSubmitBtn">Send Reset Link</button>
+        <div class="auth-links">
+          <a href="#" id="showLoginFromForgotBtn">Back to Sign In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="onboarding-overlay" id="onboarding" style="display:none;">
     <div class="onboarding-card">
       <h2>🇮🇳 English Passport</h2>
       <p class="subtitle">Your AI English conversation partner</p>
@@ -2020,6 +2151,14 @@
           <div class="label">Your User ID</div>
           <div class="value" id="friendUserId">----</div>
           <div class="status" id="friendStatus">🟢 Online</div>
+          <div class="account-actions">
+            <button id="changeIdBtn" class="account-link-btn">✏️ Change ID</button>
+            <button id="logoutBtn" class="account-link-btn">🚪 Logout</button>
+          </div>
+          <div class="change-id-box" id="changeIdBox" style="display:none;">
+            <input id="newUserCodeInput" placeholder="New 4-digit ID" maxlength="4" inputmode="numeric" />
+            <button id="confirmChangeIdBtn">Save</button>
+          </div>
         </div>
         <div class="video-call-container" id="videoCallContainer" style="display:none;">
           <video id="remoteVideo" autoplay playsinline></video>
@@ -2062,6 +2201,7 @@
       'use strict';
 
       const state = {
+        authUser: null,
         userId: null, userPeerId: null, socket: null, peer: null,
         currentCall: null, localStream: null, remoteStream: null,
         isRecording: false, recognition: null,
@@ -2105,7 +2245,12 @@
         'groupCallView', 'groupCallTimer', 'groupCallMemberCount', 'groupCallGrid',
         'groupMuteBtn', 'groupCameraBtn', 'leaveGroupCallBtn',
         'groupAddParticipantBox', 'groupAddParticipantInput', 'groupAddParticipantBtn', 'confirmAddParticipantBtn',
-        'toastContainer'
+        'toastContainer',
+        'authOverlay', 'authSubtitle', 'authError',
+        'authLoginView', 'loginEmail', 'loginPassword', 'loginSubmitBtn', 'showForgotBtn', 'showSignupBtn',
+        'authSignupView', 'signupName', 'signupEmail', 'signupUserCode', 'signupPassword', 'signupConfirmPassword', 'signupSubmitBtn', 'showLoginFromSignupBtn',
+        'authForgotView', 'forgotEmail', 'forgotSubmitBtn', 'showLoginFromForgotBtn',
+        'changeIdBtn', 'logoutBtn', 'changeIdBox', 'newUserCodeInput', 'confirmChangeIdBtn'
       ].forEach(id => { els[id] = $(id); });
 
       // ==========================================================
@@ -2208,7 +2353,7 @@
       // SOCKET.IO
       // ==========================================================
       function connectSocket() {
-        state.socket = io({ reconnection: true, reconnectionAttempts: 5, reconnectionDelay: 1000 });
+        state.socket = io({ reconnection: true, reconnectionAttempts: 5, reconnectionDelay: 1000, withCredentials: true });
         state.socket.on('connect', () => { console.log('✅ Socket connected'); if (state.userName) state.socket.emit('set-user-name', state.userName); });
         state.socket.on('connect_error', (error) => { console.error('❌ Socket error:', error); });
         state.socket.on('user-id', (id) => { state.userId = id; els.userIdDisplay.textContent = 'ID: ' + id; els.friendUserId.textContent = id; initPeer(); });
@@ -3594,6 +3739,139 @@
           } else if (existing) { existing.remove(); }
         });
       }
+
+      // ==========================================================
+      // AUTHENTICATION
+      // ==========================================================
+      function showAuthError(msg) {
+        els.authError.textContent = msg;
+        els.authError.style.display = 'block';
+      }
+      function clearAuthError() {
+        els.authError.style.display = 'none';
+        els.authError.textContent = '';
+      }
+      function showAuthView(view) {
+        clearAuthError();
+        els.authLoginView.style.display = view === 'login' ? 'block' : 'none';
+        els.authSignupView.style.display = view === 'signup' ? 'block' : 'none';
+        els.authForgotView.style.display = view === 'forgot' ? 'block' : 'none';
+        els.authSubtitle.textContent = view === 'signup' ? 'Create your account' : view === 'forgot' ? 'Reset your password' : 'Sign in to continue';
+      }
+
+      els.showForgotBtn.addEventListener('click', (e) => { e.preventDefault(); showAuthView('forgot'); });
+      els.showSignupBtn.addEventListener('click', (e) => { e.preventDefault(); showAuthView('signup'); });
+      els.showLoginFromSignupBtn.addEventListener('click', (e) => { e.preventDefault(); showAuthView('login'); });
+      els.showLoginFromForgotBtn.addEventListener('click', (e) => { e.preventDefault(); showAuthView('login'); });
+
+      async function authFetch(url, body) {
+        const res = await fetch(url, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { throw new Error(data.error || 'Something went wrong'); }
+        return data;
+      }
+
+      els.loginSubmitBtn.addEventListener('click', async () => {
+        clearAuthError();
+        const email = els.loginEmail.value.trim();
+        const password = els.loginPassword.value;
+        if (!email || !password) { showAuthError('Enter your email and password'); return; }
+        els.loginSubmitBtn.disabled = true; els.loginSubmitBtn.textContent = 'Signing in...';
+        try {
+          const data = await authFetch('/api/auth/login', { email, password });
+          onAuthSuccess(data.user);
+        } catch (e) { showAuthError(e.message); }
+        finally { els.loginSubmitBtn.disabled = false; els.loginSubmitBtn.textContent = 'Sign In'; }
+      });
+
+      els.signupSubmitBtn.addEventListener('click', async () => {
+        clearAuthError();
+        const displayName = els.signupName.value.trim();
+        const email = els.signupEmail.value.trim();
+        const userCode = els.signupUserCode.value.trim();
+        const password = els.signupPassword.value;
+        const confirmPassword = els.signupConfirmPassword.value;
+        if (!displayName) { showAuthError('Enter your name'); return; }
+        if (!/^[0-9]{4}$/.test(userCode)) { showAuthError('User ID must be exactly 4 digits'); return; }
+        if (password.length < 8) { showAuthError('Password must be at least 8 characters'); return; }
+        if (password !== confirmPassword) { showAuthError('Passwords do not match'); return; }
+        els.signupSubmitBtn.disabled = true; els.signupSubmitBtn.textContent = 'Creating account...';
+        try {
+          const data = await authFetch('/api/auth/signup', { email, password, displayName, userCode });
+          onAuthSuccess(data.user);
+        } catch (e) { showAuthError(e.message); }
+        finally { els.signupSubmitBtn.disabled = false; els.signupSubmitBtn.textContent = 'Create Account'; }
+      });
+
+      els.forgotSubmitBtn.addEventListener('click', async () => {
+        clearAuthError();
+        const email = els.forgotEmail.value.trim();
+        if (!email) { showAuthError('Enter your email'); return; }
+        els.forgotSubmitBtn.disabled = true; els.forgotSubmitBtn.textContent = 'Sending...';
+        try {
+          await authFetch('/api/auth/forgot-password', { email });
+          showAuthError('If that email has an account, a reset link has been sent.');
+        } catch (e) { showAuthError(e.message); }
+        finally { els.forgotSubmitBtn.disabled = false; els.forgotSubmitBtn.textContent = 'Send Reset Link'; }
+      });
+
+      function onAuthSuccess(user) {
+        state.authUser = user;
+        els.authOverlay.style.display = 'none';
+        els.nameInput.value = user.displayName;
+        els.onboarding.style.display = 'flex';
+      }
+
+      els.logoutBtn.addEventListener('click', async () => {
+        try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) { console.error('Logout error:', e); }
+        window.location.reload();
+      });
+
+      els.changeIdBtn.addEventListener('click', () => {
+        const isHidden = els.changeIdBox.style.display === 'none';
+        els.changeIdBox.style.display = isHidden ? 'flex' : 'none';
+        if (isHidden) { els.newUserCodeInput.focus(); }
+      });
+
+      els.confirmChangeIdBtn.addEventListener('click', async () => {
+        const newCode = els.newUserCodeInput.value.trim();
+        if (!/^[0-9]{4}$/.test(newCode)) { els.friendCallStatus.textContent = '⚠️ Enter a valid 4-digit ID'; return; }
+        els.confirmChangeIdBtn.disabled = true;
+        try {
+          const res = await fetch('/api/auth/change-user-id', {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ newCode })
+          });
+          const data = await res.json();
+          if (!res.ok) { throw new Error(data.error || 'Could not change ID'); }
+          els.friendCallStatus.textContent = '✅ User ID changed to ' + newCode + '. Reconnecting...';
+          setTimeout(() => { window.location.reload(); }, 1200);
+        } catch (e) {
+          els.friendCallStatus.textContent = '❌ ' + e.message;
+          els.confirmChangeIdBtn.disabled = false;
+        }
+      });
+
+      els.newUserCodeInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); els.confirmChangeIdBtn.click(); }
+      });
+
+      async function bootstrapAuth() {
+        try {
+          const res = await fetch('/api/auth/me', { credentials: 'include' });
+          const data = await res.json();
+          if (data.user) { onAuthSuccess(data.user); return; }
+        } catch (e) { console.error('Auth check failed:', e); }
+        els.authOverlay.style.display = 'flex';
+      }
+
+      bootstrapAuth();
 
       console.log('🚀 English Passport Pro loaded successfully!');
       console.log('✅ Text Chat & Voice Conversation - COMPLETELY INDEPENDENT');

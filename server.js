@@ -4,6 +4,9 @@ const cors = require("cors");
 const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
+const cookieParser = require("cookie-parser");
+const auth = require("./auth");
+const { query } = require("./db/pool");
 
 let db;
 try {
@@ -21,13 +24,41 @@ try {
 }
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: process.env.APP_URL || true, credentials: true }));
 app.use(express.json({ limit: "10mb" }));
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+const SESSION_COOKIE = "epp_session";
+const SESSION_COOKIE_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days, matches auth.js SESSION_TTL_MS
+
+// Attaches req.user if a valid session cookie is present (does NOT block
+// the request either way — use requireAuth for routes that must be
+// authenticated).
+app.use(async (req, res, next) => {
+  try {
+    const token = req.cookies && req.cookies[SESSION_COOKIE];
+    req.user = token ? await auth.getUserByToken(token) : null;
+  } catch (e) {
+    req.user = null;
+  }
+  next();
+});
+
+function requireAuth(req, res, next) {
+  if (!req.user) return res.status(401).json({ error: "Not signed in" });
+  next();
+}
+
+function handleAuthError(res, err) {
+  const status = err.status || 500;
+  if (status === 500) { console.error("Auth error:", err); }
+  res.status(status).json({ error: err.message || "Something went wrong" });
+}
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" },
+  cors: { origin: process.env.APP_URL || true, credentials: true },
   pingTimeout: 60000,
   pingInterval: 25000
 });
@@ -41,7 +72,6 @@ const MODEL = "openai/gpt-oss-20b"; // llama-3.1-8b-instant was retired by Groq 
 const textChatMemory = new Map();      // userId -> { messages: [], corrections: {} }
 const voiceChatMemory = new Map();     // userId -> { messages: [], corrections: {} }
 const users = new Map();
-const userIdPool = new Set();
 const activeCalls = new Map();
 const pendingCallRequests = new Map();
 const groupRooms = new Map(); // roomId -> { host, isVideo, participants: Map(userId -> {peerId, userName}), pendingInvites: Set(userId) }
@@ -127,17 +157,6 @@ function getVoiceMessages(userId, count = 20) {
   return conv.messages.slice(-count);
 }
 
-function generateUniqueId() {
-  let id;
-  let attempts = 0;
-  do {
-    id = String(Math.floor(1000 + Math.random() * 9000));
-    attempts++;
-  } while (userIdPool.has(id) && attempts < 100);
-  userIdPool.add(id);
-  return id;
-}
-
 // ============================================================
 // 20 VOICES
 // ============================================================
@@ -211,23 +230,59 @@ function getEmotionVoiceSettings(emotion = 'neutral') {
 // ============================================================
 // SOCKET.IO
 // ============================================================
+// ============================================================
+// SOCKET.IO AUTHENTICATION
+// Every real-time connection must present a valid session cookie
+// (the same one set by /api/auth/login or /api/auth/signup).
+// Unauthenticated sockets are rejected during the handshake.
+// ============================================================
+function parseCookieHeader(header) {
+  const out = {};
+  if (!header) return out;
+  header.split(";").forEach((pair) => {
+    const idx = pair.indexOf("=");
+    if (idx === -1) return;
+    const key = pair.slice(0, idx).trim();
+    try { out[key] = decodeURIComponent(pair.slice(idx + 1).trim()); } catch (e) { out[key] = pair.slice(idx + 1).trim(); }
+  });
+  return out;
+}
+
+io.use(async (socket, next) => {
+  try {
+    const cookies = parseCookieHeader(socket.handshake.headers.cookie);
+    const token = cookies[SESSION_COOKIE];
+    const user = token ? await auth.getUserByToken(token) : null;
+    if (!user) return next(new Error("unauthorized"));
+    socket.authUser = user;
+    next();
+  } catch (e) {
+    next(new Error("unauthorized"));
+  }
+});
+
 io.on("connection", (socket) => {
-  console.log("🟢 Client connected:", socket.id);
-  const userId = generateUniqueId();
-  const sessionRecordId = db.startSession(userId, null);
+  const userId = socket.authUser.userCode;
+  const displayName = socket.authUser.displayName;
+  console.log(`🟢 ${displayName} (${userId}) connected:`, socket.id);
+  const sessionRecordId = db.startSession(userId, displayName);
+  // A user reconnecting (new tab, refresh, network blip) should just take
+  // over their existing entry rather than create a phantom duplicate.
+  const existing = users.get(userId);
   users.set(userId, {
     socketId: socket.id,
     connected: true,
-    busy: false,
-    peerId: null,
-    voicePreference: 'en-IN-NeerjaNeural',
-    joinedAt: Date.now(),
-    userName: null,
-    currentCallId: null,
+    busy: existing ? existing.busy : false,
+    peerId: existing ? existing.peerId : null,
+    voicePreference: existing ? existing.voicePreference : 'en-IN-NeerjaNeural',
+    joinedAt: existing ? existing.joinedAt : Date.now(),
+    userName: displayName,
+    currentCallId: existing ? existing.currentCallId : null,
     sessionRecordId
   });
   socket.userId = userId;
   socket.emit("user-id", userId);
+  socket.emit("auth-user", socket.authUser);
   console.log(`👤 User ${userId} registered`);
   broadcastOnlineUsers();
 
@@ -253,19 +308,31 @@ io.on("connection", (socket) => {
 
   socket.on("get-voices", (callback) => callback(VOICES));
 
-  socket.on("find-user", (targetUserId, callback) => {
+  socket.on("find-user", async (targetUserId, callback) => {
     const user = users.get(targetUserId);
-    if (!user) callback({ exists: false, message: "User not found" });
-    else if (!user.connected) callback({ exists: true, online: false, message: "User is offline" });
-    else if (user.busy) callback({ exists: true, online: true, busy: true, message: "User is in a call" });
-    else callback({ 
-      exists: true, 
-      online: true, 
-      busy: false, 
-      peerId: user.peerId, 
-      userId: targetUserId,
-      userName: user.userName || targetUserId
-    });
+    if (user) {
+      if (!user.connected) { callback({ exists: true, online: false, message: "User is offline" }); return; }
+      if (user.busy) { callback({ exists: true, online: true, busy: true, message: "User is in a call" }); return; }
+      callback({
+        exists: true,
+        online: true,
+        busy: false,
+        peerId: user.peerId,
+        userId: targetUserId,
+        userName: user.userName || targetUserId
+      });
+      return;
+    }
+    // Not currently connected — check whether the account exists at all
+    // (permanent IDs mean "not online right now" and "no such account"
+    // are different, meaningful answers).
+    try {
+      const result = await query("SELECT display_name FROM users WHERE user_code = $1", [targetUserId]);
+      if (result.rows.length) { callback({ exists: true, online: false, message: "User is offline" }); }
+      else { callback({ exists: false, message: "User not found" }); }
+    } catch (e) {
+      callback({ exists: false, message: "User not found" });
+    }
   });
 
   socket.on("call-request", (data) => {
@@ -657,7 +724,6 @@ io.on("connection", (socket) => {
         broadcastOnlineUsers();
         setTimeout(() => {
           if (users.has(socket.userId) && !users.get(socket.userId).connected) {
-            userIdPool.delete(socket.userId);
             users.delete(socket.userId);
           }
         }, 30000);
@@ -705,6 +771,84 @@ function leaveGroupRoom(leavingUserId, roomId) {
   }
   broadcastOnlineUsers();
 }
+
+// ============================================================
+// AUTHENTICATION ENDPOINTS
+// ============================================================
+function setSessionCookie(res, token) {
+  res.cookie(SESSION_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: SESSION_COOKIE_MAX_AGE
+  });
+}
+
+app.post("/api/auth/signup", async (req, res) => {
+  if (!auth.rateLimit(`signup:${req.ip}`, 10, 15 * 60 * 1000)) {
+    return res.status(429).json({ error: "Too many attempts. Try again in a few minutes." });
+  }
+  try {
+    const { email, password, displayName, userCode } = req.body || {};
+    const user = await auth.signup({ email, password, displayName, userCode });
+    const { token } = await auth.login({ email, password }, { userAgent: req.headers["user-agent"], ip: req.ip });
+    setSessionCookie(res, token);
+    res.json({ user });
+  } catch (err) { handleAuthError(res, err); }
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  if (!auth.rateLimit(`login:${req.ip}`, 15, 15 * 60 * 1000)) {
+    return res.status(429).json({ error: "Too many attempts. Try again in a few minutes." });
+  }
+  try {
+    const { email, password } = req.body || {};
+    const { token, user } = await auth.login({ email, password }, { userAgent: req.headers["user-agent"], ip: req.ip });
+    setSessionCookie(res, token);
+    res.json({ user });
+  } catch (err) { handleAuthError(res, err); }
+});
+
+app.post("/api/auth/logout", async (req, res) => {
+  try {
+    const token = req.cookies && req.cookies[SESSION_COOKIE];
+    await auth.logout(token);
+    res.clearCookie(SESSION_COOKIE);
+    res.json({ ok: true });
+  } catch (err) { handleAuthError(res, err); }
+});
+
+app.get("/api/auth/me", (req, res) => {
+  res.json({ user: req.user || null });
+});
+
+app.post("/api/auth/forgot-password", async (req, res) => {
+  if (!auth.rateLimit(`forgot:${req.ip}`, 5, 15 * 60 * 1000)) {
+    return res.status(429).json({ error: "Too many attempts. Try again in a few minutes." });
+  }
+  try {
+    const { email } = req.body || {};
+    await auth.requestPasswordReset(email);
+    // Always the same response — don't reveal whether the email exists.
+    res.json({ ok: true, message: "If that email has an account, a reset link has been sent." });
+  } catch (err) { handleAuthError(res, err); }
+});
+
+app.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { token, newPassword } = req.body || {};
+    await auth.resetPassword(token, newPassword);
+    res.json({ ok: true });
+  } catch (err) { handleAuthError(res, err); }
+});
+
+app.post("/api/auth/change-user-id", requireAuth, async (req, res) => {
+  try {
+    const { newCode } = req.body || {};
+    const userCode = await auth.changeUserCode(req.user.id, newCode);
+    res.json({ ok: true, userCode });
+  } catch (err) { handleAuthError(res, err); }
+});
 
 // ============================================================
 // AI TEXT CHAT ENDPOINT - FIXED
