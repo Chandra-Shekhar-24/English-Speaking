@@ -6,6 +6,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cookieParser = require("cookie-parser");
 const auth = require("./auth");
+const sheets = require("./sheets");
 const { query } = require("./db/pool");
 
 let db;
@@ -848,6 +849,30 @@ app.post("/api/auth/change-user-id", requireAuth, async (req, res) => {
     const userCode = await auth.changeUserCode(req.user.id, newCode);
     res.json({ ok: true, userCode });
   } catch (err) { handleAuthError(res, err); }
+});
+
+// ============================================================
+// ADMIN: delete a user's account entirely (Postgres + Sheet row)
+// Protected by ADMIN_SECRET (set in .env) — this is NOT tied to any
+// user login. Call it with header: x-admin-secret: <your ADMIN_SECRET>.
+// Example:
+//   curl -X DELETE http://localhost:3000/api/admin/users/4821 \
+//     -H "x-admin-secret: your_admin_secret_here"
+// ============================================================
+app.delete("/api/admin/users/:userCode", async (req, res) => {
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (!adminSecret) return res.status(503).json({ error: "ADMIN_SECRET is not configured on the server" });
+  if (req.headers["x-admin-secret"] !== adminSecret) return res.status(403).json({ error: "Invalid admin secret" });
+  try {
+    const userCode = req.params.userCode;
+    const result = await query("DELETE FROM users WHERE user_code = $1 RETURNING id", [userCode]);
+    if (!result.rows.length) return res.status(404).json({ error: "No user with that ID" });
+    await sheets.deleteUserRow(userCode).catch(() => {});
+    res.json({ ok: true, deleted: userCode });
+  } catch (err) {
+    console.error("Admin delete error:", err);
+    res.status(500).json({ error: "Delete failed" });
+  }
 });
 
 // ============================================================

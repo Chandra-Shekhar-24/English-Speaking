@@ -16,6 +16,7 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { query } = require('./db/pool');
+const sheets = require('./sheets');
 
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 const RESET_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -93,7 +94,9 @@ async function signup({ email, password, displayName, userCode }) {
      RETURNING id, user_code, email, display_name, avatar_url, created_at`,
     [userCode, email.toLowerCase(), displayName.trim(), passwordHash]
   );
-  return publicUser(result.rows[0]);
+  const user = publicUser(result.rows[0]);
+  sheets.upsertUser(user).catch(() => {}); // fire-and-forget, never blocks signup
+  return user;
 }
 
 async function login({ email, password }, meta = {}) {
@@ -169,7 +172,14 @@ async function changeUserCode(userId, newCode) {
   if (!isValidUserCode(newCode)) throw httpError(400, 'User ID must be exactly 4 digits');
   const existing = await query('SELECT id FROM users WHERE user_code = $1 AND id != $2', [newCode, userId]);
   if (existing.rows.length) throw httpError(409, 'That User ID is already taken');
-  await query('UPDATE users SET user_code = $1, updated_at = now() WHERE id = $2', [newCode, userId]);
+  const current = await query('SELECT user_code FROM users WHERE id = $1', [userId]);
+  const oldCode = current.rows[0] ? current.rows[0].user_code : null;
+  const result = await query(
+    'UPDATE users SET user_code = $1, updated_at = now() WHERE id = $2 RETURNING id, user_code, email, display_name, avatar_url, created_at',
+    [newCode, userId]
+  );
+  const user = publicUser(result.rows[0]);
+  sheets.upsertUser(user, oldCode).catch(() => {});
   return newCode;
 }
 

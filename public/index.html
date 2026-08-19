@@ -1520,6 +1520,68 @@
       padding: 0 3px;
     }
 
+    .fluency-card {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 32px 26px;
+      text-align: center;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .fluency-score-ring {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+      color: white;
+      font-size: 32px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      box-shadow: 0 8px 24px rgba(79,195,247,0.35);
+    }
+
+    .fluency-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 18px;
+    }
+
+    .fluency-stats {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .fluency-stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13.5px;
+      color: var(--text-secondary);
+    }
+
+    .fluency-stat-row span:last-child {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .fluency-tip {
+      background: rgba(79,195,247,0.08);
+      color: var(--blue);
+      font-size: 12.5px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-top: 12px;
+      line-height: 1.4;
+      text-align: left;
+    }
+
     .friend-row button.end-friend-call-btn:hover {
       opacity: 0.85;
     }
@@ -1979,6 +2041,15 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <div class="incoming-call-modal" id="fluencyModal" style="display:none;">
+    <div class="fluency-card">
+      <div class="fluency-score-ring" id="fluencyScoreRing">--</div>
+      <div class="fluency-title">Session Summary</div>
+      <div class="fluency-stats" id="fluencyStatsBody"></div>
+      <button class="start-btn" id="closeFluencyModalBtn">Continue Practicing</button>
+    </div>
+  </div>
+
   <div class="incoming-call-modal" id="incomingCallModal" style="display:none;">
     <div class="incoming-call-card">
       <div class="incoming-call-avatar" id="incomingCallAvatar">📞</div>
@@ -2202,6 +2273,7 @@
 
       const state = {
         authUser: null,
+        fluencyStats: null,
         userId: null, userPeerId: null, socket: null, peer: null,
         currentCall: null, localStream: null, remoteStream: null,
         isRecording: false, recognition: null,
@@ -2250,7 +2322,8 @@
         'authLoginView', 'loginEmail', 'loginPassword', 'loginSubmitBtn', 'showForgotBtn', 'showSignupBtn',
         'authSignupView', 'signupName', 'signupEmail', 'signupUserCode', 'signupPassword', 'signupConfirmPassword', 'signupSubmitBtn', 'showLoginFromSignupBtn',
         'authForgotView', 'forgotEmail', 'forgotSubmitBtn', 'showLoginFromForgotBtn',
-        'changeIdBtn', 'logoutBtn', 'changeIdBox', 'newUserCodeInput', 'confirmChangeIdBtn'
+        'changeIdBtn', 'logoutBtn', 'changeIdBox', 'newUserCodeInput', 'confirmChangeIdBtn',
+        'fluencyModal', 'fluencyScoreRing', 'fluencyStatsBody', 'closeFluencyModalBtn'
       ].forEach(id => { els[id] = $(id); });
 
       // ==========================================================
@@ -2303,6 +2376,65 @@
           }
         } catch (e) { console.error('Text chat greeting error:', e); }
       }
+
+      // ==========================================================
+      // FLUENCY SCORE — real-time speaking analytics
+      // Tracks filler words, speaking pace, and grammar accuracy
+      // across a voice practice session, purely from data the app
+      // already has (recognized speech + correction results) —
+      // no extra API calls or external service needed.
+      // ==========================================================
+      const FILLER_WORDS = ['um', 'umm', 'uh', 'uhh', 'uhm', 'like', 'you know', 'actually', 'basically', 'i mean', 'kind of', 'sort of', 'matlab', 'toh'];
+
+      function resetFluencyStats() {
+        state.fluencyStats = { totalWords: 0, fillerWords: 0, totalTurns: 0, mistakes: 0, sessionStart: Date.now() };
+      }
+
+      function analyzeUserSpeech(text) {
+        if (!state.fluencyStats) resetFluencyStats();
+        const lower = (text || '').toLowerCase();
+        const words = lower.split(/\s+/).filter(Boolean);
+        state.fluencyStats.totalWords += words.length;
+        state.fluencyStats.totalTurns += 1;
+        FILLER_WORDS.forEach((f) => {
+          const pattern = '\\b' + f.replace(/\s+/g, '\\s+') + '\\b';
+          const matches = lower.match(new RegExp(pattern, 'g'));
+          if (matches) { state.fluencyStats.fillerWords += matches.length; }
+        });
+      }
+
+      function computeFluencyScore() {
+        const s = state.fluencyStats;
+        if (!s || s.totalTurns === 0) return null;
+        const fillerRatio = s.totalWords > 0 ? s.fillerWords / s.totalWords : 0;
+        const mistakeRatio = s.totalTurns > 0 ? s.mistakes / s.totalTurns : 0;
+        const rawScore = 100 - (fillerRatio * 150) - (mistakeRatio * 100);
+        const score = Math.max(0, Math.min(100, Math.round(rawScore)));
+        const elapsedMin = Math.max(0.2, (Date.now() - s.sessionStart) / 60000);
+        const wpm = Math.round(s.totalWords / elapsedMin);
+        const accuracy = Math.max(0, Math.round((1 - mistakeRatio) * 100));
+        return { score, wpm, accuracy, fillerCount: s.fillerWords, fillerPct: Math.round(fillerRatio * 100), totalWords: s.totalWords, totalTurns: s.totalTurns };
+      }
+
+      function showFluencyModal() {
+        const r = computeFluencyScore();
+        if (!r || r.totalTurns < 2) return; // not enough data yet for a meaningful summary
+        els.fluencyScoreRing.textContent = r.score;
+        let tip;
+        if (r.fillerPct > 8) tip = '💡 Try pausing silently instead of saying "um" / "like" — it sounds more confident.';
+        else if (r.accuracy < 70) tip = '💡 Re-read the corrections from this session — the same small mistakes tend to repeat until you notice the pattern.';
+        else if (r.wpm < 90) tip = '💡 You\'re speaking carefully and clearly — try picking up the pace a little as you get more comfortable.';
+        else tip = '💡 Strong session! Keep practicing regularly to lock in this fluency.';
+        els.fluencyStatsBody.innerHTML =
+          '<div class="fluency-stat-row"><span>Words spoken</span><span>' + r.totalWords + '</span></div>' +
+          '<div class="fluency-stat-row"><span>Speaking pace</span><span>' + r.wpm + ' wpm</span></div>' +
+          '<div class="fluency-stat-row"><span>Grammar accuracy</span><span>' + r.accuracy + '%</span></div>' +
+          '<div class="fluency-stat-row"><span>Filler words</span><span>' + r.fillerCount + ' (' + r.fillerPct + '%)</span></div>' +
+          '<div class="fluency-tip">' + tip + '</div>';
+        els.fluencyModal.style.display = 'flex';
+      }
+
+      els.closeFluencyModalBtn.addEventListener('click', () => { els.fluencyModal.style.display = 'none'; });
 
       async function startVoiceChatGreeting() {
         try {
@@ -2866,7 +2998,7 @@
             btn.classList.add('active');
             state.activeTab = btn.dataset.tab;
             Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === btn.dataset.tab));
-            if (btn.dataset.tab === 'voice' && !state.isConversationStarted) { state.isConversationStarted = true; setTimeout(() => startVoiceChatGreeting(), 500); }
+            if (btn.dataset.tab === 'voice' && !state.isConversationStarted) { state.isConversationStarted = true; resetFluencyStats(); setTimeout(() => startVoiceChatGreeting(), 500); }
           });
         });
       }
@@ -3187,6 +3319,7 @@
         state.isProcessing = true;
         updateCallStatus('thinking', '⏳ Thinking...');
         els.aiAvatar.className = 'ai-avatar-small thinking';
+        analyzeUserSpeech(userText);
 
         const lastMsg = els.conversationArea.querySelector('.conv-msg.user:last-child');
         if (!lastMsg || lastMsg.dataset.final !== 'true') { addConversationMessage('user', userText); }
@@ -3213,6 +3346,7 @@
                 wordChanges: data.wordChanges || [],
                 explanation: data.explanation || ''
               };
+              if (data.correction) { if (state.fluencyStats) state.fluencyStats.mistakes++; }
             }
             addConversationMessage('ai', data.reply, data.correctionIndex);
             await speakText(data.reply, data.emotion || 'neutral');
@@ -3290,6 +3424,7 @@
         addConversationMessage('system', '📞 AI Call ended. Tap mic to start again.');
         state.isAICallActive = false;
         state.isConversationStarted = false;
+        showFluencyModal();
       }
 
       // ==========================================================
