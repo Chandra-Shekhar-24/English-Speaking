@@ -12,56 +12,66 @@ const { query } = require("./db/pool");
 // ============================================================
 // DATABASE - PostgreSQL (Render)
 // ============================================================
+// NOTE: chat/call/session history is intentionally the LOCAL JSON store
+// (db.js), not Postgres — see README's storage table. Postgres (db/pool.js,
+// required as `query` above) holds accounts/sessions-for-auth/permanent IDs.
+// This used to `require("./db/pool")` here and call methods like
+// saveMessage/getConversation/startCallRecord on it — but pool.js only
+// exports { pool, query }, so every one of those calls threw
+// "pgDb.<method> is not a function", was silently swallowed by the
+// try/catch below, and chat history, call history, and session tracking
+// never actually persisted. Pointing this at "./db" (the real
+// implementation of those methods) fixes it.
 let db;
 try {
-  const pgDb = require("./db/pool");
-  
-  // Wrap PostgreSQL functions to match the db interface
+  const localDb = require("./db");
+
+  // Wrap local JSON-store functions to match the db interface
   db = {
     saveMessage: async (fromUser, toUser, fromName, text) => {
       try {
-        await pgDb.saveMessage(fromUser, toUser, fromName, text);
+        localDb.saveMessage(fromUser, toUser, fromName, text);
       } catch (e) { console.error("DB save error:", e); }
     },
     getConversation: (user1, user2, limit) => {
       try {
-        return pgDb.getConversation(user1, user2, limit);
+        return localDb.getConversation(user1, user2, limit);
       } catch (e) { console.error("DB get error:", e); return []; }
     },
     startCallRecord: (callType, mediaType, participants) => {
       try {
-        return pgDb.startCallRecord(callType, mediaType, participants);
+        return localDb.startCallRecord(callType, mediaType, participants);
       } catch (e) { console.error("DB call error:", e); return null; }
     },
     endCallRecord: (recordId, startedAt) => {
       try {
-        pgDb.endCallRecord(recordId, startedAt);
+        localDb.endCallRecord(recordId, startedAt);
       } catch (e) { console.error("DB end call error:", e); }
     },
     startSession: (userId, displayName) => {
       try {
-        return pgDb.startSession(userId, displayName);
+        return localDb.startSession(userId, displayName);
       } catch (e) { console.error("DB session error:", e); return null; }
     },
     endSession: (sessionId) => {
       try {
-        pgDb.endSession(sessionId);
+        localDb.endSession(sessionId);
       } catch (e) { console.error("DB end session error:", e); }
     },
     updateSessionName: (sessionId, userName) => {
       try {
-        pgDb.updateSessionName(sessionId, userName);
+        localDb.updateSessionName(sessionId, userName);
       } catch (e) { console.error("DB update session error:", e); }
     },
     getStats: () => {
       try {
-        return pgDb.getStats();
+        return localDb.getStats();
       } catch (e) { console.error("DB stats error:", e); return { totalMessages: 0, totalCalls: 0, sessionsLast24h: 0 }; }
     }
   };
-  console.log("💾 PostgreSQL database module loaded ✅");
+  console.log("💾 Local JSON database module loaded ✅ (chat/call/session history)");
 } catch (e) {
-  console.warn("⚠️ PostgreSQL module unavailable:", e.message);
+  console.warn("⚠️ Local database module unavailable:", e.message);
   // Fallback no-op implementation so the app still runs without persistence.
   db = {
     saveMessage: () => null, getConversation: () => [],
