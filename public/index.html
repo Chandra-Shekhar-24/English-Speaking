@@ -849,93 +849,190 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      padding: 4px 0;
+      gap: 14px;
+      padding: 4px 0 4px;
       min-height: 0;
+      overflow-y: auto;
     }
 
     .friend-info {
-      background: var(--bg-input);
-      border-radius: var(--radius);
-      padding: 14px;
+      position: relative;
+      background: linear-gradient(160deg, rgba(79,195,247,0.10), var(--bg-card) 55%);
+      border-radius: var(--radius-lg);
+      padding: 20px 16px 16px;
       text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(79,195,247,0.18);
       flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .friend-info::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(79,195,247,0.25), transparent 70%);
+      pointer-events: none;
+    }
+
+    .friend-avatar-ring {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+      box-shadow: 0 6px 18px rgba(79,195,247,0.35);
     }
 
     .friend-info .label {
       font-size: 10px;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 1.2px;
+      font-weight: 600;
     }
 
     .friend-info .value {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--blue);
-      margin-top: 2px;
-      letter-spacing: 4px;
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-top: 4px;
+      letter-spacing: 5px;
     }
 
     .friend-info .status {
-      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
       color: var(--green);
-      margin-top: 2px;
+      margin-top: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(102, 187, 106, 0.12);
+    }
+
+    .friend-info .status::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 3px rgba(102,187,106,0.2);
     }
 
     .friend-info .status.offline {
       color: var(--red);
+      background: rgba(239, 83, 80, 0.12);
+    }
+
+    .friend-info .status.offline::before {
+      background: var(--red);
+      box-shadow: 0 0 0 3px rgba(239,83,80,0.2);
     }
 
     .account-actions {
       display: flex;
       justify-content: center;
-      gap: 16px;
-      margin-top: 10px;
+      gap: 10px;
+      margin-top: 14px;
     }
 
     .account-link-btn {
-      border: none;
-      background: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-input);
       color: var(--text-secondary);
-      font-size: 11.5px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
-      padding: 4px 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      transition: var(--transition);
     }
 
     .account-link-btn:hover {
       color: var(--blue);
+      border-color: var(--blue);
+      background: rgba(79,195,247,0.08);
+      transform: translateY(-1px);
+    }
+
+    #logoutBtn.account-link-btn:hover {
+      color: var(--red);
+      border-color: var(--red);
+      background: rgba(239,83,80,0.08);
     }
 
     .change-id-box {
       display: flex;
       gap: 8px;
       justify-content: center;
-      margin-top: 10px;
+      margin-top: 14px;
+      animation: fadeSlideIn 0.2s ease;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .change-id-box input {
-      width: 110px;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background: var(--bg-card);
+      width: 130px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 2px solid var(--border-color);
+      background: var(--bg-input);
       color: var(--text-primary);
-      font-size: 13px;
+      font-size: 14px;
+      font-weight: 700;
       text-align: center;
+      letter-spacing: 3px;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .change-id-box input:focus {
+      border-color: var(--blue);
     }
 
     .change-id-box button {
-      padding: 8px 14px;
+      padding: 10px 16px;
       border: none;
-      border-radius: 8px;
-      background: var(--blue);
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
       color: white;
       font-weight: 700;
-      font-size: 12px;
+      font-size: 12.5px;
       cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .change-id-box button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .friend-section-title {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 6px;
+      padding-left: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .friend-row {
@@ -981,33 +1078,39 @@
     }
 
     .friend-row button.connect-btn {
-      background: var(--blue);
-      color: var(--bg-primary);
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+      color: white;
+      box-shadow: 0 4px 14px rgba(79,195,247,0.3);
     }
 
     .friend-row button.connect-btn:hover {
-      opacity: 0.85;
+      opacity: 0.92;
+      transform: translateY(-1px);
     }
 
     .friend-row button.connect-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      transform: none;
     }
 
     .friend-row button.random-btn {
       background: var(--bg-card);
       color: var(--text-primary);
       flex: 1;
+      border: 2px solid var(--border-color);
     }
 
     .friend-row button.random-btn:hover {
       background: var(--border-color);
+      border-color: var(--blue);
     }
 
     .friend-row button.end-friend-call-btn {
-      background: var(--red);
+      background: linear-gradient(135deg, var(--red), #c62828);
       color: white;
       display: none;
+      box-shadow: 0 4px 14px rgba(239,83,80,0.3);
     }
 
     .incoming-call-modal {
@@ -1157,21 +1260,33 @@
       box-shadow: 0 4px 14px rgba(79,195,247,0.35);
     }
 
+    .friend-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
     .chat-entry-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
       width: 100%;
       padding: 12px 0;
-      border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       background: var(--bg-card);
       border: 2px solid var(--border-color);
       color: var(--text-primary);
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
+      transition: var(--transition);
     }
 
     .chat-entry-btn:hover {
       background: var(--border-color);
+      border-color: var(--blue);
+      transform: translateY(-1px);
     }
 
     .friend-chat-panel {
@@ -1583,7 +1698,8 @@
     }
 
     .friend-row button.end-friend-call-btn:hover {
-      opacity: 0.85;
+      opacity: 0.92;
+      transform: translateY(-1px);
     }
 
     .accept-call-btn {
@@ -1596,20 +1712,24 @@
       background: var(--bg-card);
       color: var(--text-primary);
       flex: 1;
+      border: 2px solid var(--border-color);
     }
 
     .friend-row button.mute-btn:hover,
     .friend-row button.camera-btn:hover {
       background: var(--border-color);
+      border-color: var(--blue);
     }
 
     .friend-row button.mute-btn.active {
-      background: var(--red);
+      background: linear-gradient(135deg, var(--red), #c62828);
+      border-color: var(--red);
       color: white;
     }
 
     .friend-row button.camera-btn.active {
-      background: var(--red);
+      background: linear-gradient(135deg, var(--red), #c62828);
+      border-color: var(--red);
       color: white;
     }
 
@@ -1721,87 +1841,107 @@
     .online-users {
       background: var(--bg-input);
       border-radius: var(--radius);
-      padding: 10px 12px;
+      padding: 12px 14px;
       flex: 1;
-      min-height: 60px;
-      max-height: 100px;
+      min-height: 70px;
+      max-height: 140px;
       overflow-y: auto;
-      border: 1px solid rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .online-users .title {
-      font-size: 10px;
+      font-size: 10.5px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .online-users .list {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
+      gap: 6px;
     }
 
     .online-users .chip {
-      background: rgba(79, 195, 247, 0.08);
-      padding: 2px 6px 2px 10px;
-      border-radius: 12px;
-      font-size: 11px;
+      background: var(--bg-card);
+      border: 1px solid rgba(79, 195, 247, 0.15);
+      padding: 5px 6px 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
       color: var(--blue);
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       cursor: pointer;
       transition: var(--transition);
     }
 
     .online-users .chip:hover {
-      background: rgba(79, 195, 247, 0.18);
+      background: rgba(79, 195, 247, 0.14);
+      border-color: var(--blue);
+      transform: translateY(-1px);
     }
 
     .online-users .chip .dot {
-      width: 4px;
-      height: 4px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--green);
       display: inline-block;
+      box-shadow: 0 0 0 2px rgba(102,187,106,0.2);
     }
 
     .online-users .chip .busy {
       background: var(--red);
+      box-shadow: 0 0 0 2px rgba(239,83,80,0.2);
     }
 
     .online-users .chip .name-label {
       color: var(--text-muted);
-      font-size: 10px;
+      font-size: 10.5px;
+      font-weight: 600;
     }
 
     .online-users .chip .chip-chat-btn {
       border: none;
-      background: none;
+      background: rgba(79,195,247,0.12);
       color: var(--blue);
       font-size: 12px;
       cursor: pointer;
-      padding: 2px 3px;
+      padding: 3px 5px;
       line-height: 1;
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+
+    .online-users .chip .chip-chat-btn:hover {
+      background: var(--blue);
+      color: white;
     }
 
     .online-users .empty {
       color: var(--text-muted);
-      font-size: 12px;
+      font-size: 12.5px;
       text-align: center;
-      padding: 10px;
+      padding: 16px 10px;
     }
 
     .friend-status {
-      font-size: 12px;
+      font-size: 12.5px;
+      font-weight: 600;
       color: var(--text-muted);
       text-align: center;
-      padding: 6px;
+      padding: 8px;
       background: var(--bg-input);
       border-radius: 10px;
       flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.04);
     }
 
     .friend-status .highlight {
@@ -1855,13 +1995,14 @@
     }
 
     .call-timer {
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 800;
       color: var(--blue);
       text-align: center;
-      padding: 4px 0;
+      padding: 6px 0;
       font-variant-numeric: tabular-nums;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
+      text-shadow: 0 0 20px rgba(79,195,247,0.35);
     }
 
     @media (max-width: 480px) {
@@ -2219,15 +2360,16 @@
     <div id="tab-friend" class="panel">
       <div class="friend-area">
         <div class="friend-info">
+          <div class="friend-avatar-ring">🎧</div>
           <div class="label">Your User ID</div>
           <div class="value" id="friendUserId">----</div>
-          <div class="status" id="friendStatus">🟢 Online</div>
+          <div class="status" id="friendStatus">Online</div>
           <div class="account-actions">
             <button id="changeIdBtn" class="account-link-btn">✏️ Change ID</button>
             <button id="logoutBtn" class="account-link-btn">🚪 Logout</button>
           </div>
           <div class="change-id-box" id="changeIdBox" style="display:none;">
-            <input id="newUserCodeInput" placeholder="New 4-digit ID" maxlength="4" inputmode="numeric" />
+            <input id="newUserCodeInput" placeholder="New ID" maxlength="4" inputmode="numeric" />
             <button id="confirmChangeIdBtn">Save</button>
           </div>
         </div>
@@ -2235,16 +2377,19 @@
           <video id="remoteVideo" autoplay playsinline></video>
           <video id="localVideo" autoplay playsinline muted></video>
         </div>
-        <div class="call-type-row" id="callTypeRow">
-          <button type="button" class="call-type-btn active" id="voiceTypeBtn"><span class="call-type-icon">📞</span>Voice Call</button>
-          <button type="button" class="call-type-btn" id="videoTypeBtn"><span class="call-type-icon">🎥</span>Video Call</button>
+        <div>
+          <div class="friend-section-title">📞 Start a Call</div>
+          <div class="call-type-row" id="callTypeRow">
+            <button type="button" class="call-type-btn active" id="voiceTypeBtn"><span class="call-type-icon">📞</span>Voice Call</button>
+            <button type="button" class="call-type-btn" id="videoTypeBtn"><span class="call-type-icon">🎥</span>Video Call</button>
+          </div>
         </div>
         <div class="friend-row">
           <input id="friendIdInput" placeholder="Enter 4-digit ID" maxlength="4" />
           <button class="connect-btn" id="connectBtn">Connect</button>
         </div>
-        <div class="friend-row" id="chatEntryRow">
-          <button class="chat-entry-btn" id="chatBtn">💬 Chat with this ID</button>
+        <div class="friend-actions-grid" id="chatEntryRow">
+          <button class="chat-entry-btn" id="chatBtn">💬 Chat</button>
           <button class="chat-entry-btn" id="groupCallBtn">👥 Group Call</button>
         </div>
         <div class="friend-row" id="inCallControls" style="display:none;">
@@ -2266,6 +2411,7 @@
       </div>
     </div>
   </div>
+
 
   <script>
     (function () {
