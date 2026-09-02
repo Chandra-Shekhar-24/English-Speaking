@@ -7,7 +7,7 @@ const { Server } = require("socket.io");
 const cookieParser = require("cookie-parser");
 const auth = require("./auth");
 const sheets = require("./sheets");
-const { query } = require("./db/pool");
+const { query, runMigrations } = require("./db/pool");
 
 // ============================================================
 // DATABASE - PostgreSQL (Render)
@@ -1322,15 +1322,21 @@ app.get("/api/health", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`\n  🚀 English Passport Pro running: http://localhost:${PORT}\n`);
-  if (!API_KEY || API_KEY === "your_api_key_here") {
-    console.log("  ⚠️  GROQ_API_KEY not set. Get free key from https://console.groq.com\n");
-  }
-  console.log(`  ✅ ${VOICES.male.length + VOICES.female.length} Voice Options Available`);
-  console.log(`  ✅ Text Chat & Voice Conversation - COMPLETELY INDEPENDENT`);
-  console.log(`  ✅ Corrections stored separately (not in messages)`);
-  console.log(`  ✅ AI Model: ${MODEL}`);
-  console.log(`  ✅ Friend Voice + Video Calls, Group Calls, Friend Chat`);
-  console.log(`  ✅ Chat + call history persisted to local database\n`);
+
+// Create/verify all Postgres tables before accepting traffic, so a
+// fresh database (or one nobody ran schema.sql against yet) doesn't
+// fail every request with `relation "users" does not exist`.
+runMigrations().finally(() => {
+  server.listen(PORT, () => {
+    console.log(`\n  🚀 English Passport Pro running: http://localhost:${PORT}\n`);
+    if (!API_KEY || API_KEY === "your_api_key_here") {
+      console.log("  ⚠️  GROQ_API_KEY not set. Get free key from https://console.groq.com\n");
+    }
+    console.log(`  ✅ ${VOICES.male.length + VOICES.female.length} Voice Options Available`);
+    console.log(`  ✅ Text Chat & Voice Conversation - COMPLETELY INDEPENDENT`);
+    console.log(`  ✅ Corrections stored separately (not in messages)`);
+    console.log(`  ✅ AI Model: ${MODEL}`);
+    console.log(`  ✅ Friend Voice + Video Calls, Group Calls, Friend Chat`);
+    console.log(`  ✅ Chat + call history persisted to local database\n`);
+  });
 });

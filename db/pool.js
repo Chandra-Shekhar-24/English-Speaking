@@ -129,4 +129,37 @@ async function query(text, params) {
   }
 }
 
-module.exports = { pool, query };
+// ------------------------------------------------------------
+// Auto-migration: run db/schema.sql once at boot so a fresh
+// database (or one schema.sql was never manually run against) gets
+// its tables created automatically, instead of every request
+// failing with `relation "users" does not exist` until someone
+// pastes the schema into a SQL editor by hand. Every statement in
+// schema.sql is CREATE ... IF NOT EXISTS / idempotent, so running
+// it on every boot (including ones where the tables already exist)
+// is safe and just does nothing on the 2nd+ run.
+// ------------------------------------------------------------
+async function runMigrations() {
+  if (!pool) return; // no DB configured — nothing to migrate
+  const fs = require('fs');
+  const path = require('path');
+  const schemaPath = path.join(__dirname, 'schema.sql');
+  let schemaSql;
+  try {
+    schemaSql = fs.readFileSync(schemaPath, 'utf8');
+  } catch (e) {
+    console.error('⚠️  Could not read db/schema.sql — skipping auto-migration:', e.message);
+    return;
+  }
+  try {
+    // node-postgres runs a whole ;-separated script fine via the
+    // simple query protocol as long as it's a single unparameterized
+    // string, which schema.sql is.
+    await pool.query(schemaSql);
+    console.log('🗄️  Database schema verified/created (auto-migration) ✅');
+  } catch (e) {
+    console.error('❌ Auto-migration failed — tables may be missing. Run db/schema.sql manually against your database. Error:', e.message);
+  }
+}
+
+module.exports = { pool, query, runMigrations };
