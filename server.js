@@ -82,6 +82,10 @@ try {
 }
 
 const app = express();
+// Render (and most hosts) sit behind a reverse proxy that terminates TLS,
+// so Express itself sees plain HTTP. Without `trust proxy`, req.secure is
+// always false and secure cookies/redirects behave incorrectly.
+app.set('trust proxy', 1);
 app.use(cors({ origin: process.env.APP_URL || true, credentials: true }));
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
@@ -836,7 +840,13 @@ function leaveGroupRoom(leavingUserId, roomId) {
 function setSessionCookie(res, token) {
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // Render (and virtually every real host) always serves over HTTPS,
+    // but doesn't set NODE_ENV=production by default, so relying on that
+    // alone left the cookie non-Secure in production and could make some
+    // mobile browsers refuse/drop it. RENDER is auto-set by Render itself;
+    // this falls back to NODE_ENV for other hosts, and only skips Secure
+    // for genuine local HTTP development.
+    secure: process.env.NODE_ENV === "production" || !!process.env.RENDER,
     sameSite: "lax",
     maxAge: SESSION_COOKIE_MAX_AGE
   });

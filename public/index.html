@@ -2633,7 +2633,16 @@
       function connectSocket() {
         state.socket = io({ reconnection: true, reconnectionAttempts: 5, reconnectionDelay: 1000, withCredentials: true });
         state.socket.on('connect', () => { console.log('✅ Socket connected'); if (state.userName) state.socket.emit('set-user-name', state.userName); });
-        state.socket.on('connect_error', (error) => { console.error('❌ Socket error:', error); });
+        state.socket.on('connect_error', (error) => {
+          console.error('❌ Socket error:', error);
+          showToast('⚠️', 'Connection problem', error.message || 'Could not connect to the server');
+        });
+        state.socket.on('disconnect', (reason) => {
+          console.warn('🔌 Socket disconnected:', reason);
+          if (reason !== 'io client disconnect') {
+            showToast('🔌', 'Disconnected', reason === 'io server disconnect' ? 'Server closed the connection' : 'Reconnecting…');
+          }
+        });
         state.socket.on('user-id', (id) => { state.userId = id; els.userIdDisplay.textContent = 'ID: ' + id; els.friendUserId.textContent = id; initPeer(); });
         state.socket.on('online-users', (users) => { renderOnlineUsers(users); const online = users.filter(u => !u.busy).length; els.onlineCount.textContent = online; });
 
