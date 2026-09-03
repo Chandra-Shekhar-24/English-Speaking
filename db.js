@@ -30,7 +30,7 @@ const MAX_MESSAGES = 5000; // prevent unbounded file growth over time
 const MAX_CALLS = 2000;
 const MAX_SESSIONS = 2000;
 
-let data = { chatMessages: [], callHistory: [], userSessions: [], nextCallId: 1, nextSessionId: 1 };
+let data = { chatMessages: [], callHistory: [], userSessions: [], nextCallId: 1, nextSessionId: 1, nextMessageId: 1 };
 
 function load() {
   try {
@@ -42,7 +42,8 @@ function load() {
         callHistory: Array.isArray(parsed.callHistory) ? parsed.callHistory : [],
         userSessions: Array.isArray(parsed.userSessions) ? parsed.userSessions : [],
         nextCallId: parsed.nextCallId || 1,
-        nextSessionId: parsed.nextSessionId || 1
+        nextSessionId: parsed.nextSessionId || 1,
+        nextMessageId: parsed.nextMessageId || 1
       };
       console.log(`💾 Database loaded: ${data.chatMessages.length} messages, ${data.callHistory.length} call records`);
     } else {
@@ -76,15 +77,20 @@ function saveNow() {
 
 load();
 
-function saveMessage(fromUser, toUser, fromName, text) {
+function saveMessage(fromUser, toUser, fromName, text, attachment) {
   try {
-    const record = { fromUser, toUser, fromName: fromName || null, text, createdAt: Date.now() };
+    const id = data.nextMessageId++;
+    const record = {
+      id, fromUser, toUser, fromName: fromName || null, text,
+      attachment: attachment || null, // { url, publicId, resourceType, type, filename, size, mimeType, expiresAt, deleted }
+      createdAt: Date.now()
+    };
     data.chatMessages.push(record);
     if (data.chatMessages.length > MAX_MESSAGES) {
       data.chatMessages.splice(0, data.chatMessages.length - MAX_MESSAGES);
     }
     scheduleSave();
-    return true;
+    return record;
   } catch (e) { console.error('DB saveMessage error:', e.message); return null; }
 }
 
@@ -95,6 +101,31 @@ function getConversation(userA, userB, limit = 200) {
     );
     return matches.slice(-limit);
   } catch (e) { console.error('DB getConversation error:', e.message); return []; }
+}
+
+// Returns every message whose attachment has passed its expiry and
+// hasn't been cleaned up yet — used by media.js's background job to
+// actually delete the underlying file (not just hide it in the UI).
+function getExpiredAttachments(now = Date.now()) {
+  try {
+    return data.chatMessages
+      .filter(m => m.attachment && !m.attachment.deleted && m.attachment.expiresAt <= now)
+      .map(m => ({ messageId: m.id, attachment: m.attachment }));
+  } catch (e) { console.error('DB getExpiredAttachments error:', e.message); return []; }
+}
+
+// Marks a message's attachment as expired: clears the (now-deleted)
+// URL but keeps filename/type so the UI can still show a meaningful
+// "Attachment expired" bubble instead of a broken link.
+function markAttachmentExpired(messageId) {
+  try {
+    const record = data.chatMessages.find(m => m.id === messageId);
+    if (record && record.attachment) {
+      record.attachment.deleted = true;
+      record.attachment.url = null;
+      scheduleSave();
+    }
+  } catch (e) { console.error('DB markAttachmentExpired error:', e.message); }
 }
 
 function startCallRecord(callType, mediaType, participantIds) {
@@ -170,6 +201,7 @@ process.on('SIGINT', saveNow);
 
 module.exports = {
   saveMessage, getConversation,
+  getExpiredAttachments, markAttachmentExpired,
   startCallRecord, endCallRecord,
   startSession, endSession, updateSessionName,
   getStats

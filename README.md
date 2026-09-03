@@ -155,7 +155,7 @@ english-passport-pro/
 ## Current Limitations (being addressed in later phases)
 - **Friend requests / accept-reject gating** are not yet built — anyone can message or call anyone by ID.
 - **Blocking** is not yet implemented.
-- **File/image/media sharing** is not yet implemented (needs a cloud storage provider like S3/Cloudinary).
+- ~~File/image/media sharing~~ **Now implemented** — Friend Chat supports images, videos, PDFs, and documents (via Cloudinary). Attachments auto-expire and are permanently deleted ~24 hours after sending. Requires `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` in `.env` (free tier at cloudinary.com).
 - **Front/back camera switching** on mobile is not yet implemented.
 - **Floating/minimized call widget** while chatting is not yet implemented.
 - **TURN server** is not configured — calls between two users on strict/symmetric NAT may fail to connect.

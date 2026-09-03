@@ -28,15 +28,25 @@ try {
 
   // Wrap local JSON-store functions to match the db interface
   db = {
-    saveMessage: async (fromUser, toUser, fromName, text) => {
+    saveMessage: (fromUser, toUser, fromName, text, attachment) => {
       try {
-        localDb.saveMessage(fromUser, toUser, fromName, text);
-      } catch (e) { console.error("DB save error:", e); }
+        return localDb.saveMessage(fromUser, toUser, fromName, text, attachment);
+      } catch (e) { console.error("DB save error:", e); return null; }
     },
     getConversation: (user1, user2, limit) => {
       try {
         return localDb.getConversation(user1, user2, limit);
       } catch (e) { console.error("DB get error:", e); return []; }
+    },
+    getExpiredAttachments: (now) => {
+      try {
+        return localDb.getExpiredAttachments(now);
+      } catch (e) { console.error("DB getExpiredAttachments error:", e); return []; }
+    },
+    markAttachmentExpired: (messageId) => {
+      try {
+        localDb.markAttachmentExpired(messageId);
+      } catch (e) { console.error("DB markAttachmentExpired error:", e); }
     },
     startCallRecord: (callType, mediaType, participants) => {
       try {
@@ -75,11 +85,17 @@ try {
   // Fallback no-op implementation so the app still runs without persistence.
   db = {
     saveMessage: () => null, getConversation: () => [],
+    getExpiredAttachments: () => [], markAttachmentExpired: () => {},
     startCallRecord: () => null, endCallRecord: () => {},
     startSession: () => null, endSession: () => {}, updateSessionName: () => {},
     getStats: () => ({ totalMessages: 0, totalCalls: 0, sessionsLast24h: 0 })
   };
 }
+
+const media = require("./media");
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: media.MAX_FILE_SIZE_BYTES } });
+media.scheduleCleanup(db); // 24-hour attachment auto-deletion (see media.js)
 
 const app = express();
 // Render (and most hosts) sit behind a reverse proxy that terminates TLS,
@@ -515,11 +531,12 @@ io.on("connection", (socket) => {
   socket.on("friend-message", (data) => {
     const targetUserId = data && data.targetUserId;
     const text = data && typeof data.text === 'string' ? data.text.trim().slice(0, 1000) : '';
+    const attachment = data && data.attachment && typeof data.attachment === 'object' ? data.attachment : null;
     if (!targetUserId) { console.warn(`⚠️ friend-message from ${userId}: missing targetUserId`); return; }
-    if (!text) { console.warn(`⚠️ friend-message from ${userId} to ${targetUserId}: empty text, ignored`); return; }
+    if (!text && !attachment) { console.warn(`⚠️ friend-message from ${userId} to ${targetUserId}: empty message, ignored`); return; }
     const sender = users.get(userId);
     const senderName = (sender && sender.userName) || `User ${userId}`;
-    db.saveMessage(userId, targetUserId, senderName, text);
+    const saved = db.saveMessage(userId, targetUserId, senderName, text, attachment);
     const target = users.get(targetUserId);
     if (!target || !target.connected) {
       console.log(`💬 friend-message ${userId} -> ${targetUserId} FAILED: target offline (saved for later)`);
@@ -530,11 +547,12 @@ io.on("connection", (socket) => {
       from: userId,
       fromName: senderName,
       text,
-      timestamp: Date.now()
+      attachment,
+      timestamp: (saved && saved.createdAt) || Date.now()
     };
     io.to(target.socketId).emit("friend-message", payload);
     socket.emit("friend-message-sent", { targetUserId, timestamp: payload.timestamp });
-    console.log(`💬 friend-message ${userId} -> ${targetUserId}: delivered`);
+    console.log(`💬 friend-message ${userId} -> ${targetUserId}: delivered${attachment ? ' (with attachment)' : ''}`);
   });
 
   socket.on("get-chat-history", (data, callback) => {
@@ -542,7 +560,7 @@ io.on("connection", (socket) => {
     if (!otherUserId || typeof callback !== 'function') return;
     const rows = db.getConversation(userId, otherUserId, 200);
     const messages = rows.map(r => ({
-      from: r.fromUser, to: r.toUser, fromName: r.fromName, text: r.text, timestamp: r.createdAt
+      from: r.fromUser, to: r.toUser, fromName: r.fromName, text: r.text, attachment: r.attachment || null, timestamp: r.createdAt
     }));
     callback({ messages });
   });
@@ -916,6 +934,43 @@ app.post("/api/auth/change-user-id", requireAuth, async (req, res) => {
     const userCode = await auth.changeUserCode(req.user.id, newCode);
     res.json({ ok: true, userCode });
   } catch (err) { handleAuthError(res, err); }
+});
+
+// ============================================================
+// FRIEND CHAT — FILE/IMAGE/VIDEO ATTACHMENT UPLOAD
+// Uploads the file to Cloudinary and returns metadata only — this
+// does NOT send the chat message itself. The client uploads first,
+// then emits the "friend-message" socket event with the returned
+// attachment metadata attached, so upload progress and message
+// sending stay two separate, independently-retryable steps.
+// Every attachment carries a 24h expiresAt; media.scheduleCleanup()
+// (started above) actually deletes the Cloudinary file once it
+// passes that time, not just hides it in the UI.
+// ============================================================
+app.post("/api/friend-chat/upload", requireAuth, (req, res, next) => {
+  upload.single("file")(req, res, (err) => {
+    if (err) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(400).json({ error: `File too large (max ${media.MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB)` });
+      }
+      console.error("Attachment upload middleware error:", err.message);
+      return res.status(400).json({ error: "Upload failed. Please try again." });
+    }
+    next();
+  });
+}, async (req, res) => {
+  try {
+    if (!media.isConfigured()) {
+      return res.status(503).json({ error: "File sharing is not configured on this server yet." });
+    }
+    const validationError = media.validateFile(req.file);
+    if (validationError) return res.status(400).json({ error: validationError });
+    const result = await media.uploadBuffer(req.file);
+    res.json({ ok: true, attachment: result });
+  } catch (err) {
+    console.error("Attachment upload error:", err.message);
+    res.status(500).json({ error: "Upload failed. Please try again." });
+  }
 });
 
 // ============================================================

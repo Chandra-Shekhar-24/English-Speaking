@@ -1396,6 +1396,221 @@
       cursor: pointer;
     }
 
+    .friend-chat-attach-btn {
+      padding: 12px 14px !important;
+      background: var(--bg-input) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-secondary) !important;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .friend-chat-attach-btn:hover {
+      color: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .friend-chat-send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ---- Attachment preview (before sending) ---- */
+    .attach-preview-bar {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .attach-preview-bar.active { display: flex; }
+
+    .attach-preview-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--bg-input);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .attach-preview-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .attach-preview-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .attach-preview-size {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .attach-preview-progress {
+      width: 100%;
+      height: 3px;
+      background: var(--border-color);
+      border-radius: 3px;
+      margin-top: 4px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .attach-preview-progress.active { display: block; }
+
+    .attach-preview-progress-fill {
+      height: 100%;
+      background: var(--blue);
+      width: 0%;
+      transition: width 0.15s ease;
+    }
+
+    .attach-preview-cancel {
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+      padding: 4px 6px;
+    }
+
+    .attach-preview-cancel:hover { color: var(--red); }
+
+    /* ---- Media bubbles ---- */
+    .chat-media-image {
+      max-width: 220px;
+      max-height: 220px;
+      border-radius: 10px;
+      display: block;
+      cursor: pointer;
+      object-fit: cover;
+    }
+
+    .chat-media-video {
+      max-width: 240px;
+      max-height: 240px;
+      border-radius: 10px;
+      display: block;
+    }
+
+    .chat-media-file {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 10px;
+      text-decoration: none;
+      color: inherit;
+      min-width: 180px;
+    }
+
+    .friend-chat-bubble.received .chat-media-file {
+      background: var(--bg-input);
+    }
+
+    .chat-media-file-icon {
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .chat-media-file-info {
+      min-width: 0;
+    }
+
+    .chat-media-file-name {
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 160px;
+    }
+
+    .chat-media-file-size {
+      font-size: 11px;
+      opacity: 0.75;
+    }
+
+    .chat-media-expired {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.12);
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-style: italic;
+    }
+
+    .chat-media-uploading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      opacity: 0.85;
+    }
+
+    .chat-media-spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: chatSpin 0.7s linear infinite;
+    }
+
+    @keyframes chatSpin { to { transform: rotate(360deg); } }
+
+    /* ---- Lightbox for full-size image preview ---- */
+    .media-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 10050;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .media-lightbox.active { display: flex; }
+
+    .media-lightbox img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 8px;
+    }
+
+    .media-lightbox-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      font-size: 22px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
     .group-setup-body {
       padding: 16px;
       display: flex;
@@ -2174,10 +2389,26 @@
       <button class="friend-chat-close" id="closeFriendChatBtn">✖</button>
     </div>
     <div class="friend-chat-messages" id="friendChatMessages"></div>
-    <div class="friend-chat-input-row">
-      <input id="friendChatInput" placeholder="Type a message..." maxlength="1000" />
-      <button id="friendChatSendBtn">Send</button>
+    <div class="attach-preview-bar" id="attachPreviewBar">
+      <div class="attach-preview-thumb" id="attachPreviewThumb">📎</div>
+      <div class="attach-preview-info">
+        <div class="attach-preview-name" id="attachPreviewName">file.jpg</div>
+        <div class="attach-preview-size" id="attachPreviewSize">0 KB</div>
+        <div class="attach-preview-progress" id="attachPreviewProgress"><div class="attach-preview-progress-fill" id="attachPreviewProgressFill"></div></div>
+      </div>
+      <button class="attach-preview-cancel" id="attachPreviewCancel" title="Remove">✖</button>
     </div>
+    <div class="friend-chat-input-row">
+      <input type="file" id="friendChatFileInput" style="display:none;" accept="image/*,video/mp4,video/webm,video/quicktime,application/pdf,.doc,.docx,.xls,.xlsx,.txt" />
+      <button class="friend-chat-attach-btn" id="friendChatAttachBtn" title="Attach a file">📎</button>
+      <input id="friendChatInput" placeholder="Type a message..." maxlength="1000" />
+      <button class="friend-chat-send-btn" id="friendChatSendBtn">Send</button>
+    </div>
+  </div>
+
+  <div class="media-lightbox" id="mediaLightbox">
+    <button class="media-lightbox-close" id="mediaLightboxClose">✖</button>
+    <img id="mediaLightboxImg" src="" alt="Preview" />
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
@@ -2456,6 +2687,9 @@
         'declineCallBtn', 'acceptCallBtn',
         'friendChatPanel', 'friendChatTargetId', 'friendChatMessages', 'friendChatInput',
         'friendChatSendBtn', 'closeFriendChatBtn',
+        'friendChatAttachBtn', 'friendChatFileInput', 'attachPreviewBar', 'attachPreviewThumb',
+        'attachPreviewName', 'attachPreviewSize', 'attachPreviewProgress', 'attachPreviewProgressFill',
+        'attachPreviewCancel', 'mediaLightbox', 'mediaLightboxImg', 'mediaLightboxClose',
         'groupCallBtn', 'groupSetupPanel', 'closeGroupSetupBtn', 'groupVoiceTypeBtn', 'groupVideoTypeBtn',
         'groupIdInput', 'addGroupIdBtn', 'groupChipList', 'startGroupCallBtn',
         'incomingGroupCallModal', 'incomingGroupCallType', 'incomingGroupCallerName',
@@ -3713,8 +3947,26 @@
           if (e.key === 'Enter') { e.preventDefault(); sendFriendChatMessage(); }
         });
 
+        // ---- Attachments ----
+        els.friendChatAttachBtn.addEventListener('click', () => { els.friendChatFileInput.click(); });
+        els.friendChatFileInput.addEventListener('change', () => {
+          const file = els.friendChatFileInput.files && els.friendChatFileInput.files[0];
+          if (file) { selectAttachment(file); }
+          els.friendChatFileInput.value = '';
+        });
+        els.attachPreviewCancel.addEventListener('click', () => { clearAttachment(); });
+        els.mediaLightboxClose.addEventListener('click', () => { els.mediaLightbox.classList.remove('active'); });
+        els.mediaLightbox.addEventListener('click', (e) => { if (e.target === els.mediaLightbox) { els.mediaLightbox.classList.remove('active'); } });
+        els.friendChatMessages.addEventListener('click', (e) => {
+          const img = e.target.closest('.chat-media-image');
+          if (img && img.dataset.fullUrl) {
+            els.mediaLightboxImg.src = img.dataset.fullUrl;
+            els.mediaLightbox.classList.add('active');
+          }
+        });
+
         state.socket.on('friend-message', (data) => {
-          appendChatMessage(data.from, { text: data.text, self: false, fromName: data.fromName, timestamp: data.timestamp });
+          appendChatMessage(data.from, { text: data.text, attachment: data.attachment || null, self: false, fromName: data.fromName, timestamp: data.timestamp });
           const isPanelOpenForSender = els.friendChatPanel.style.display !== 'none' && state.chatTargetId === data.from;
           if (!isPanelOpenForSender) {
             state.unreadCounts[data.from] = (state.unreadCounts[data.from] || 0) + 1;
@@ -3944,6 +4196,7 @@
         els.friendChatTargetId.textContent = targetId;
         els.friendChatPanel.style.display = 'flex';
         els.friendChatInput.focus();
+        clearAttachment();
 
         if (state.chatHistories[targetId]) {
           renderChatMessages(targetId);
@@ -3953,7 +4206,7 @@
         els.friendChatMessages.innerHTML = '<div class="friend-chat-bubble system">Loading conversation...</div>';
         state.socket.emit('get-chat-history', { withUserId: targetId }, (res) => {
           const loaded = (res && Array.isArray(res.messages)) ? res.messages.map(m => ({
-            text: m.text, self: m.from === state.userId, status: 'delivered', timestamp: m.timestamp
+            text: m.text, attachment: m.attachment || null, self: m.from === state.userId, status: 'delivered', timestamp: m.timestamp
           })) : [];
           state.chatHistories[targetId] = loaded;
           if (state.chatTargetId === targetId) { renderChatMessages(targetId); }
@@ -3963,12 +4216,52 @@
       function closeFriendChat() {
         els.friendChatPanel.style.display = 'none';
         state.chatTargetId = null;
+        clearAttachment();
       }
 
       function appendChatMessage(targetId, msg) {
         if (!state.chatHistories[targetId]) { state.chatHistories[targetId] = []; }
         state.chatHistories[targetId].push(msg);
         if (state.chatTargetId === targetId) { renderChatMessages(targetId); }
+      }
+
+      function formatFileSize(bytes) {
+        if (!bytes && bytes !== 0) return '';
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      }
+
+      function fileIconFor(type, mimeType) {
+        if (type === 'image') return '🖼️';
+        if (type === 'video') return '🎬';
+        if (mimeType === 'application/pdf') return '📄';
+        if (mimeType && mimeType.includes('word')) return '📝';
+        if (mimeType && mimeType.includes('sheet')) return '📊';
+        return '📎';
+      }
+
+      function renderAttachment(att) {
+        if (!att) return '';
+        if (att.deleted || !att.url) {
+          return `<div class="chat-media-expired">⏱️ ${escapeHtml(att.filename || 'Attachment')} — expired</div>`;
+        }
+        if (att.uploading) {
+          return `<div class="chat-media-uploading"><span class="chat-media-spinner"></span> Uploading ${escapeHtml(att.filename || '')}...</div>`;
+        }
+        if (att.type === 'image') {
+          return `<img class="chat-media-image" src="${att.url}" data-full-url="${att.url}" alt="${escapeHtml(att.filename || 'Image')}" loading="lazy" />`;
+        }
+        if (att.type === 'video') {
+          return `<video class="chat-media-video" src="${att.url}" controls preload="metadata"></video>`;
+        }
+        return `<a class="chat-media-file" href="${att.url}" target="_blank" rel="noopener">
+          <span class="chat-media-file-icon">${fileIconFor(att.type, att.mimeType)}</span>
+          <span class="chat-media-file-info">
+            <div class="chat-media-file-name">${escapeHtml(att.filename || 'File')}</div>
+            <div class="chat-media-file-size">${formatFileSize(att.size)} · Open</div>
+          </span>
+        </a>`;
       }
 
       function renderChatMessages(targetId) {
@@ -3978,7 +4271,9 @@
           const cls = m.self ? 'sent' : 'received';
           let tick = '';
           if (m.self) { tick = m.status === 'delivered' ? ' <span class="chat-tick">✓✓</span>' : ' <span class="chat-tick">✓</span>'; }
-          return `<div class="friend-chat-bubble ${cls}">${escapeHtml(m.text)}${tick}</div>`;
+          const mediaHtml = m.attachment ? renderAttachment(m.attachment) : '';
+          const textHtml = m.text ? `<div>${escapeHtml(m.text)}${tick}</div>` : (m.self ? `<div style="text-align:right;">${tick}</div>` : '');
+          return `<div class="friend-chat-bubble ${cls}">${mediaHtml}${textHtml}</div>`;
         }).join('');
         els.friendChatMessages.scrollTop = els.friendChatMessages.scrollHeight;
       }
@@ -3989,12 +4284,87 @@
         return div.innerHTML;
       }
 
-      function sendFriendChatMessage() {
+      // ---- Attachment selection / upload ----
+      function selectAttachment(file) {
+        const maxBytes = 20 * 1024 * 1024;
+        if (file.size > maxBytes) {
+          showToast('⚠️', 'File too large', 'Max size is 20MB');
+          return;
+        }
+        state.pendingAttachmentFile = file;
+        els.attachPreviewBar.classList.add('active');
+        els.attachPreviewName.textContent = file.name;
+        els.attachPreviewSize.textContent = formatFileSize(file.size);
+        els.attachPreviewProgress.classList.remove('active');
+        els.attachPreviewProgressFill.style.width = '0%';
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = () => { els.attachPreviewThumb.innerHTML = `<img src="${reader.result}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`; };
+          reader.readAsDataURL(file);
+        } else {
+          els.attachPreviewThumb.innerHTML = file.type.startsWith('video/') ? '🎬' : '📎';
+        }
+      }
+
+      function clearAttachment() {
+        state.pendingAttachmentFile = null;
+        els.attachPreviewBar.classList.remove('active');
+        els.attachPreviewProgress.classList.remove('active');
+        els.attachPreviewProgressFill.style.width = '0%';
+        els.attachPreviewThumb.innerHTML = '📎';
+      }
+
+      function uploadAttachment(file, onProgress) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', '/api/friend-chat/upload');
+          xhr.withCredentials = true;
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable && onProgress) { onProgress(Math.round((e.loaded / e.total) * 100)); }
+          };
+          xhr.onload = () => {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              if (xhr.status >= 200 && xhr.status < 300 && data.ok) { resolve(data.attachment); }
+              else { reject(new Error(data.error || 'Upload failed')); }
+            } catch (e) { reject(new Error('Upload failed')); }
+          };
+          xhr.onerror = () => reject(new Error('Network error during upload'));
+          const formData = new FormData();
+          formData.append('file', file);
+          xhr.send(formData);
+        });
+      }
+
+      async function sendFriendChatMessage() {
         const text = els.friendChatInput.value.trim();
-        if (!text || !state.chatTargetId) return;
-        state.socket.emit('friend-message', { targetUserId: state.chatTargetId, text });
-        appendChatMessage(state.chatTargetId, { text, self: true, status: 'sending', timestamp: Date.now() });
+        const file = state.pendingAttachmentFile;
+        if (!text && !file) return;
+        if (!state.chatTargetId) return;
+        const targetId = state.chatTargetId;
         els.friendChatInput.value = '';
+
+        if (file) {
+          clearAttachment();
+          const tempMsg = { text, attachment: { filename: file.name, size: file.size, type: file.type.startsWith('image/') ? 'image' : (file.type.startsWith('video/') ? 'video' : 'file'), uploading: true }, self: true, status: 'sending', timestamp: Date.now() };
+          appendChatMessage(targetId, tempMsg);
+          try {
+            const attachment = await uploadAttachment(file, () => {});
+            tempMsg.attachment = attachment;
+            renderChatMessages(targetId);
+            state.socket.emit('friend-message', { targetUserId: targetId, text, attachment });
+            tempMsg.status = 'delivered';
+            renderChatMessages(targetId);
+          } catch (e) {
+            tempMsg.attachment = { deleted: true, filename: file.name };
+            tempMsg.text = (tempMsg.text ? tempMsg.text + ' ' : '') + '(upload failed)';
+            renderChatMessages(targetId);
+            showToast('⚠️', 'Upload failed', e.message || 'Please try again');
+          }
+        } else {
+          state.socket.emit('friend-message', { targetUserId: targetId, text });
+          appendChatMessage(targetId, { text, self: true, status: 'sending', timestamp: Date.now() });
+        }
       }
 
       // ==========================================================
