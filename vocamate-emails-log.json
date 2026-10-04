@@ -1,0 +1,4870 @@
+{
+  "logs": [
+    {
+      "id": "mail_1791082462423_283",
+      "timestamp": "2026-10-04T02:54:22.423Z",
+      "to": "student_test_1791082461923@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Your VocaMate Verification Code: 936888 (User ID: #1647)",
+      "type": "email_verification",
+      "status": "sandbox_restricted",
+      "provider": "resend",
+      "error": "You can only send testing emails to your own email address (chandrashekharbansal.2006@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+      "metadata": {
+        "userId": 11,
+        "userCode": "1647",
+        "displayName": "Student Learner",
+        "otp": "936888",
+        "verifyUrl": "http://localhost:3000/verify-email.html?token=11e46967aef220002513fc779c9c5cab2f29d84bb2681a4c87a4af306b337422",
+        "tokenPrefix": "11e46967"
+      },
+      "sandboxRestricted": true
+    },
+    {
+      "id": "mail_1791082437466_282",
+      "timestamp": "2026-10-04T02:53:57.467Z",
+      "to": "chandrashekharb.2405@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Your VocaMate Verification Code: 482910 (User ID: #2405)",
+      "type": "email_verification",
+      "status": "sandbox_restricted",
+      "provider": "resend",
+      "error": "You can only send testing emails to your own email address (chandrashekharbansal.2006@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+      "metadata": {
+        "userId": 999,
+        "userCode": "2405",
+        "displayName": "Chandra Test",
+        "otp": "482910",
+        "verifyUrl": "http://localhost:3000/verify-email.html?token=test_token_abc_123",
+        "tokenPrefix": "test_tok"
+      },
+      "sandboxRestricted": true
+    },
+    {
+      "id": "mail_1790947622506_281",
+      "timestamp": "2026-10-02T13:27:02.506Z",
+      "to": "user_test_1790947620549@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "send_failed",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 10,
+        "userCode": "6318",
+        "displayName": "Test Student"
+      },
+      "sandboxRestricted": false
+    },
+    {
+      "id": "mail_1790947621301_280",
+      "timestamp": "2026-10-02T13:27:01.301Z",
+      "to": "user_test_1790947620549@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Your VocaMate Password Reset Code: 412778",
+      "type": "password_reset",
+      "status": "send_failed",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 10,
+        "userCode": "6318",
+        "displayName": "Test Student",
+        "otp": "412778",
+        "resetUrl": "http://localhost:3000/reset-password.html?token=49ce71d5d1313597f684e75a4228f419cdeb35ebcffe3978883d1d1e483d7428",
+        "tokenPrefix": "49ce71d5"
+      },
+      "sandboxRestricted": false
+    },
+    {
+      "id": "mail_1790947620973_279",
+      "timestamp": "2026-10-02T13:27:00.973Z",
+      "to": "user_test_1790947620549@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Your VocaMate Verification Code: 707550 (User ID: #6318)",
+      "type": "email_verification",
+      "status": "send_failed",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 10,
+        "userCode": "6318",
+        "displayName": "Test Student",
+        "otp": "707550",
+        "verifyUrl": "http://localhost:3000/verify-email.html?token=2025a0d5cc05290b56da680843e5272c8e9b4008cddb39bd8f75b76f2a7b0053",
+        "tokenPrefix": "2025a0d5"
+      },
+      "sandboxRestricted": false
+    },
+    {
+      "id": "mail_1790947602315_278",
+      "timestamp": "2026-10-02T13:26:42.315Z",
+      "to": "chandras.bansal.24@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Your VocaMate Verification Code: 661303 (User ID: #5796)",
+      "type": "email_verification",
+      "status": "sandbox_restricted",
+      "provider": "resend",
+      "error": "You can only send testing emails to your own email address (chandrashekharbansal.2006@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+      "metadata": {
+        "userId": 9,
+        "userCode": "5796",
+        "displayName": "Chandra Shekhar Bansal",
+        "otp": "661303",
+        "verifyUrl": "https://ais-dev-a436vhcnhcmbfplmfthk4w-963565358104.asia-southeast1.run.app/verify-email.html?token=9fd2efc54e8f317ffc79a21612bd78db4b6c01a3b6370504af0979bba3232551",
+        "tokenPrefix": "9fd2efc5"
+      },
+      "sandboxRestricted": true
+    },
+    {
+      "id": "mail_1790947081430_277",
+      "timestamp": "2026-10-02T13:18:01.430Z",
+      "to": "chandrashekharb.2405@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Your VocaMate Password Reset Code: 397567",
+      "type": "password_reset",
+      "status": "sandbox_restricted",
+      "provider": "resend",
+      "error": "You can only send testing emails to your own email address (chandrashekharbansal.2006@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+      "metadata": {
+        "userId": 3,
+        "userCode": "6178",
+        "displayName": "Chandra Shekhar Bansal",
+        "otp": "397567",
+        "resetUrl": "https://ais-dev-a436vhcnhcmbfplmfthk4w-963565358104.asia-southeast1.run.app/reset-password.html?token=7f7abec329a72aaadccb7f57f6020106105d8a6ca58512c46439e6ebed017aef",
+        "tokenPrefix": "7f7abec3"
+      },
+      "sandboxRestricted": true
+    },
+    {
+      "id": "mail_1790947031350_276",
+      "timestamp": "2026-10-02T13:17:11.350Z",
+      "to": "testuser_1790947030644@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Your VocaMate Password Reset Code: 162299",
+      "type": "password_reset",
+      "status": "pending",
+      "provider": "resend",
+      "error": null,
+      "metadata": {
+        "userId": 8,
+        "userCode": "2245",
+        "displayName": "Test Student",
+        "otp": "162299",
+        "resetUrl": "http://localhost:3000/reset-password.html?token=2a49990afc36a520539ad9f25567beb5488d21c7ef7702b66d312c450548472b",
+        "tokenPrefix": "2a49990a"
+      }
+    },
+    {
+      "id": "mail_1790947031067_275",
+      "timestamp": "2026-10-02T13:17:11.067Z",
+      "to": "testuser_1790947030644@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Your VocaMate Verification Code: 655526 (User ID: #2245)",
+      "type": "email_verification",
+      "status": "sandbox_restricted",
+      "provider": "resend",
+      "error": "You can only send testing emails to your own email address (chandrashekharbansal.2006@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+      "metadata": {
+        "userId": 8,
+        "userCode": "2245",
+        "displayName": "Test Student",
+        "otp": "655526",
+        "verifyUrl": "http://localhost:3000/verify-email.html?token=c8de8ba8a4c85d782c5f7de2121268a800e0311a226fab8e97bd5a8e38422714",
+        "tokenPrefix": "c8de8ba8"
+      },
+      "sandboxRestricted": true
+    },
+    {
+      "id": "mail_1790947030359_274",
+      "timestamp": "2026-10-02T13:17:10.359Z",
+      "to": "chandrashekharb.2405@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Your VocaMate Password Reset Code: 998877",
+      "type": "password_reset",
+      "status": "sandbox_restricted",
+      "provider": "resend",
+      "error": "You can only send testing emails to your own email address (chandrashekharbansal.2006@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+      "metadata": {
+        "userId": 999,
+        "userCode": "8888",
+        "displayName": "Chandra",
+        "otp": "998877",
+        "resetUrl": "http://localhost:3000/reset-password.html?token=test_reset_123",
+        "tokenPrefix": "test_res"
+      },
+      "sandboxRestricted": true
+    },
+    {
+      "id": "mail_1790947029991_273",
+      "timestamp": "2026-10-02T13:17:09.991Z",
+      "to": "chandrashekharb.2405@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Your VocaMate Verification Code: 556677 (User ID: #8888)",
+      "type": "email_verification",
+      "status": "sandbox_restricted",
+      "provider": "resend",
+      "error": "You can only send testing emails to your own email address (chandrashekharbansal.2006@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+      "metadata": {
+        "userId": 999,
+        "userCode": "8888",
+        "displayName": "Chandra",
+        "otp": "556677",
+        "verifyUrl": "http://localhost:3000/verify-email.html?token=test_token_123",
+        "tokenPrefix": "test_tok"
+      },
+      "sandboxRestricted": true
+    },
+    {
+      "id": "mail_1790946787898_272",
+      "timestamp": "2026-10-02T13:13:07.898Z",
+      "to": "voca_user_1790946785654@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "pending",
+      "provider": "resend",
+      "error": null,
+      "metadata": {
+        "userId": 7,
+        "userCode": "7573",
+        "displayName": "Aarav Sharma",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790946787897_271",
+      "timestamp": "2026-10-02T13:13:07.897Z",
+      "to": "voca_user_1790946785654@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Your VocaMate Password Reset Code: 432478",
+      "type": "password_reset",
+      "status": "pending",
+      "provider": "resend",
+      "error": null,
+      "metadata": {
+        "userId": 7,
+        "userCode": "7573",
+        "displayName": "Aarav Sharma",
+        "otp": "432478",
+        "resetUrl": "http://localhost:3000/reset-password.html?token=133f56aaf955609201a92bc2bd59767906b70cdffc6ce88dae36dd8648118ef0",
+        "tokenPrefix": "133f56aa"
+      }
+    },
+    {
+      "id": "mail_1790946786825_270",
+      "timestamp": "2026-10-02T13:13:06.825Z",
+      "to": "voca_user_1790946785654@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "send_failed",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 7,
+        "userCode": "7573",
+        "displayName": "Aarav Sharma",
+        "ip": "127.0.0.1"
+      },
+      "sandboxRestricted": false
+    },
+    {
+      "id": "mail_1790946786803_269",
+      "timestamp": "2026-10-02T13:13:06.803Z",
+      "to": "voca_user_1790946785654@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Your VocaMate Password Reset Code: 667238",
+      "type": "password_reset",
+      "status": "send_failed",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 7,
+        "userCode": "7573",
+        "displayName": "Aarav Sharma",
+        "otp": "667238",
+        "resetUrl": "http://localhost:3000/reset-password.html?token=e01b8cb1774597fdcf76a75e4c1e0a1f532eecfa9963d6b891f80d8c242cdfd6",
+        "tokenPrefix": "e01b8cb1"
+      },
+      "sandboxRestricted": false
+    },
+    {
+      "id": "mail_1790946786079_268",
+      "timestamp": "2026-10-02T13:13:06.079Z",
+      "to": "voca_user_1790946785654@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Your VocaMate Verification Code: 270496 (User ID: #7573)",
+      "type": "email_verification",
+      "status": "send_failed",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 7,
+        "userCode": "7573",
+        "displayName": "Aarav Sharma",
+        "otp": "270496",
+        "verifyUrl": "http://localhost:3000/verify-email.html?token=af0305bd1e83cc25d552fcf4b9e5680a08ddf2e2cb24a14465c37657c4d284f1",
+        "tokenPrefix": "af0305bd"
+      },
+      "sandboxRestricted": false
+    },
+    {
+      "id": "mail_1790946387319_267",
+      "timestamp": "2026-10-02T13:06:27.319Z",
+      "to": "testotp1790946386544@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Your VocaMate Password Reset Code: 645274",
+      "type": "password_reset",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 6,
+        "userCode": "1228",
+        "displayName": "Test User",
+        "otp": "645274",
+        "resetUrl": "http://localhost:3000/reset-password.html?token=0500c8a0af97979c2d12a1549e6b38fe28d8cd024792976e5e5bd61ba33d78cc",
+        "tokenPrefix": "0500c8a0"
+      }
+    },
+    {
+      "id": "mail_1790946386967_266",
+      "timestamp": "2026-10-02T13:06:26.967Z",
+      "to": "testotp1790946386544@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Your VocaMate Verification Code: 732987 (User ID: #1228)",
+      "type": "email_verification",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 6,
+        "userCode": "1228",
+        "displayName": "Test User",
+        "verifyUrl": "http://localhost:3000/verify-email.html?token=e466a11d39de8034c5101743e7c9f967d6dbeaa575982b6837533567eec84f7e",
+        "tokenPrefix": "e466a11d"
+      }
+    },
+    {
+      "id": "mail_1790946208679_265",
+      "timestamp": "2026-10-02T13:03:28.679Z",
+      "to": "randomuser999@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Your VocaMate Verification Code: 123456 (User ID: #1234)",
+      "type": "email_verification",
+      "status": "logged",
+      "provider": "resend",
+      "error": "You can only send testing emails to your own email address (chandrashekharbansal.2006@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Test",
+        "verifyUrl": "http://localhost:3000/verify-email.html?token=test_token",
+        "tokenPrefix": "test_tok"
+      }
+    },
+    {
+      "id": "mail_1790861725266_264",
+      "timestamp": "2026-10-01T13:35:25.266Z",
+      "to": "rohit.test.verify@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Your VocaMate Password Reset Code: 200980",
+      "type": "password_reset",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 5,
+        "userCode": "4322",
+        "displayName": "Rohit Sharma",
+        "otp": "200980",
+        "resetUrl": "http://localhost:3000/reset-password.html?token=0463d46eee88c035066b4e0cc0034b75a356d2e3011ba9fb0cf2e5787fe2dec0",
+        "tokenPrefix": "0463d46e"
+      }
+    },
+    {
+      "id": "mail_1790861711665_263",
+      "timestamp": "2026-10-01T13:35:11.665Z",
+      "to": "rohit.test.verify@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Verify Your VocaMate Account (User ID: #4322)",
+      "type": "email_verification",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 5,
+        "userCode": "4322",
+        "displayName": "Rohit Sharma",
+        "verifyUrl": "http://localhost:3000/verify-email.html?token=5b7fdf50e5e2d58b90e04b6b6e8624d2fc5e6ca885278ca050a6a0a7494a9147",
+        "tokenPrefix": "5b7fdf50"
+      }
+    },
+    {
+      "id": "mail_1790860330945_262",
+      "timestamp": "2026-10-01T13:12:10.945Z",
+      "to": "chandrashekharb.2405@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Verify Your VocaMate Account (User ID: #6178)",
+      "type": "email_verification",
+      "status": "logged",
+      "provider": "resend",
+      "error": "You can only send testing emails to your own email address (chandrashekharbansal.2006@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+      "metadata": {
+        "userId": 3,
+        "userCode": "6178",
+        "displayName": "Chandra Shekhar Bansal",
+        "verifyUrl": "https://ais-dev-a436vhcnhcmbfplmfthk4w-963565358104.asia-southeast1.run.app/verify-email.html?token=547a6081e6725cf13cdb9c757d2438ade9793f90d90749d866217f9865cb3066",
+        "tokenPrefix": "547a6081"
+      }
+    },
+    {
+      "id": "mail_1790860147605_261",
+      "timestamp": "2026-10-01T13:09:07.605Z",
+      "to": "chandrashekharbansal.2006@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Verify Your VocaMate Account (User ID: #4910)",
+      "type": "email_verification",
+      "status": "sent",
+      "provider": "resend",
+      "error": null,
+      "metadata": {
+        "userId": 4,
+        "userCode": "4910",
+        "displayName": "Chandra Shekhar Bansal",
+        "verifyUrl": "https://ais-dev-a436vhcnhcmbfplmfthk4w-963565358104.asia-southeast1.run.app/verify-email.html?token=483be4cb8fd6cf651cdeadd94bfb468bd14b7998bf811d8d0dbfc7ed6e2b3536",
+        "tokenPrefix": "483be4cb"
+      },
+      "resendId": "01a0f795-3c34-70e8-b594-54ca76ca7358"
+    },
+    {
+      "id": "mail_1790860115493_260",
+      "timestamp": "2026-10-01T13:08:35.493Z",
+      "to": "chandrashekharb.2405@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Verify Your VocaMate Account (User ID: #6178)",
+      "type": "email_verification",
+      "status": "logged",
+      "provider": "resend",
+      "error": "You can only send testing emails to your own email address (chandrashekharbansal.2006@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+      "metadata": {
+        "userId": 3,
+        "userCode": "6178",
+        "displayName": "Chandra Shekhar Bansal",
+        "verifyUrl": "https://ais-dev-a436vhcnhcmbfplmfthk4w-963565358104.asia-southeast1.run.app/verify-email.html?token=1248dd91dc9675ebf508d3a905cdc1f65b5192b82fccdeaef42bc6b2f03968e1",
+        "tokenPrefix": "1248dd91"
+      }
+    },
+    {
+      "id": "mail_1790774267574_259",
+      "timestamp": "2026-09-30T13:17:47.574Z",
+      "to": "market.test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 2,
+        "userCode": "9182",
+        "displayName": "Market Tester",
+        "ip": "127.0.0.1",
+        "userAgent": "node"
+      }
+    },
+    {
+      "id": "mail_1790774266424_258",
+      "timestamp": "2026-09-30T13:17:46.424Z",
+      "to": "market.test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Reset Your VocaMate Account Password",
+      "type": "password_reset",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 2,
+        "userCode": "9182",
+        "displayName": "Market Tester",
+        "resetUrl": "http://localhost:3000/reset-password.html?token=3b92a3c1786a42c8335faf0a1814ced19af2008afe2c042fdc25f44da73c0683",
+        "tokenPrefix": "3b92a3c1"
+      }
+    },
+    {
+      "id": "mail_1790774227990_257",
+      "timestamp": "2026-09-30T13:17:07.990Z",
+      "to": "market.test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 2,
+        "userCode": "9182",
+        "displayName": "Market Tester"
+      }
+    },
+    {
+      "id": "mail_1790774226810_256",
+      "timestamp": "2026-09-30T13:17:06.810Z",
+      "to": "market.test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Reset Your VocaMate Account Password",
+      "type": "password_reset",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 2,
+        "userCode": "9182",
+        "displayName": "Market Tester",
+        "resetUrl": "http://localhost:3000/reset-password.html?token=f0903cf2420ea44dbebdf55ec214d9cfed0cee7e45fd093f2fc2e353e9a65240",
+        "tokenPrefix": "f0903cf2"
+      }
+    },
+    {
+      "id": "mail_1790774226483_255",
+      "timestamp": "2026-09-30T13:17:06.483Z",
+      "to": "market.test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Reset Your VocaMate Account Password",
+      "type": "password_reset",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 2,
+        "userCode": "9182",
+        "displayName": "Market Tester",
+        "resetUrl": "http://localhost:3000/reset-password.html?token=3dfa057b7dfded6fa8a5a5c464ef0637b12ae7d5718144e26d35fd1b0253a972",
+        "tokenPrefix": "3dfa057b"
+      }
+    },
+    {
+      "id": "mail_1790675131678_254",
+      "timestamp": "2026-09-29T09:45:31.678Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "pending",
+      "provider": "resend",
+      "error": null,
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.23"
+      }
+    },
+    {
+      "id": "mail_1790675131260_253",
+      "timestamp": "2026-09-29T09:45:31.260Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "pending",
+      "provider": "resend",
+      "error": null,
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.22"
+      }
+    },
+    {
+      "id": "mail_1790675130846_252",
+      "timestamp": "2026-09-29T09:45:30.846Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.21"
+      }
+    },
+    {
+      "id": "mail_1790675130020_251",
+      "timestamp": "2026-09-29T09:45:30.020Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.20"
+      }
+    },
+    {
+      "id": "mail_1790675130019_250",
+      "timestamp": "2026-09-29T09:45:30.019Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.19"
+      }
+    },
+    {
+      "id": "mail_1790675129607_249",
+      "timestamp": "2026-09-29T09:45:29.607Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.18"
+      }
+    },
+    {
+      "id": "mail_1790675129196_248",
+      "timestamp": "2026-09-29T09:45:29.196Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.17"
+      }
+    },
+    {
+      "id": "mail_1790675128784_247",
+      "timestamp": "2026-09-29T09:45:28.784Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.16"
+      }
+    },
+    {
+      "id": "mail_1790675128359_246",
+      "timestamp": "2026-09-29T09:45:28.359Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.15"
+      }
+    },
+    {
+      "id": "mail_1790675127914_245",
+      "timestamp": "2026-09-29T09:45:27.914Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.14"
+      }
+    },
+    {
+      "id": "mail_1790675127484_244",
+      "timestamp": "2026-09-29T09:45:27.484Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.13"
+      }
+    },
+    {
+      "id": "mail_1790675127053_243",
+      "timestamp": "2026-09-29T09:45:27.053Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.12"
+      }
+    },
+    {
+      "id": "mail_1790675126628_242",
+      "timestamp": "2026-09-29T09:45:26.628Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.11"
+      }
+    },
+    {
+      "id": "mail_1790675126202_241",
+      "timestamp": "2026-09-29T09:45:26.202Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.10"
+      }
+    },
+    {
+      "id": "mail_1790675125785_240",
+      "timestamp": "2026-09-29T09:45:25.785Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.9"
+      }
+    },
+    {
+      "id": "mail_1790675125784_239",
+      "timestamp": "2026-09-29T09:45:25.784Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.8"
+      }
+    },
+    {
+      "id": "mail_1790675125783_238",
+      "timestamp": "2026-09-29T09:45:25.783Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.7"
+      }
+    },
+    {
+      "id": "mail_1790675125782_237",
+      "timestamp": "2026-09-29T09:45:25.782Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.6"
+      }
+    },
+    {
+      "id": "mail_1790675125781_236",
+      "timestamp": "2026-09-29T09:45:25.781Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.5"
+      }
+    },
+    {
+      "id": "mail_1790675125780_235",
+      "timestamp": "2026-09-29T09:45:25.780Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.4"
+      }
+    },
+    {
+      "id": "mail_1790675125778_234",
+      "timestamp": "2026-09-29T09:45:25.778Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.3"
+      }
+    },
+    {
+      "id": "mail_1790675125777_233",
+      "timestamp": "2026-09-29T09:45:25.777Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.2"
+      }
+    },
+    {
+      "id": "mail_1790675125776_232",
+      "timestamp": "2026-09-29T09:45:25.776Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.1"
+      }
+    },
+    {
+      "id": "mail_1790675125356_231",
+      "timestamp": "2026-09-29T09:45:25.356Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.23"
+      }
+    },
+    {
+      "id": "mail_1790675124884_230",
+      "timestamp": "2026-09-29T09:45:24.884Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.25"
+      }
+    },
+    {
+      "id": "mail_1790675123652_229",
+      "timestamp": "2026-09-29T09:45:23.652Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.24"
+      }
+    },
+    {
+      "id": "mail_1790675122420_228",
+      "timestamp": "2026-09-29T09:45:22.420Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.22"
+      }
+    },
+    {
+      "id": "mail_1790675121190_227",
+      "timestamp": "2026-09-29T09:45:21.190Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.21"
+      }
+    },
+    {
+      "id": "mail_1790675119964_226",
+      "timestamp": "2026-09-29T09:45:19.964Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.20"
+      }
+    },
+    {
+      "id": "mail_1790675119535_225",
+      "timestamp": "2026-09-29T09:45:19.535Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.17"
+      }
+    },
+    {
+      "id": "mail_1790675119116_224",
+      "timestamp": "2026-09-29T09:45:19.116Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.15"
+      }
+    },
+    {
+      "id": "mail_1790675118698_223",
+      "timestamp": "2026-09-29T09:45:18.698Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.19"
+      }
+    },
+    {
+      "id": "mail_1790675118277_222",
+      "timestamp": "2026-09-29T09:45:18.277Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.14"
+      }
+    },
+    {
+      "id": "mail_1790675117846_221",
+      "timestamp": "2026-09-29T09:45:17.846Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.18"
+      }
+    },
+    {
+      "id": "mail_1790675117404_220",
+      "timestamp": "2026-09-29T09:45:17.404Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.16"
+      }
+    },
+    {
+      "id": "mail_1790675116977_219",
+      "timestamp": "2026-09-29T09:45:16.977Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.13"
+      }
+    },
+    {
+      "id": "mail_1790675116558_218",
+      "timestamp": "2026-09-29T09:45:16.558Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.11"
+      }
+    },
+    {
+      "id": "mail_1790675116138_217",
+      "timestamp": "2026-09-29T09:45:16.138Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.12"
+      }
+    },
+    {
+      "id": "mail_1790675115712_216",
+      "timestamp": "2026-09-29T09:45:15.712Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.7"
+      }
+    },
+    {
+      "id": "mail_1790675115710_215",
+      "timestamp": "2026-09-29T09:45:15.710Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.3"
+      }
+    },
+    {
+      "id": "mail_1790675115265_214",
+      "timestamp": "2026-09-29T09:45:15.265Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.10"
+      }
+    },
+    {
+      "id": "mail_1790675115264_213",
+      "timestamp": "2026-09-29T09:45:15.264Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.9"
+      }
+    },
+    {
+      "id": "mail_1790675115263_212",
+      "timestamp": "2026-09-29T09:45:15.263Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.8"
+      }
+    },
+    {
+      "id": "mail_1790675115262_211",
+      "timestamp": "2026-09-29T09:45:15.262Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.5"
+      }
+    },
+    {
+      "id": "mail_1790675115261_210",
+      "timestamp": "2026-09-29T09:45:15.261Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.6"
+      }
+    },
+    {
+      "id": "mail_1790675115259_209",
+      "timestamp": "2026-09-29T09:45:15.259Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.4"
+      }
+    },
+    {
+      "id": "mail_1790675115258_208",
+      "timestamp": "2026-09-29T09:45:15.258Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.2"
+      }
+    },
+    {
+      "id": "mail_1790675115256_207",
+      "timestamp": "2026-09-29T09:45:15.256Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.1"
+      }
+    },
+    {
+      "id": "mail_1790675110187_206",
+      "timestamp": "2026-09-29T09:45:10.187Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.10"
+      }
+    },
+    {
+      "id": "mail_1790675110185_205",
+      "timestamp": "2026-09-29T09:45:10.185Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.9"
+      }
+    },
+    {
+      "id": "mail_1790675110184_204",
+      "timestamp": "2026-09-29T09:45:10.184Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.8"
+      }
+    },
+    {
+      "id": "mail_1790675110182_203",
+      "timestamp": "2026-09-29T09:45:10.182Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.7"
+      }
+    },
+    {
+      "id": "mail_1790675110179_202",
+      "timestamp": "2026-09-29T09:45:10.179Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.6"
+      }
+    },
+    {
+      "id": "mail_1790675110178_201",
+      "timestamp": "2026-09-29T09:45:10.178Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.5"
+      }
+    },
+    {
+      "id": "mail_1790675110175_200",
+      "timestamp": "2026-09-29T09:45:10.175Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.4"
+      }
+    },
+    {
+      "id": "mail_1790675110174_199",
+      "timestamp": "2026-09-29T09:45:10.174Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.3"
+      }
+    },
+    {
+      "id": "mail_1790675110171_198",
+      "timestamp": "2026-09-29T09:45:10.171Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.2"
+      }
+    },
+    {
+      "id": "mail_1790675110164_197",
+      "timestamp": "2026-09-29T09:45:10.164Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "49.37.1.1"
+      }
+    },
+    {
+      "id": "mail_1790675091517_196",
+      "timestamp": "2026-09-29T09:44:51.517Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "172.16.0.42"
+      }
+    },
+    {
+      "id": "mail_1790675077998_195",
+      "timestamp": "2026-09-29T09:44:37.998Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "172.16.0.42"
+      }
+    },
+    {
+      "id": "mail_1790675069529_194",
+      "timestamp": "2026-09-29T09:44:29.529Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "172.16.0.42"
+      }
+    },
+    {
+      "id": "mail_1790675028383_193",
+      "timestamp": "2026-09-29T09:43:48.383Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "10.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790675028375_192",
+      "timestamp": "2026-09-29T09:43:48.375Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.100"
+      }
+    },
+    {
+      "id": "mail_1790675028254_191",
+      "timestamp": "2026-09-29T09:43:48.254Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.99"
+      }
+    },
+    {
+      "id": "mail_1790675028038_190",
+      "timestamp": "2026-09-29T09:43:48.038Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.98"
+      }
+    },
+    {
+      "id": "mail_1790675027702_189",
+      "timestamp": "2026-09-29T09:43:47.702Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.93"
+      }
+    },
+    {
+      "id": "mail_1790675027261_188",
+      "timestamp": "2026-09-29T09:43:47.261Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.91"
+      }
+    },
+    {
+      "id": "mail_1790675026837_187",
+      "timestamp": "2026-09-29T09:43:46.837Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.97"
+      }
+    },
+    {
+      "id": "mail_1790675026418_186",
+      "timestamp": "2026-09-29T09:43:46.418Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.92"
+      }
+    },
+    {
+      "id": "mail_1790675025999_185",
+      "timestamp": "2026-09-29T09:43:45.999Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.96"
+      }
+    },
+    {
+      "id": "mail_1790675025584_184",
+      "timestamp": "2026-09-29T09:43:45.584Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.95"
+      }
+    },
+    {
+      "id": "mail_1790675025170_183",
+      "timestamp": "2026-09-29T09:43:45.170Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.94"
+      }
+    },
+    {
+      "id": "mail_1790675024755_182",
+      "timestamp": "2026-09-29T09:43:44.755Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.90"
+      }
+    },
+    {
+      "id": "mail_1790675024331_181",
+      "timestamp": "2026-09-29T09:43:44.331Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.89"
+      }
+    },
+    {
+      "id": "mail_1790675023896_180",
+      "timestamp": "2026-09-29T09:43:43.896Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.88"
+      }
+    },
+    {
+      "id": "mail_1790675023469_179",
+      "timestamp": "2026-09-29T09:43:43.469Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.84"
+      }
+    },
+    {
+      "id": "mail_1790675023040_178",
+      "timestamp": "2026-09-29T09:43:43.040Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.81"
+      }
+    },
+    {
+      "id": "mail_1790675022617_177",
+      "timestamp": "2026-09-29T09:43:42.617Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.78"
+      }
+    },
+    {
+      "id": "mail_1790675022188_176",
+      "timestamp": "2026-09-29T09:43:42.188Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.86"
+      }
+    },
+    {
+      "id": "mail_1790675021773_175",
+      "timestamp": "2026-09-29T09:43:41.773Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.85"
+      }
+    },
+    {
+      "id": "mail_1790675021360_174",
+      "timestamp": "2026-09-29T09:43:41.360Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.76"
+      }
+    },
+    {
+      "id": "mail_1790675020949_173",
+      "timestamp": "2026-09-29T09:43:40.949Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.87"
+      }
+    },
+    {
+      "id": "mail_1790675020535_172",
+      "timestamp": "2026-09-29T09:43:40.535Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.83"
+      }
+    },
+    {
+      "id": "mail_1790675020119_171",
+      "timestamp": "2026-09-29T09:43:40.119Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.79"
+      }
+    },
+    {
+      "id": "mail_1790675019672_170",
+      "timestamp": "2026-09-29T09:43:39.672Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.82"
+      }
+    },
+    {
+      "id": "mail_1790675019250_169",
+      "timestamp": "2026-09-29T09:43:39.250Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.80"
+      }
+    },
+    {
+      "id": "mail_1790675018814_168",
+      "timestamp": "2026-09-29T09:43:38.814Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.77"
+      }
+    },
+    {
+      "id": "mail_1790675018375_167",
+      "timestamp": "2026-09-29T09:43:38.375Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.74"
+      }
+    },
+    {
+      "id": "mail_1790675017962_166",
+      "timestamp": "2026-09-29T09:43:37.962Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.75"
+      }
+    },
+    {
+      "id": "mail_1790675017550_165",
+      "timestamp": "2026-09-29T09:43:37.550Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.73"
+      }
+    },
+    {
+      "id": "mail_1790675017138_164",
+      "timestamp": "2026-09-29T09:43:37.138Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.72"
+      }
+    },
+    {
+      "id": "mail_1790675016728_163",
+      "timestamp": "2026-09-29T09:43:36.728Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.71"
+      }
+    },
+    {
+      "id": "mail_1790675016306_162",
+      "timestamp": "2026-09-29T09:43:36.306Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.70"
+      }
+    },
+    {
+      "id": "mail_1790675015894_161",
+      "timestamp": "2026-09-29T09:43:35.894Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.69"
+      }
+    },
+    {
+      "id": "mail_1790675015480_160",
+      "timestamp": "2026-09-29T09:43:35.480Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.68"
+      }
+    },
+    {
+      "id": "mail_1790675015067_159",
+      "timestamp": "2026-09-29T09:43:35.067Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.66"
+      }
+    },
+    {
+      "id": "mail_1790675014650_158",
+      "timestamp": "2026-09-29T09:43:34.650Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.67"
+      }
+    },
+    {
+      "id": "mail_1790675014232_157",
+      "timestamp": "2026-09-29T09:43:34.232Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.65"
+      }
+    },
+    {
+      "id": "mail_1790675013814_156",
+      "timestamp": "2026-09-29T09:43:33.814Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.64"
+      }
+    },
+    {
+      "id": "mail_1790675013386_155",
+      "timestamp": "2026-09-29T09:43:33.386Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.63"
+      }
+    },
+    {
+      "id": "mail_1790675012955_154",
+      "timestamp": "2026-09-29T09:43:32.955Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.62"
+      }
+    },
+    {
+      "id": "mail_1790675012520_153",
+      "timestamp": "2026-09-29T09:43:32.520Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.61"
+      }
+    },
+    {
+      "id": "mail_1790675012092_152",
+      "timestamp": "2026-09-29T09:43:32.092Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.60"
+      }
+    },
+    {
+      "id": "mail_1790675011666_151",
+      "timestamp": "2026-09-29T09:43:31.666Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.59"
+      }
+    },
+    {
+      "id": "mail_1790675011238_150",
+      "timestamp": "2026-09-29T09:43:31.238Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.58"
+      }
+    },
+    {
+      "id": "mail_1790675010812_149",
+      "timestamp": "2026-09-29T09:43:30.812Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.57"
+      }
+    },
+    {
+      "id": "mail_1790675010392_148",
+      "timestamp": "2026-09-29T09:43:30.392Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.56"
+      }
+    },
+    {
+      "id": "mail_1790675009972_147",
+      "timestamp": "2026-09-29T09:43:29.972Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.55"
+      }
+    },
+    {
+      "id": "mail_1790675009539_146",
+      "timestamp": "2026-09-29T09:43:29.539Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.53"
+      }
+    },
+    {
+      "id": "mail_1790675009103_145",
+      "timestamp": "2026-09-29T09:43:29.103Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.54"
+      }
+    },
+    {
+      "id": "mail_1790675008653_144",
+      "timestamp": "2026-09-29T09:43:28.653Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.52"
+      }
+    },
+    {
+      "id": "mail_1790675008234_143",
+      "timestamp": "2026-09-29T09:43:28.234Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.51"
+      }
+    },
+    {
+      "id": "mail_1790675007819_142",
+      "timestamp": "2026-09-29T09:43:27.819Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.50"
+      }
+    },
+    {
+      "id": "mail_1790675007399_141",
+      "timestamp": "2026-09-29T09:43:27.399Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.49"
+      }
+    },
+    {
+      "id": "mail_1790675006985_140",
+      "timestamp": "2026-09-29T09:43:26.985Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.48"
+      }
+    },
+    {
+      "id": "mail_1790675006567_139",
+      "timestamp": "2026-09-29T09:43:26.567Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.47"
+      }
+    },
+    {
+      "id": "mail_1790675006128_138",
+      "timestamp": "2026-09-29T09:43:26.128Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.46"
+      }
+    },
+    {
+      "id": "mail_1790675005706_137",
+      "timestamp": "2026-09-29T09:43:25.706Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.45"
+      }
+    },
+    {
+      "id": "mail_1790675005287_136",
+      "timestamp": "2026-09-29T09:43:25.287Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.44"
+      }
+    },
+    {
+      "id": "mail_1790675004866_135",
+      "timestamp": "2026-09-29T09:43:24.866Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.43"
+      }
+    },
+    {
+      "id": "mail_1790675004447_134",
+      "timestamp": "2026-09-29T09:43:24.447Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.42"
+      }
+    },
+    {
+      "id": "mail_1790675004024_133",
+      "timestamp": "2026-09-29T09:43:24.024Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.40"
+      }
+    },
+    {
+      "id": "mail_1790675003580_132",
+      "timestamp": "2026-09-29T09:43:23.580Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.41"
+      }
+    },
+    {
+      "id": "mail_1790675003136_131",
+      "timestamp": "2026-09-29T09:43:23.136Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.39"
+      }
+    },
+    {
+      "id": "mail_1790675002704_130",
+      "timestamp": "2026-09-29T09:43:22.704Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.38"
+      }
+    },
+    {
+      "id": "mail_1790675002279_129",
+      "timestamp": "2026-09-29T09:43:22.279Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.37"
+      }
+    },
+    {
+      "id": "mail_1790675001864_128",
+      "timestamp": "2026-09-29T09:43:21.864Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.34"
+      }
+    },
+    {
+      "id": "mail_1790675001446_127",
+      "timestamp": "2026-09-29T09:43:21.446Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.33"
+      }
+    },
+    {
+      "id": "mail_1790675001032_126",
+      "timestamp": "2026-09-29T09:43:21.032Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.35"
+      }
+    },
+    {
+      "id": "mail_1790675000207_125",
+      "timestamp": "2026-09-29T09:43:20.207Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.36"
+      }
+    },
+    {
+      "id": "mail_1790675000205_124",
+      "timestamp": "2026-09-29T09:43:20.205Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.32"
+      }
+    },
+    {
+      "id": "mail_1790674999783_123",
+      "timestamp": "2026-09-29T09:43:19.783Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.31"
+      }
+    },
+    {
+      "id": "mail_1790674999365_122",
+      "timestamp": "2026-09-29T09:43:19.365Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.30"
+      }
+    },
+    {
+      "id": "mail_1790674998942_121",
+      "timestamp": "2026-09-29T09:43:18.942Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.29"
+      }
+    },
+    {
+      "id": "mail_1790674998517_120",
+      "timestamp": "2026-09-29T09:43:18.517Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.28"
+      }
+    },
+    {
+      "id": "mail_1790674998089_119",
+      "timestamp": "2026-09-29T09:43:18.089Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.27"
+      }
+    },
+    {
+      "id": "mail_1790674997664_118",
+      "timestamp": "2026-09-29T09:43:17.664Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.26"
+      }
+    },
+    {
+      "id": "mail_1790674997225_117",
+      "timestamp": "2026-09-29T09:43:17.225Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.25"
+      }
+    },
+    {
+      "id": "mail_1790674996807_116",
+      "timestamp": "2026-09-29T09:43:16.807Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.23"
+      }
+    },
+    {
+      "id": "mail_1790674996382_115",
+      "timestamp": "2026-09-29T09:43:16.382Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.24"
+      }
+    },
+    {
+      "id": "mail_1790674995965_114",
+      "timestamp": "2026-09-29T09:43:15.965Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.22"
+      }
+    },
+    {
+      "id": "mail_1790674995548_113",
+      "timestamp": "2026-09-29T09:43:15.548Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.50"
+      }
+    },
+    {
+      "id": "mail_1790674995130_112",
+      "timestamp": "2026-09-29T09:43:15.130Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.49"
+      }
+    },
+    {
+      "id": "mail_1790674994703_111",
+      "timestamp": "2026-09-29T09:43:14.703Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.48"
+      }
+    },
+    {
+      "id": "mail_1790674994285_110",
+      "timestamp": "2026-09-29T09:43:14.285Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.46"
+      }
+    },
+    {
+      "id": "mail_1790674993865_109",
+      "timestamp": "2026-09-29T09:43:13.865Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.44"
+      }
+    },
+    {
+      "id": "mail_1790674993436_108",
+      "timestamp": "2026-09-29T09:43:13.436Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.47"
+      }
+    },
+    {
+      "id": "mail_1790674993005_107",
+      "timestamp": "2026-09-29T09:43:13.005Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.45"
+      }
+    },
+    {
+      "id": "mail_1790674992574_106",
+      "timestamp": "2026-09-29T09:43:12.574Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.43"
+      }
+    },
+    {
+      "id": "mail_1790674992155_105",
+      "timestamp": "2026-09-29T09:43:12.155Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.41"
+      }
+    },
+    {
+      "id": "mail_1790674991732_104",
+      "timestamp": "2026-09-29T09:43:11.732Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.42"
+      }
+    },
+    {
+      "id": "mail_1790674991306_103",
+      "timestamp": "2026-09-29T09:43:11.306Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.40"
+      }
+    },
+    {
+      "id": "mail_1790674990880_102",
+      "timestamp": "2026-09-29T09:43:10.880Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.39"
+      }
+    },
+    {
+      "id": "mail_1790674990443_101",
+      "timestamp": "2026-09-29T09:43:10.443Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.38"
+      }
+    },
+    {
+      "id": "mail_1790674990005_100",
+      "timestamp": "2026-09-29T09:43:10.005Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.37"
+      }
+    },
+    {
+      "id": "mail_1790674989577_99",
+      "timestamp": "2026-09-29T09:43:09.577Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.36"
+      }
+    },
+    {
+      "id": "mail_1790674989160_98",
+      "timestamp": "2026-09-29T09:43:09.160Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.35"
+      }
+    },
+    {
+      "id": "mail_1790674988739_97",
+      "timestamp": "2026-09-29T09:43:08.739Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.34"
+      }
+    },
+    {
+      "id": "mail_1790674988255_96",
+      "timestamp": "2026-09-29T09:43:08.255Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.33"
+      }
+    },
+    {
+      "id": "mail_1790674987826_95",
+      "timestamp": "2026-09-29T09:43:07.826Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.30"
+      }
+    },
+    {
+      "id": "mail_1790674987383_94",
+      "timestamp": "2026-09-29T09:43:07.383Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.32"
+      }
+    },
+    {
+      "id": "mail_1790674986943_93",
+      "timestamp": "2026-09-29T09:43:06.943Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.31"
+      }
+    },
+    {
+      "id": "mail_1790674986500_92",
+      "timestamp": "2026-09-29T09:43:06.500Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.29"
+      }
+    },
+    {
+      "id": "mail_1790674986071_91",
+      "timestamp": "2026-09-29T09:43:06.071Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.28"
+      }
+    },
+    {
+      "id": "mail_1790674986069_90",
+      "timestamp": "2026-09-29T09:43:06.069Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.21"
+      }
+    },
+    {
+      "id": "mail_1790674986067_89",
+      "timestamp": "2026-09-29T09:43:06.067Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.20"
+      }
+    },
+    {
+      "id": "mail_1790674986065_88",
+      "timestamp": "2026-09-29T09:43:06.065Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.19"
+      }
+    },
+    {
+      "id": "mail_1790674986064_87",
+      "timestamp": "2026-09-29T09:43:06.064Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.18"
+      }
+    },
+    {
+      "id": "mail_1790674986062_86",
+      "timestamp": "2026-09-29T09:43:06.062Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.17"
+      }
+    },
+    {
+      "id": "mail_1790674986060_85",
+      "timestamp": "2026-09-29T09:43:06.060Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.16"
+      }
+    },
+    {
+      "id": "mail_1790674986058_84",
+      "timestamp": "2026-09-29T09:43:06.058Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.15"
+      }
+    },
+    {
+      "id": "mail_1790674986057_83",
+      "timestamp": "2026-09-29T09:43:06.057Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.12"
+      }
+    },
+    {
+      "id": "mail_1790674986055_82",
+      "timestamp": "2026-09-29T09:43:06.055Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.11"
+      }
+    },
+    {
+      "id": "mail_1790674986051_81",
+      "timestamp": "2026-09-29T09:43:06.051Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.10"
+      }
+    },
+    {
+      "id": "mail_1790674986048_80",
+      "timestamp": "2026-09-29T09:43:06.048Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.14"
+      }
+    },
+    {
+      "id": "mail_1790674986043_79",
+      "timestamp": "2026-09-29T09:43:06.043Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.13"
+      }
+    },
+    {
+      "id": "mail_1790674986040_78",
+      "timestamp": "2026-09-29T09:43:06.040Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.9"
+      }
+    },
+    {
+      "id": "mail_1790674986038_77",
+      "timestamp": "2026-09-29T09:43:06.038Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.8"
+      }
+    },
+    {
+      "id": "mail_1790674986036_76",
+      "timestamp": "2026-09-29T09:43:06.036Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.7"
+      }
+    },
+    {
+      "id": "mail_1790674986034_75",
+      "timestamp": "2026-09-29T09:43:06.034Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.6"
+      }
+    },
+    {
+      "id": "mail_1790674986031_74",
+      "timestamp": "2026-09-29T09:43:06.031Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.5"
+      }
+    },
+    {
+      "id": "mail_1790674986029_73",
+      "timestamp": "2026-09-29T09:43:06.029Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.4"
+      }
+    },
+    {
+      "id": "mail_1790674986027_72",
+      "timestamp": "2026-09-29T09:43:06.027Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.3"
+      }
+    },
+    {
+      "id": "mail_1790674986026_71",
+      "timestamp": "2026-09-29T09:43:06.026Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.2"
+      }
+    },
+    {
+      "id": "mail_1790674986025_70",
+      "timestamp": "2026-09-29T09:43:06.025Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.1"
+      }
+    },
+    {
+      "id": "mail_1790674985363_69",
+      "timestamp": "2026-09-29T09:43:05.363Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.27"
+      }
+    },
+    {
+      "id": "mail_1790674982756_68",
+      "timestamp": "2026-09-29T09:43:02.756Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.22"
+      }
+    },
+    {
+      "id": "mail_1790674980190_67",
+      "timestamp": "2026-09-29T09:43:00.190Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.26"
+      }
+    },
+    {
+      "id": "mail_1790674977647_66",
+      "timestamp": "2026-09-29T09:42:57.647Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.25"
+      }
+    },
+    {
+      "id": "mail_1790674975096_65",
+      "timestamp": "2026-09-29T09:42:55.096Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.24"
+      }
+    },
+    {
+      "id": "mail_1790674974661_64",
+      "timestamp": "2026-09-29T09:42:54.661Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.23"
+      }
+    },
+    {
+      "id": "mail_1790674974233_63",
+      "timestamp": "2026-09-29T09:42:54.233Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.21"
+      }
+    },
+    {
+      "id": "mail_1790674974231_62",
+      "timestamp": "2026-09-29T09:42:54.231Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.20"
+      }
+    },
+    {
+      "id": "mail_1790674974229_61",
+      "timestamp": "2026-09-29T09:42:54.229Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.19"
+      }
+    },
+    {
+      "id": "mail_1790674974228_60",
+      "timestamp": "2026-09-29T09:42:54.228Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.18"
+      }
+    },
+    {
+      "id": "mail_1790674974226_59",
+      "timestamp": "2026-09-29T09:42:54.226Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.17"
+      }
+    },
+    {
+      "id": "mail_1790674974225_58",
+      "timestamp": "2026-09-29T09:42:54.225Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.16"
+      }
+    },
+    {
+      "id": "mail_1790674974223_57",
+      "timestamp": "2026-09-29T09:42:54.223Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.15"
+      }
+    },
+    {
+      "id": "mail_1790674974222_56",
+      "timestamp": "2026-09-29T09:42:54.222Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.14"
+      }
+    },
+    {
+      "id": "mail_1790674974220_55",
+      "timestamp": "2026-09-29T09:42:54.220Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.13"
+      }
+    },
+    {
+      "id": "mail_1790674974218_54",
+      "timestamp": "2026-09-29T09:42:54.218Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.12"
+      }
+    },
+    {
+      "id": "mail_1790674974217_53",
+      "timestamp": "2026-09-29T09:42:54.217Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.11"
+      }
+    },
+    {
+      "id": "mail_1790674974215_52",
+      "timestamp": "2026-09-29T09:42:54.215Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.10"
+      }
+    },
+    {
+      "id": "mail_1790674974212_51",
+      "timestamp": "2026-09-29T09:42:54.212Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.9"
+      }
+    },
+    {
+      "id": "mail_1790674974203_50",
+      "timestamp": "2026-09-29T09:42:54.203Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.8"
+      }
+    },
+    {
+      "id": "mail_1790674974202_49",
+      "timestamp": "2026-09-29T09:42:54.202Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.7"
+      }
+    },
+    {
+      "id": "mail_1790674974200_48",
+      "timestamp": "2026-09-29T09:42:54.200Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.6"
+      }
+    },
+    {
+      "id": "mail_1790674974198_47",
+      "timestamp": "2026-09-29T09:42:54.198Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Too many requests. You can only make 10 requests per second. See rate limit response headers for more information. Or contact support to increase rate limit.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.5"
+      }
+    },
+    {
+      "id": "mail_1790674974197_46",
+      "timestamp": "2026-09-29T09:42:54.197Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.4"
+      }
+    },
+    {
+      "id": "mail_1790674974195_45",
+      "timestamp": "2026-09-29T09:42:54.195Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.3"
+      }
+    },
+    {
+      "id": "mail_1790674974193_44",
+      "timestamp": "2026-09-29T09:42:54.193Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.2"
+      }
+    },
+    {
+      "id": "mail_1790674973616_43",
+      "timestamp": "2026-09-29T09:42:53.616Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.1"
+      }
+    },
+    {
+      "id": "mail_1790674964481_42",
+      "timestamp": "2026-09-29T09:42:44.481Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.22"
+      }
+    },
+    {
+      "id": "mail_1790674964466_41",
+      "timestamp": "2026-09-29T09:42:44.466Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.25"
+      }
+    },
+    {
+      "id": "mail_1790674964355_40",
+      "timestamp": "2026-09-29T09:42:44.355Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.24"
+      }
+    },
+    {
+      "id": "mail_1790674964134_39",
+      "timestamp": "2026-09-29T09:42:44.134Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.23"
+      }
+    },
+    {
+      "id": "mail_1790674963817_38",
+      "timestamp": "2026-09-29T09:42:43.817Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.21"
+      }
+    },
+    {
+      "id": "mail_1790674963407_37",
+      "timestamp": "2026-09-29T09:42:43.407Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.18"
+      }
+    },
+    {
+      "id": "mail_1790674962590_36",
+      "timestamp": "2026-09-29T09:42:42.590Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.20"
+      }
+    },
+    {
+      "id": "mail_1790674962588_35",
+      "timestamp": "2026-09-29T09:42:42.588Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.19"
+      }
+    },
+    {
+      "id": "mail_1790674962178_34",
+      "timestamp": "2026-09-29T09:42:42.178Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.17"
+      }
+    },
+    {
+      "id": "mail_1790674961761_33",
+      "timestamp": "2026-09-29T09:42:41.761Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.16"
+      }
+    },
+    {
+      "id": "mail_1790674961344_32",
+      "timestamp": "2026-09-29T09:42:41.344Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.15"
+      }
+    },
+    {
+      "id": "mail_1790674960918_31",
+      "timestamp": "2026-09-29T09:42:40.918Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.14"
+      }
+    },
+    {
+      "id": "mail_1790674960491_30",
+      "timestamp": "2026-09-29T09:42:40.491Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.13"
+      }
+    },
+    {
+      "id": "mail_1790674960055_29",
+      "timestamp": "2026-09-29T09:42:40.055Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.12"
+      }
+    },
+    {
+      "id": "mail_1790674959623_28",
+      "timestamp": "2026-09-29T09:42:39.623Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.11"
+      }
+    },
+    {
+      "id": "mail_1790674959193_27",
+      "timestamp": "2026-09-29T09:42:39.193Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.10"
+      }
+    },
+    {
+      "id": "mail_1790674958756_26",
+      "timestamp": "2026-09-29T09:42:38.756Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.9"
+      }
+    },
+    {
+      "id": "mail_1790674958326_25",
+      "timestamp": "2026-09-29T09:42:38.326Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.8"
+      }
+    },
+    {
+      "id": "mail_1790674957889_24",
+      "timestamp": "2026-09-29T09:42:37.889Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.7"
+      }
+    },
+    {
+      "id": "mail_1790674957456_23",
+      "timestamp": "2026-09-29T09:42:37.456Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.6"
+      }
+    },
+    {
+      "id": "mail_1790674957021_22",
+      "timestamp": "2026-09-29T09:42:37.021Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.4"
+      }
+    },
+    {
+      "id": "mail_1790674956596_21",
+      "timestamp": "2026-09-29T09:42:36.596Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.5"
+      }
+    },
+    {
+      "id": "mail_1790674956169_20",
+      "timestamp": "2026-09-29T09:42:36.169Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.3"
+      }
+    },
+    {
+      "id": "mail_1790674955728_19",
+      "timestamp": "2026-09-29T09:42:35.728Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.2"
+      }
+    },
+    {
+      "id": "mail_1790674954888_18",
+      "timestamp": "2026-09-29T09:42:34.888Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.1"
+      }
+    },
+    {
+      "id": "mail_1790674928953_17",
+      "timestamp": "2026-09-29T09:42:08.953Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674928951_16",
+      "timestamp": "2026-09-29T09:42:08.951Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674928833_15",
+      "timestamp": "2026-09-29T09:42:08.833Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674928621_14",
+      "timestamp": "2026-09-29T09:42:08.621Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674927869_13",
+      "timestamp": "2026-09-29T09:42:07.869Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674927457_12",
+      "timestamp": "2026-09-29T09:42:07.457Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674927454_11",
+      "timestamp": "2026-09-29T09:42:07.454Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674926612_10",
+      "timestamp": "2026-09-29T09:42:06.612Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674926217_9",
+      "timestamp": "2026-09-29T09:42:06.217Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674925818_8",
+      "timestamp": "2026-09-29T09:42:05.818Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674925426_7",
+      "timestamp": "2026-09-29T09:42:05.426Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674925045_6",
+      "timestamp": "2026-09-29T09:42:05.045Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674924662_5",
+      "timestamp": "2026-09-29T09:42:04.662Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674924282_4",
+      "timestamp": "2026-09-29T09:42:04.282Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674923583_3",
+      "timestamp": "2026-09-29T09:42:03.583Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "127.0.0.1"
+      }
+    },
+    {
+      "id": "mail_1790674903230_2",
+      "timestamp": "2026-09-29T09:41:43.230Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🛡️ Security Alert: New Sign-in to your VocaMate Account",
+      "type": "login_alert",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "ip": "192.168.1.10",
+        "userAgent": "Chrome/124.0.0.0 (Macintosh)"
+      }
+    },
+    {
+      "id": "mail_1790674902286_1",
+      "timestamp": "2026-09-29T09:41:42.286Z",
+      "to": "test@example.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "🔑 Reset Your VocaMate Account Password",
+      "type": "password_reset",
+      "status": "logged",
+      "provider": "resend",
+      "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.",
+      "metadata": {
+        "userId": 1,
+        "userCode": "1234",
+        "displayName": "Chandra",
+        "resetUrl": "https://ais-dev-a436vhcnhcmbfplmfthk4w-963565358104.asia-southeast1.run.app/reset-password.html?token=46d4b42ca7a9a933ace5ce3b0040ab2c8343ebd8b814c5bca04bdeb2ede8fbc6",
+        "tokenPrefix": "46d4b42c"
+      }
+    }
+  ],
+  "nextEmailId": 284
+}

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Verify Email — VocaMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #070b14;
+      --bg-secondary: #0e1526;
+      --bg-card: #151f34;
+      --bg-input: #090e1a;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --voca-emerald: #10b981;
+      --voca-teal: #0d9488;
+      --blue: #38bdf8;
+      --red: #ef4444;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --radius-lg: 20px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: radial-gradient(circle at 50% 10%, #0e2238 0%, #070b14 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    .card {
+      background: var(--bg-card);
+      max-width: 440px;
+      width: 100%;
+      padding: 36px 30px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+    .brand-title {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, var(--voca-emerald), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .status-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      transition: var(--transition);
+    }
+    .status-icon.loading {
+      background: rgba(56, 189, 248, 0.12);
+      border: 2px solid var(--blue);
+      animation: spin 1.4s linear infinite;
+    }
+    .status-icon.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 2px solid var(--voca-emerald);
+      color: var(--voca-emerald);
+    }
+    .status-icon.error {
+      background: rgba(239, 68, 68, 0.12);
+      border: 2px solid var(--red);
+      color: var(--red);
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    p.message {
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+    .id-chip {
+      display: inline-block;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--voca-emerald);
+      color: #34d399;
+      font-weight: 800;
+      font-family: monospace;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 15px;
+      margin-bottom: 18px;
+    }
+    .start-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--voca-emerald), var(--voca-teal));
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 12px;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+      transition: var(--transition);
+      text-decoration: none;
+      display: inline-block;
+    }
+    .start-btn:hover {
+      transform: translateY(-2px);
+      opacity: 0.95;
+    }
+    .resend-box {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      text-align: left;
+    }
+    .resend-box label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .resend-box input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 10px;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 14.5px;
+      outline: none;
+      margin-bottom: 10px;
+    }
+    .resend-box input:focus {
+      border-color: var(--voca-emerald);
+    }
+    .secondary-btn {
+      width: 100%;
+      padding: 11px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .back-link {
+      display: block;
+      margin-top: 20px;
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .alert-banner {
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .alert-banner.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--red);
+      color: #f87171;
+      display: block;
+    }
+    .alert-banner.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--voca-emerald);
+      color: #34d399;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand-title">🗣️ VocaMate</div>
+    <div class="subtitle">AI English Speaking & Peer Conversation</div>
+
+    <div id="alertBox" class="alert-banner"></div>
+
+    <!-- 1. LOADING STATE -->
+    <div id="loadingState">
+      <div class="status-icon loading">⏳</div>
+      <h3>Verifying Your Email...</h3>
+      <p class="message">Please wait a moment while we authenticate and activate your VocaMate account.</p>
+    </div>
+
+    <!-- 2. SUCCESS STATE -->
+    <div id="successState" style="display:none;">
+      <div class="status-icon success">✅</div>
+      <h3 style="color:#34d399;">Email Verified Successfully!</h3>
+      <div id="userCodeChip" class="id-chip">User ID: #0000</div>
+      <p class="message" id="successMessage">Your account is fully activated. You are now logged in and ready for English speaking practice!</p>
+      <a href="/" class="start-btn" id="continueBtn">👉 Go to Speaking Dashboard</a>
+      <div style="font-size:12px; color:var(--text-muted); margin-top:10px;">Redirecting automatically in <span id="countdown">3</span> seconds...</div>
+    </div>
+
+    <!-- 3. ERROR STATE -->
+    <div id="errorState" style="display:none;">
+      <div class="status-icon error">⚠️</div>
+      <h3 style="color:#f87171;">Verification Failed</h3>
+      <p class="message" id="errorMessage">This verification link is invalid, expired, or has already been used.</p>
+
+      <div class="resend-box">
+        <label>Need a new activation link?</label>
+        <input type="text" id="resendIdentifier" placeholder="Enter your email or 4-digit User ID" />
+        <button type="button" class="secondary-btn" id="resendBtn">✉️ Resend Verification Link</button>
+      </div>
+
+      <a href="/" class="back-link">← Return to Sign In</a>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = (params.get('token') || '').trim();
+    const urlError = params.get('error');
+
+    const loadingState = document.getElementById('loadingState');
+    const successState = document.getElementById('successState');
+    const errorState = document.getElementById('errorState');
+    const alertBox = document.getElementById('alertBox');
+    const userCodeChip = document.getElementById('userCodeChip');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
+    const countdownEl = document.getElementById('countdown');
+    const resendBtn = document.getElementById('resendBtn');
+    const resendIdentifier = document.getElementById('resendIdentifier');
+
+    function showError(msg) {
+      loadingState.style.display = 'none';
+      successState.style.display = 'none';
+      errorState.style.display = 'block';
+      errorMessage.textContent = msg || 'This verification link is invalid or has expired.';
+    }
+
+    function showSuccess(user) {
+      loadingState.style.display = 'none';
+      errorState.style.display = 'none';
+      successState.style.display = 'block';
+      if (user && user.userCode) {
+        userCodeChip.textContent = 'User ID: #' + user.userCode;
+      }
+      successMessage.textContent = `Welcome, ${user.displayName || 'Learner'}! Your account has been activated and you are signed in.`;
+
+      let secs = 3;
+      countdownEl.textContent = secs;
+      const timer = setInterval(() => {
+        secs--;
+        countdownEl.textContent = secs;
+        if (secs <= 0) {
+          clearInterval(timer);
+          window.location.href = '/?verified=1';
+        }
+      }, 1000);
+    }
+
+    async function executeVerification() {
+      if (!token) {
+        if (urlError) {
+          showError(decodeURIComponent(urlError));
+        } else {
+          showError('No verification token provided. Please click the link sent to your email.');
+        }
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/verify-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Verification failed');
+        }
+        showSuccess(data.user);
+      } catch (err) {
+        showError(err.message);
+      }
+    }
+
+    resendBtn.addEventListener('click', async () => {
+      const identifier = resendIdentifier.value.trim();
+      if (!identifier) {
+        alertBox.className = 'alert-banner error';
+        alertBox.textContent = 'Please enter your email or 4-digit User ID';
+        return;
+      }
+      resendBtn.disabled = true;
+      resendBtn.textContent = 'Sending link...';
+      alertBox.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/auth/resend-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, email: identifier })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not send verification email');
+
+        alertBox.className = 'alert-banner success';
+        alertBox.textContent = data.message || 'Verification link sent! Check your inbox.';
+        resendIdentifier.value = '';
+      } catch (e) {
+        alertBox.className = 'alert-banner error';
+        alertBox.textContent = e.message;
+      } finally {
+        resendBtn.disabled = false;
+        resendBtn.textContent = '✉️ Resend Verification Link';
+      }
+    });
+
+    executeVerification();
+  </script>
+</body>
+</html>

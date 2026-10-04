@@ -16,12 +16,30 @@ CREATE TABLE IF NOT EXISTS users (
   email          VARCHAR(255) UNIQUE NOT NULL,
   display_name   VARCHAR(100) NOT NULL,
   password_hash  TEXT NOT NULL,
+  is_verified    BOOLEAN NOT NULL DEFAULT false,
   avatar_url     TEXT,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_users_user_code ON users(user_code);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_is_verified ON users(is_verified);
+
+-- ------------------------------------------------------------
+-- EMAIL VERIFICATIONS
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS email_verifications (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash  TEXT NOT NULL UNIQUE,
+  otp_code    VARCHAR(10),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at  TIMESTAMPTZ NOT NULL,
+  verified_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_email_verifications_token_hash ON email_verifications(token_hash);
+CREATE INDEX IF NOT EXISTS idx_email_verifications_user_id ON email_verifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_email_verifications_otp_code ON email_verifications(otp_code);
 
 -- ------------------------------------------------------------
 -- SESSIONS — server-side session tokens (httpOnly cookie holds
@@ -47,11 +65,13 @@ CREATE TABLE IF NOT EXISTS password_resets (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   token_hash  TEXT NOT NULL UNIQUE,
+  otp_code    VARCHAR(10),
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   expires_at  TIMESTAMPTZ NOT NULL,
   used_at     TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS idx_password_resets_token_hash ON password_resets(token_hash);
+CREATE INDEX IF NOT EXISTS idx_password_resets_otp_code ON password_resets(otp_code);
 
 -- ------------------------------------------------------------
 -- FRIEND REQUESTS + FRIENDSHIPS

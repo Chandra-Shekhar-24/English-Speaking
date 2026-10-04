@@ -1,25 +1,6 @@
 // ============================================================
 // db.js — lightweight local persistence layer (pure JavaScript,
 // ZERO external dependencies)
-//
-// Why not better-sqlite3? It's a native C++ addon that has to be
-// compiled on the host machine (node-gyp/make). Many hosting
-// platforms (Render, some Docker images, newer Node versions) fail
-// that build step with V8 API mismatches, which is exactly what
-// happened here. This version uses only Node's built-in `fs` module
-// and a plain JSON file, so there is nothing to compile, ever — it
-// works identically on every platform.
-//
-// Storage: a single JSON file (english-passport-data.json) next to
-// this module, holding three arrays: chatMessages, callHistory,
-// userSessions. Writes are synchronous and atomic (write to a temp
-// file, then rename) so a crash mid-write can't corrupt the file.
-//
-// Scope note: this persists chat messages and call/session records.
-// User IDs themselves are still generated fresh per connection (the
-// app's existing "temporary 4-digit ID" design) — this module does
-// NOT add login/accounts/permanent identity. That would be a
-// separate, bigger feature (auth, password/OTP, etc.).
 // ============================================================
 const fs = require('fs');
 const path = require('path');
@@ -56,8 +37,6 @@ function load() {
 
 let saveScheduled = false;
 function scheduleSave() {
-  // Debounce writes slightly so a burst of messages doesn't hit disk
-  // once per message — still effectively immediate (well under 100ms).
   if (saveScheduled) return;
   saveScheduled = true;
   setTimeout(() => {
@@ -82,7 +61,7 @@ function saveMessage(fromUser, toUser, fromName, text, attachment) {
     const id = data.nextMessageId++;
     const record = {
       id, fromUser, toUser, fromName: fromName || null, text,
-      attachment: attachment || null, // { url, publicId, resourceType, type, filename, size, mimeType, expiresAt, deleted }
+      attachment: attachment || null,
       createdAt: Date.now()
     };
     data.chatMessages.push(record);
@@ -103,9 +82,6 @@ function getConversation(userA, userB, limit = 200) {
   } catch (e) { console.error('DB getConversation error:', e.message); return []; }
 }
 
-// Returns every message whose attachment has passed its expiry and
-// hasn't been cleaned up yet — used by media.js's background job to
-// actually delete the underlying file (not just hide it in the UI).
 function getExpiredAttachments(now = Date.now()) {
   try {
     return data.chatMessages
@@ -114,9 +90,6 @@ function getExpiredAttachments(now = Date.now()) {
   } catch (e) { console.error('DB getExpiredAttachments error:', e.message); return []; }
 }
 
-// Marks a message's attachment as expired: clears the (now-deleted)
-// URL but keeps filename/type so the UI can still show a meaningful
-// "Attachment expired" bubble instead of a broken link.
 function markAttachmentExpired(messageId) {
   try {
     const record = data.chatMessages.find(m => m.id === messageId);
@@ -194,8 +167,6 @@ function getStats() {
   } catch (e) { return { totalMessages: 0, totalCalls: 0, sessionsLast24h: 0 }; }
 }
 
-// Flush any pending debounced write on graceful shutdown, so nothing
-// from the last few messages before a deploy/restart is lost.
 process.on('SIGTERM', saveNow);
 process.on('SIGINT', saveNow);
 

@@ -33,7 +33,7 @@ const ALLOWED_MIME_TYPES = new Set([
 ]);
 
 let configured = false;
-function isConfigured() {
+function isCloudinaryConfigured() {
   if (configured) return true;
   const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
   if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
@@ -49,6 +49,10 @@ function isConfigured() {
   return false;
 }
 
+function isConfigured() {
+  return true; // Cloudinary or built-in local attachment storage fallback
+}
+
 function categoryFor(mimeType) {
   if (mimeType.startsWith('image/')) return 'image';
   if (mimeType.startsWith('video/')) return 'video';
@@ -62,27 +66,34 @@ function validateFile(file) {
   return null;
 }
 
-// Uploads a buffer (from multer's memory storage) to Cloudinary and
-// returns the metadata the chat message will carry.
+// Uploads a buffer (from multer's memory storage) to Cloudinary or returns data-URL
+// and returns the metadata the chat message will carry.
 function uploadBuffer(file) {
+  const category = categoryFor(file.mimetype);
+  const resourceType = category === 'file' ? 'raw' : category;
+
+  if (!isCloudinaryConfigured()) {
+    // Built-in data URL fallback for local / preview environments
+    const base64 = file.buffer.toString('base64');
+    const dataUrl = `data:${file.mimetype};base64,${base64}`;
+    return Promise.resolve({
+      url: dataUrl,
+      publicId: 'local_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+      resourceType,
+      type: category,
+      filename: file.originalname,
+      size: file.size,
+      mimeType: file.mimetype,
+      expiresAt: Date.now() + ATTACHMENT_TTL_MS,
+      deleted: false
+    });
+  }
+
   return new Promise((resolve, reject) => {
-    if (!isConfigured()) {
-      return reject(new Error('File uploads are not configured on this server (missing Cloudinary credentials).'));
-    }
-    const category = categoryFor(file.mimetype);
-    // Cloudinary's `image`/`video` resource types get thumbnails,
-    // transformations, and inline preview; everything else (pdf, doc,
-    // etc.) goes in as `raw` so it's stored as-is and downloadable.
-    const resourceType = category === 'file' ? 'raw' : category;
     const stream = cloudinary.uploader.upload_stream(
       {
         resource_type: resourceType,
         folder: 'english-passport-chat',
-        // Belt-and-suspenders: also ask Cloudinary to expire the asset
-        // itself via a signed delete token isn't available on free
-        // plans, so the real deletion is done by our own cleanup job
-        // (see scheduleCleanup) — this context tag just makes it easy
-        // to spot stray files by hand in the Cloudinary dashboard too.
         context: `expires_at=${new Date(Date.now() + ATTACHMENT_TTL_MS).toISOString()}`
       },
       (err, result) => {
@@ -105,7 +116,7 @@ function uploadBuffer(file) {
 }
 
 async function deleteFromCloudinary(publicId, resourceType) {
-  if (!isConfigured()) return;
+  if (!isCloudinaryConfigured() || (publicId && publicId.startsWith('local_'))) return;
   try {
     await cloudinary.uploader.destroy(publicId, { resource_type: resourceType || 'image' });
   } catch (e) {
