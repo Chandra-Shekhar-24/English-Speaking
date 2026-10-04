@@ -123,10 +123,8 @@ async function signup({ email, password, displayName }, appUrl) {
       needsVerification: true,
       userCode: existing.user_code,
       email: email.toLowerCase(),
-      otp: verifyOtp,
       delivered: Boolean(emailRes && emailRes.delivered),
       sandboxRestricted: Boolean(emailRes && emailRes.sandboxRestricted),
-      verifyUrl: (emailRes && emailRes.verifyUrl) || null,
       message: `Verification code sent to ${email}. Please enter the 6-digit OTP code to activate your account.`
     };
   }
@@ -189,7 +187,9 @@ async function signup({ email, password, displayName }, appUrl) {
     email: user.email,
     delivered: isDelivered,
     sandboxRestricted: isSandbox,
-    message: `Account created! We've sent a 6-digit verification code to ${user.email}. Please check your email inbox and enter the code below to activate your account.`
+    message: isDelivered
+      ? `Account created! We've sent a 6-digit verification code to ${user.email}. Please check your email inbox and enter the code below to activate your account.`
+      : `Account created! A verification code has been dispatched to ${user.email}. Please check your email inbox.`
   };
 }
 
@@ -334,7 +334,9 @@ async function resendVerificationEmail(identifier, appUrl) {
     emailMasked,
     delivered: isDelivered,
     sandboxRestricted: isSandbox,
-    message: `A fresh 6-digit verification code has been sent to your email (${emailMasked}). Please check your inbox and enter the code below.`
+    message: isDelivered
+      ? `A fresh 6-digit verification code has been sent to your email (${emailMasked}). Please check your inbox and enter the code below.`
+      : `A verification code has been dispatched to your email (${emailMasked}). Please check your inbox.`
   };
 }
 
@@ -451,7 +453,9 @@ async function requestPasswordReset(identifier, appUrl) {
     displayName: user.display_name,
     delivered: isDelivered,
     sandboxRestricted: isSandbox,
-    message: `A 6-digit password reset code has been sent to your registered email (${emailMasked}). Please check your inbox and enter the code below.`
+    message: isDelivered
+      ? `A 6-digit password reset code has been sent to your registered email (${emailMasked}). Please check your inbox and enter the code below.`
+      : `A password reset code has been dispatched to your email (${emailMasked}). Please check your inbox.`
   };
 }
 

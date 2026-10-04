@@ -1149,9 +1149,9 @@ app.post("/api/auth/signup", async (req, res) => {
       emailDelivered: signupResult.delivered !== false,
       sandboxRestricted: Boolean(signupResult.sandboxRestricted),
       message: signupResult.delivered !== false
-        ? `We've sent a 6-digit verification code (OTP) to ${signupResult.email}. Please check your email inbox and enter the code below.`
+        ? `We've sent a 6-digit verification code to ${signupResult.email}. Please check your email inbox and enter the code below to activate your account.`
         : (signupResult.sandboxRestricted
-            ? `Account created! Notice: Resend is in free sandbox mode and can only send to its account owner. Please configure Gmail SMTP or a custom domain in Admin Console 🛡️ to send to ${signupResult.email}.`
+            ? `Notice: Resend is in free sandbox mode and can only send to its account owner. Please configure Gmail SMTP in Admin Console 🛡️ to send to ${signupResult.email}.`
             : `We attempted to dispatch a verification code to ${signupResult.email}. Please check your spam folder or click Resend.`)
     });
   } catch (err) { handleAuthError(res, err); }
@@ -1462,7 +1462,8 @@ function isAdminRequest(req) {
   if (req.user && req.user.email) {
     const adminEmails = [
       process.env.ADMIN_EMAIL,
-      "chandrashekharb.2405@gmail.com"
+      "chandrashekharb.2405@gmail.com",
+      "chandrashekharbansal.2006@gmail.com"
     ].filter(Boolean).map(e => e.toLowerCase());
     if (adminEmails.includes(req.user.email.toLowerCase())) return true;
   }
@@ -1485,7 +1486,8 @@ app.post("/api/admin/login", (req, res) => {
   const { secret } = req.body || {};
   const isAlreadyAdminUser = req.user && req.user.email && [
     process.env.ADMIN_EMAIL,
-    "chandrashekharb.2405@gmail.com"
+    "chandrashekharb.2405@gmail.com",
+    "chandrashekharbansal.2006@gmail.com"
   ].filter(Boolean).map(e => e.toLowerCase()).includes(req.user.email.toLowerCase());
 
   if (!isAlreadyAdminUser && (!secret || secret !== ADMIN_SECRET)) {
@@ -1846,6 +1848,39 @@ app.post("/api/admin/users/:userCode/resend-verification", requireAdmin, async (
   }
 });
 
+// POST /api/admin/users/:userCode/activate — Admin can instantly verify/activate any student account
+app.post("/api/admin/users/:userCode/activate", requireAdmin, async (req, res) => {
+  try {
+    const userCode = String(req.params.userCode || '').trim();
+    if (!userCode) return res.status(400).json({ error: "User ID is required" });
+
+    const userRes = await query("SELECT * FROM users WHERE user_code = $1", [userCode]);
+    const user = userRes.rows && userRes.rows[0];
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    await query("UPDATE users SET is_verified = true, updated_at = now() WHERE id = $1", [user.id]);
+    await query("UPDATE email_verifications SET verified_at = now() WHERE user_id = $1", [user.id]).catch(() => {});
+
+    activity.logEvent({
+      userCode,
+      userId: user.id,
+      email: user.email,
+      displayName: user.display_name,
+      category: 'auth',
+      type: 'admin_activated_account',
+      title: 'Account Manually Activated by Admin',
+      summary: `Admin manually activated account #${userCode} (${user.email})`
+    });
+
+    res.json({
+      ok: true,
+      message: `Account #${userCode} (${user.display_name}) has been activated successfully! The user can now log in immediately.`
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to activate user account" });
+  }
+});
+
 // GET /api/admin/emails — Sent email notification logs (login alerts & password resets)
 app.get("/api/admin/emails", requireAdmin, (req, res) => {
   try {
@@ -1858,6 +1893,22 @@ app.get("/api/admin/emails", requireAdmin, (req, res) => {
     });
   } catch (err) {
     console.error("Admin emails error:", err);
+    res.status(500).json({ error: "Failed to retrieve email logs" });
+  }
+});
+
+// GET /api/admin/email-logs alias
+app.get("/api/admin/email-logs", requireAdmin, (req, res) => {
+  try {
+    const logs = mailer.getEmailLogs(100);
+    res.json({
+      ok: true,
+      timestamp: new Date().toISOString(),
+      count: logs.length,
+      logs
+    });
+  } catch (err) {
+    console.error("Admin email logs error:", err);
     res.status(500).json({ error: "Failed to retrieve email logs" });
   }
 });

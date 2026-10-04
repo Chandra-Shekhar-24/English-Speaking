@@ -277,20 +277,45 @@
       <!-- HEADER -->
       <div class="admin-modal-header">
         <div class="admin-header-title">
-          <h3>🛡️ VocaMate Admin Console</h3>
-          <span class="tag">REAL-TIME STORE</span>
+          <div class="admin-brand-icon">🛡️</div>
+          <div class="admin-brand-texts">
+            <h3>VocaMate Admin</h3>
+            <span class="admin-brand-sub">Learner Activity & Gateway Center</span>
+          </div>
           <span class="admin-active-badge" id="adminAuthStatusBadge">Authorized</span>
         </div>
         <div class="admin-header-actions">
           <button class="admin-btn" id="adminRefreshBtn" title="Refresh user list & activity">🔄 Refresh</button>
-          <button class="admin-btn" id="adminCopyAllJsonBtn" title="Copy full structured JSON of all users">📋 Copy All JSON</button>
-          <button class="admin-btn danger" id="adminLogoutBtn" title="Lock Admin Console">🔒 Lock Console</button>
+          <button class="admin-btn" id="adminCopyAllJsonBtn" title="Copy full structured JSON of all users">📋 Copy JSON</button>
+          <button class="admin-btn danger" id="adminPurgeStudentsBtn" title="Delete unverified or test student accounts">🗑️ Clean Students</button>
+          <button class="admin-btn" id="adminLogoutBtn" title="Lock Admin Console">🔒 Lock</button>
           <button class="admin-modal-close" id="closeAdminModalBtn" title="Close Console">✕</button>
         </div>
       </div>
 
+      <!-- MAIN NAVIGATION TABS (TOUCH-FRIENDLY & RESPONSIVE) -->
+      <div class="admin-main-nav" id="adminMainNav">
+        <button class="admin-nav-tab active" id="adminViewCardsBtn" data-view="cards">
+          <span class="tab-icon">👥</span>
+          <span>Students & Learners</span>
+          <span class="tab-badge" id="tabCountUsers">0</span>
+        </button>
+        <button class="admin-nav-tab" id="adminViewEmailGatewayBtn" data-view="email_gateway">
+          <span class="tab-icon">📧</span>
+          <span>Email Gateway Setup</span>
+        </button>
+        <button class="admin-nav-tab" id="adminViewLogsBtn" data-view="logs">
+          <span class="tab-icon">📨</span>
+          <span>Sent Email Logs</span>
+        </button>
+        <button class="admin-nav-tab" id="adminViewJsonBtn" data-view="json">
+          <span class="tab-icon">💻</span>
+          <span>Raw JSON Feed</span>
+        </button>
+      </div>
+
       <!-- STATS RIBBON -->
-      <div class="admin-stats-ribbon">
+      <div class="admin-stats-ribbon" id="adminStatsRibbon">
         <div class="admin-stat-chip">
           <span class="chip-label">Total Users</span>
           <span class="chip-value" id="adminStatTotalUsers">0</span>
@@ -317,23 +342,18 @@
         </div>
       </div>
 
-      <!-- FILTERS & VIEW CONTROLS -->
-      <div class="admin-filters-bar">
+      <!-- FILTERS & SEARCH BAR (FOR STUDENTS VIEW) -->
+      <div class="admin-filters-bar" id="adminFiltersBar">
         <div class="admin-search-wrapper">
           <span class="admin-search-icon">🔍</span>
-          <input type="text" class="admin-search-input" id="adminSearchInput" placeholder="Search by name, 4-digit ID, email, status, or voice..." />
+          <input type="text" class="admin-search-input" id="adminSearchInput" placeholder="Search by name, 4-digit ID, email, level..." />
         </div>
         <div class="admin-status-filters" id="adminStatusFilters">
           <button class="admin-filter-pill active" data-filter="all">All (<span id="countFilterAll">0</span>)</button>
           <button class="admin-filter-pill" data-filter="online">🟢 Online (<span id="countFilterOnline">0</span>)</button>
           <button class="admin-filter-pill" data-filter="in-call">📞 In-Call (<span id="countFilterInCall">0</span>)</button>
+          <button class="admin-filter-pill" data-filter="pending">⏳ Pending OTP (<span id="countFilterPending">0</span>)</button>
           <button class="admin-filter-pill" data-filter="offline">⚪ Offline (<span id="countFilterOffline">0</span>)</button>
-        </div>
-        <div class="admin-view-toggle">
-          <button class="admin-view-btn active" id="adminViewCardsBtn" title="Interactive User Cards & History">🗂️ Cards</button>
-          <button class="admin-view-btn" id="adminViewJsonBtn" title="Raw Structured JSON Stream">💻 Raw JSON Feed</button>
-          <button class="admin-view-btn" id="adminViewEmailGatewayBtn" title="Configure Email Delivery & SMTP">📧 Email Gateway</button>
-          <button class="admin-view-btn danger" id="adminPurgeStudentsBtn" style="border-color:rgba(239,68,68,0.35); color:#f87171;" title="Delete student accounts">🗑️ Delete Students</button>
         </div>
       </div>
 
@@ -433,42 +453,77 @@
 
         <!-- 4. Email Gateway Configuration & Live Test Panel -->
         <div id="adminEmailGatewayContainer" class="admin-email-gateway-panel" style="display:none; flex-direction:column; gap:16px;">
-          <div style="background:rgba(56, 189, 248, 0.08); border:1px solid rgba(56, 189, 248, 0.25); border-radius:12px; padding:18px 20px;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+          <!-- Gateway Status Card -->
+          <div class="admin-gateway-status-card">
+            <div class="admin-gateway-status-header">
               <div>
-                <h4 style="margin:0 0 4px 0; color:#38bdf8; font-size:16px; font-weight:800;">📧 VocaMate Email Gateway Manager</h4>
-                <p style="margin:0; font-size:13px; color:#94a3b8; line-height:1.5;">Configure OTP delivery service to ensure verification codes reach <strong>ANY user's email address</strong>.</p>
+                <h4 style="margin:0 0 4px 0; color:#38bdf8; font-size:16px; font-weight:800;">📧 Email Delivery Gateway</h4>
+                <p style="margin:0; font-size:13px; color:#94a3b8; line-height:1.5;">Manage OTP delivery to ensure registration & reset emails reach <strong>ANY recipient address without going to Spam</strong>.</p>
               </div>
-              <span id="gatewayStatusBadge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700;">Loading...</span>
+              <span id="gatewayStatusBadge" class="admin-status-badge-lg">Loading...</span>
             </div>
-            <div id="gatewaySandboxNotice" style="margin-top:12px; font-size:12.5px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); color:#fbbf24; border-radius:8px; padding:10px 14px; line-height:1.5;">
-              ⚠️ <strong>Why emails only go to chandrashekharbansal.2006@gmail.com:</strong> Resend free tier in test sandbox mode (<code>onboarding@resend.dev</code>) restricts delivery strictly to the Resend account owner.<br>
-              <strong>👉 Solution to send OTPs to ANY email (like <code>chandrashekharb.2405@gmail.com</code> and all registered users):</strong> Enter your <strong>Gmail Address & 16-character Google App Password</strong> below! Gmail SMTP is 100% free and requires NO domain purchase.
+            <div id="gatewaySandboxNotice" style="margin-top:14px; font-size:12.5px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); color:#fbbf24; border-radius:8px; padding:12px 14px; line-height:1.5;">
+              ⚠️ <strong>Why emails were not sending to other addresses:</strong> Resend free tier in test sandbox mode (<code>onboarding@resend.dev</code>) strictly blocks emails to anyone other than the registered account owner.<br>
+              <strong>👉 Solution to send OTPs to ANY email address (including student phones & custom emails):</strong> Enter your <strong>Gmail Address & 16-character Google App Password</strong> in Option A below! Gmail SMTP is 100% free, requires NO domain, and delivers directly to the Primary Inbox!
             </div>
           </div>
 
           <!-- Configuration Grid -->
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
-            <!-- Gmail / SMTP Section -->
-            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:20px;">
-              <h5 style="margin:0 0 10px 0; color:#ffffff; font-size:14px; font-weight:700;">
-                <span>🚀 Option A: Gmail SMTP (Recommended — 0 Domain Required)</span>
+          <div class="admin-gateway-grid">
+            <!-- Option A: Gmail SMTP -->
+            <div class="admin-gateway-card recommended">
+              <div class="admin-card-badge-rec">RECOMMENDED • 0 DOMAIN REQUIRED</div>
+              <h5 style="margin:8px 0 6px 0; color:#ffffff; font-size:15px; font-weight:800;">
+                🚀 Option A: Gmail SMTP (Direct Inbox Delivery)
               </h5>
-              <p style="font-size:12px; color:#94a3b8; margin-bottom:12px; line-height:1.4;">Send OTPs from your own Gmail address directly to any recipient without domain verification.</p>
+              <p style="font-size:12px; color:#94a3b8; margin-bottom:14px; line-height:1.4;">
+                Send OTPs from your own Gmail address directly to any user's email. Verified to bypass spam filters and land in the Primary Inbox.
+              </p>
+              
               <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Your Gmail Address</label>
-              <input type="email" id="gwGmailUser" placeholder="e.g. yourname@gmail.com" style="width:100%; margin-top:4px; margin-bottom:10px;" />
+              <input type="email" id="gwGmailUser" placeholder="e.g. yourname@gmail.com" style="width:100%; margin-top:4px; margin-bottom:12px;" />
               
               <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Google 16-Character App Password</label>
-              <input type="password" id="gwGmailPass" placeholder="e.g. abcd efgh ijkl mnop" style="width:100%; margin-top:4px; margin-bottom:6px;" />
-              <div style="font-size:11px; color:#64748b; line-height:1.4; margin-bottom:14px;">
-                💡 To create: Google Account &rarr; Security &rarr; 2-Step Verification &rarr; App Passwords.
+              <div class="password-input-wrap" style="margin-top:4px; margin-bottom:8px;">
+                <input type="password" id="gwGmailPass" placeholder="e.g. abcd efgh ijkl mnop" style="margin-bottom:0;" />
+                <button type="button" class="password-toggle-btn" data-target="gwGmailPass" title="Show password" aria-label="Toggle password visibility">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
+              <div style="font-size:11.5px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:8px 10px; color:#94a3b8; line-height:1.4; margin-bottom:14px;">
+                💡 <strong>How to get Google App Password:</strong><br>
+                1. Go to <a href="https://myaccount.google.com/security" target="_blank" style="color:#38bdf8;">Google Account Security</a> &rarr; 2-Step Verification.<br>
+                2. Click <strong>App Passwords</strong> at the bottom.<br>
+                3. Name it "VocaMate", copy the 16 characters, and paste here!
               </div>
 
-              <h5 style="margin:16px 0 10px 0; color:#ffffff; font-size:13px; font-weight:700;">Or Custom SMTP Server (Optional)</h5>
+              <button class="admin-btn primary" id="gwSaveBtn" style="width:100%; padding:11px; font-weight:700; font-size:13.5px;">💾 Save Gmail SMTP Settings</button>
+            </div>
+
+            <!-- Option B: Custom SMTP or Resend Domain -->
+            <div class="admin-gateway-card">
+              <h5 style="margin:0 0 6px 0; color:#ffffff; font-size:14.5px; font-weight:700;">
+                🌐 Option B: Custom SMTP or Resend Domain
+              </h5>
+              <p style="font-size:12px; color:#94a3b8; margin-bottom:12px; line-height:1.4;">
+                If you have a corporate SMTP server or a verified custom domain at <a href="https://resend.com/domains" target="_blank" style="color:#38bdf8;">resend.com/domains</a>:
+              </p>
+              
+              <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Custom Sender Email (`from` address)</label>
+              <input type="text" id="gwFromEmail" placeholder="VocaMate &lt;noreply@yourdomain.com&gt;" style="width:100%; margin-top:4px; margin-bottom:10px;" />
+
+              <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Resend API Key</label>
+              <div class="password-input-wrap" style="margin-top:4px; margin-bottom:10px;">
+                <input type="password" id="gwResendKey" placeholder="re_..." style="margin-bottom:0;" />
+                <button type="button" class="password-toggle-btn" data-target="gwResendKey" title="Show password" aria-label="Toggle password visibility">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
+
               <div style="display:grid; grid-template-columns:2fr 1fr; gap:8px;">
                 <div>
-                  <label style="font-size:11px; color:#94a3b8;">SMTP Host</label>
-                  <input type="text" id="gwSmtpHost" placeholder="smtp.gmail.com" style="width:100%; margin-top:2px;" />
+                  <label style="font-size:11px; color:#94a3b8;">Custom SMTP Host</label>
+                  <input type="text" id="gwSmtpHost" placeholder="smtp.example.com" style="width:100%; margin-top:2px;" />
                 </div>
                 <div>
                   <label style="font-size:11px; color:#94a3b8;">Port</label>
@@ -476,39 +531,103 @@
                 </div>
               </div>
             </div>
-
-            <!-- Resend & Custom Domain Section -->
-            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:20px; display:flex; flex-direction:column; justify-content:space-between;">
-              <div>
-                <h5 style="margin:0 0 10px 0; color:#ffffff; font-size:14px; font-weight:700;">
-                  <span>🌐 Option B: Resend Custom Domain</span>
-                </h5>
-                <p style="font-size:12px; color:#94a3b8; margin-bottom:12px; line-height:1.4;">If you have a verified domain at <a href="https://resend.com/domains" target="_blank" style="color:#38bdf8;">resend.com/domains</a>, enter your verified domain sender email address here:</p>
-                <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Sender Email (`from` address)</label>
-                <input type="text" id="gwFromEmail" placeholder="VocaMate &lt;noreply@yourdomain.com&gt;" style="width:100%; margin-top:4px; margin-bottom:12px;" />
-
-                <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Resend API Key</label>
-                <input type="password" id="gwResendKey" placeholder="re_..." style="width:100%; margin-top:4px; margin-bottom:6px;" />
-              </div>
-
-              <!-- Save Button -->
-              <div style="margin-top:20px;">
-                <button class="admin-btn primary" id="gwSaveBtn" style="width:100%; padding:11px; font-weight:700; font-size:13.5px;">💾 Save Email Gateway Settings</button>
-              </div>
-            </div>
           </div>
 
           <!-- Live Test Delivery Box -->
-          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:20px;">
-            <h5 style="margin:0 0 8px 0; color:#ffffff; font-size:14px; font-weight:700;">🧪 Live Test Email Dispatcher</h5>
-            <p style="font-size:12.5px; color:#94a3b8; margin-bottom:12px;">Test sending an immediate live OTP email to any recipient address (e.g. <code>chandrashekharb.2405@gmail.com</code>):</p>
+          <div class="admin-test-email-card">
+            <h5 style="margin:0 0 6px 0; color:#ffffff; font-size:14px; font-weight:700;">🧪 Live Test Email Dispatcher</h5>
+            <p style="font-size:12.5px; color:#94a3b8; margin-bottom:12px;">Send an immediate live OTP email to test delivery to ANY address (e.g. <code>chandrashekharb.2405@gmail.com</code>):</p>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <input type="email" id="gwTestEmailInput" placeholder="Enter recipient email (e.g. chandrashekharb.2405@gmail.com)" style="flex:1; min-width:240px; margin-bottom:0;" />
-              <button class="admin-btn primary" id="gwSendTestBtn" style="padding:10px 20px; white-space:nowrap;">🚀 Send Test Email</button>
+              <button class="admin-btn primary" id="gwSendTestBtn" style="padding:10px 22px; white-space:nowrap;">🚀 Send Test Email</button>
             </div>
             <div id="gwTestResultBox" style="display:none; margin-top:14px; font-size:12.5px; padding:12px 14px; border-radius:8px; font-family:monospace; line-height:1.5;"></div>
           </div>
         </div>
+
+        <!-- 5. Email Delivery Logs View -->
+        <div id="adminEmailLogsContainer" class="admin-email-logs-panel" style="display:none; flex-direction:column; gap:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h4 style="margin:0 0 2px 0; color:#ffffff; font-size:15px; font-weight:800;">📨 Recent Outgoing Email Logs</h4>
+              <p style="margin:0; font-size:12px; color:#94a3b8;">Real-time dispatch log for verification codes, password resets, and security notices.</p>
+            </div>
+            <button class="admin-btn" id="adminRefreshLogsBtn">🔄 Refresh Logs</button>
+          </div>
+          <div class="admin-logs-table-wrap">
+            <table class="admin-logs-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Recipient</th>
+                  <th>Type</th>
+                  <th>Provider</th>
+                  <th>Status</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="adminEmailLogsTableBody">
+                <tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Loading email logs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ADMIN CLEAN STUDENTS / DATABASE MANAGEMENT MODAL
+       ============================================================ -->
+  <div class="admin-clean-modal-overlay" id="adminCleanStudentsModal" style="display:none;">
+    <div class="admin-clean-modal-card">
+      <div class="admin-clean-header">
+        <div class="admin-clean-title">
+          <span class="clean-icon">🗑️</span>
+          <div>
+            <h4>Clean Students & Test Accounts</h4>
+            <p>Database management for learner records</p>
+          </div>
+        </div>
+        <button type="button" class="clean-close-btn" id="closeCleanStudentsModalBtn" title="Close">✕</button>
+      </div>
+      
+      <div class="admin-clean-body">
+        <p class="clean-desc">Choose a cleanup option below. Administrator accounts and settings are always kept completely safe.</p>
+        
+        <div class="clean-options-grid">
+          <div class="clean-opt-card" id="cleanOptUnverified">
+            <div class="clean-opt-header">
+              <span class="clean-opt-icon">🧹</span>
+              <div class="clean-opt-content">
+                <h5>Clean Unverified & Test Accounts</h5>
+                <p>Deletes learner accounts that never completed their email or OTP verification. Verified students remain untouched.</p>
+              </div>
+            </div>
+            <button type="button" class="admin-btn danger clean-action-btn" id="btnExecuteCleanUnverified">
+              🧹 Clean Unverified (<span id="cleanUnverifiedCount">0</span>)
+            </button>
+          </div>
+
+          <div class="clean-opt-card danger-zone" id="cleanOptAll">
+            <div class="clean-opt-header">
+              <span class="clean-opt-icon">⚠️</span>
+              <div class="clean-opt-content">
+                <h5>Delete All Student Accounts</h5>
+                <p>Permanently removes all student learners and conversation history. Admin accounts are preserved.</p>
+              </div>
+            </div>
+            <button type="button" class="admin-btn danger-solid clean-action-btn" id="btnExecuteCleanAll">
+              💥 Delete All Students
+            </button>
+          </div>
+        </div>
+
+        <div class="clean-status-feedback" id="cleanFeedbackBox" style="display:none;"></div>
+      </div>
+
+      <div class="admin-clean-footer">
+        <button type="button" class="admin-btn" id="cancelCleanStudentsBtn">Cancel</button>
       </div>
     </div>
   </div>
@@ -573,6 +692,7 @@
           <span style="display:block; margin-top:4px;">We've sent a 6-digit OTP code to <strong id="otpEmailDisplay" style="color:var(--text-primary);">your email</strong>. Please check your email inbox and enter the 6-digit code below to activate your account:</span>
         </div>
         <div id="authOtpWarning" style="display:none; margin-top:10px; font-size:12px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); color:#fbbf24; border-radius:8px; padding:10px 12px; line-height:1.5;"></div>
+
         <label style="margin-top:16px; font-weight:700;">🔢 Enter 6-Digit Verification OTP from Email</label>
         <input type="text" id="verifyOtpInput" placeholder="• • • • • •" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="font-size:26px; letter-spacing:10px; text-align:center; font-weight:800; font-family:monospace; padding:12px; margin-bottom:14px;" />
         <button class="start-btn" id="verifyOtpSubmitBtn" style="margin-top:8px;">Verify OTP & Activate Account</button>
@@ -601,6 +721,7 @@
       <div id="authResetView" style="display:none;">
         <div id="resetAccountBanner" class="auth-success-banner" style="display:none;"></div>
         <div id="resetWarningBanner" style="display:none; margin-top:10px; font-size:12px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); color:#fbbf24; border-radius:8px; padding:10px 12px; line-height:1.5;"></div>
+
         <p class="name-hint" style="color:var(--text-secondary); margin-bottom:14px;">Enter the 6-digit reset code sent to your email and your new password.</p>
         <label>🔢 6-Digit Reset OTP Code</label>
         <input type="text" id="resetOtpInput" placeholder="• • • • • •" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="font-size:22px; letter-spacing:8px; font-family:monospace; text-align:center; font-weight:800; margin-bottom:12px;" />
@@ -947,7 +1068,10 @@
         'adminModal', 'adminAuthStatusBadge', 'adminRefreshBtn', 'adminCopyAllJsonBtn', 'adminLogoutBtn', 'closeAdminModalBtn',
         'adminStatTotalUsers', 'adminStatOnlineUsers', 'adminStatInCall', 'adminStat24hEvents', 'adminStatAiPractices', 'adminStatCallMinutes',
         'adminSearchInput', 'adminStatusFilters', 'countFilterAll', 'countFilterOnline', 'countFilterInCall', 'countFilterOffline',
-        'adminViewCardsBtn', 'adminViewJsonBtn', 'adminViewEmailGatewayBtn', 'adminPurgeStudentsBtn', 'adminCardsContainer', 'adminRawJsonContainer', 'adminEmailGatewayContainer', 'adminJsonSummaryLabel', 'adminCopyRawJsonBtn', 'adminRawJsonPre',
+        'adminViewCardsBtn', 'adminViewJsonBtn', 'adminViewEmailGatewayBtn', 'adminViewLogsBtn', 'adminPurgeStudentsBtn',
+        'adminCleanStudentsModal', 'closeCleanStudentsModalBtn', 'cancelCleanStudentsBtn', 'btnExecuteCleanUnverified', 'btnExecuteCleanAll', 'cleanUnverifiedCount', 'cleanFeedbackBox',
+        'tabCountUsers', 'adminCardsContainer', 'adminRawJsonContainer', 'adminEmailGatewayContainer', 'adminEmailLogsContainer',
+        'adminEmailLogsTableBody', 'adminRefreshLogsBtn', 'adminJsonSummaryLabel', 'adminCopyRawJsonBtn', 'adminRawJsonPre',
         'gatewayStatusBadge', 'gatewaySandboxNotice', 'gwGmailUser', 'gwGmailPass', 'gwSmtpHost', 'gwSmtpPort', 'gwFromEmail', 'gwResendKey', 'gwSaveBtn', 'gwTestEmailInput', 'gwSendTestBtn', 'gwTestResultBox',
         'adminUserDetailView', 'adminDetailAvatar', 'adminDetailName', 'adminDetailCode', 'adminDetailStatus', 'adminDetailEmail', 'adminDetailTimeWindow',
         'adminDetailBackBtn', 'adminDetailRefreshBtn', 'adminDetailCopyJsonBtn', 'adminDetailDeleteUserBtn',
@@ -3394,7 +3518,13 @@
             }
             showToast('⚠️', 'Email Gateway Notice', 'Resend sandbox active. Check Admin console or configure Gmail SMTP.');
           } else {
-            if (els.authOtpWarning) els.authOtpWarning.style.display = 'none';
+            if (els.authOtpWarning) {
+              els.authOtpWarning.innerHTML = `
+                <div style="color:#38bdf8; font-weight:700; margin-bottom:4px;">✉️ Check Your Email Inbox</div>
+                <div style="color:#cbd5e1; font-size:12.5px; line-height:1.45;">We have sent a 6-digit verification code to <strong>${escapeHtml(email)}</strong>. Please open your email inbox, check the <strong>Spam / Promotions</strong> folder if needed, and enter the 6-digit OTP code below.</div>
+              `;
+              els.authOtpWarning.style.display = 'block';
+            }
             showToast('✉️', 'OTP Sent to Email', `We have sent a 6-digit verification code to ${email}. Please check your email inbox.`);
           }
         } catch (e) { showAuthError(e.message); }
@@ -3445,7 +3575,13 @@
               }
               showToast('⚠️', 'Email Gateway Notice', 'Resend sandbox active. Check Admin console or configure Gmail SMTP.');
             } else {
-              if (els.authOtpWarning) els.authOtpWarning.style.display = 'none';
+              if (els.authOtpWarning) {
+                els.authOtpWarning.innerHTML = `
+                  <div style="color:#38bdf8; font-weight:700; margin-bottom:4px;">✉️ Fresh Verification Code Sent</div>
+                  <div style="color:#cbd5e1; font-size:12.5px; line-height:1.45;">A fresh 6-digit verification code has been dispatched to <strong>${escapeHtml(email)}</strong>. Please check your inbox and <strong>Spam / Promotions</strong> folder.</div>
+                `;
+                els.authOtpWarning.style.display = 'block';
+              }
               showToast('✉️', 'New OTP Sent', data.message || `A fresh 6-digit code has been sent to your email. Please check your inbox.`);
             }
             if (els.verifyOtpInput) els.verifyOtpInput.focus();
@@ -3491,7 +3627,13 @@
               els.resetWarningBanner.style.display = 'block';
             }
           } else {
-            if (els.resetWarningBanner) els.resetWarningBanner.style.display = 'none';
+            if (els.resetWarningBanner) {
+              els.resetWarningBanner.innerHTML = `
+                <div style="color:#38bdf8; font-weight:700; margin-bottom:4px;">✉️ Check Your Email Inbox</div>
+                <div style="color:#cbd5e1; font-size:12.5px; line-height:1.45;">We've sent a 6-digit password reset code to <strong>${escapeHtml(targetDisplay)}</strong>. Please check your email inbox and Spam folder, then enter the code below.</div>
+              `;
+              els.resetWarningBanner.style.display = 'block';
+            }
           }
 
           showAuthView('reset');
@@ -3850,12 +3992,16 @@
           // Update filter pill counters
           const countOnline = users.filter(u => u.isOnline).length;
           const countInCall = users.filter(u => u.status === 'in-call').length;
-          const countOffline = users.filter(u => !u.isOnline && u.status !== 'in-call').length;
+          const countPending = users.filter(u => !u.isVerified || u.status === 'pending_verification').length;
+          const countOffline = users.filter(u => u.isVerified !== false && !u.isOnline && u.status !== 'in-call').length;
 
-          els.countFilterAll.textContent = users.length;
-          els.countFilterOnline.textContent = countOnline;
-          els.countFilterInCall.textContent = countInCall;
-          els.countFilterOffline.textContent = countOffline;
+          if (els.countFilterAll) els.countFilterAll.textContent = users.length;
+          if (els.countFilterOnline) els.countFilterOnline.textContent = countOnline;
+          if (els.countFilterInCall) els.countFilterInCall.textContent = countInCall;
+          const countFilterPending = document.getElementById('countFilterPending');
+          if (countFilterPending) countFilterPending.textContent = countPending;
+          if (els.countFilterOffline) els.countFilterOffline.textContent = countOffline;
+          if (els.tabCountUsers) els.tabCountUsers.textContent = users.length;
 
           renderAdminUsersView();
         } catch (err) {
@@ -3886,33 +4032,53 @@
         renderAdminUsersView();
       });
 
-      // View switcher
-      els.adminViewCardsBtn.addEventListener('click', () => {
-        adminState.viewMode = 'cards';
-        els.adminViewCardsBtn.classList.add('active');
-        els.adminViewJsonBtn.classList.remove('active');
-        if (els.adminViewEmailGatewayBtn) els.adminViewEmailGatewayBtn.classList.remove('active');
-        renderAdminUsersView();
-      });
+      // Unified Tab View Switcher
+      function switchAdminView(mode) {
+        adminState.viewMode = mode;
+        adminState.inspectingUserCode = null;
 
-      els.adminViewJsonBtn.addEventListener('click', () => {
-        adminState.viewMode = 'json';
-        els.adminViewJsonBtn.classList.add('active');
-        els.adminViewCardsBtn.classList.remove('active');
-        if (els.adminViewEmailGatewayBtn) els.adminViewEmailGatewayBtn.classList.remove('active');
-        renderAdminUsersView();
-      });
+        const navBtns = [
+          { btn: els.adminViewCardsBtn, mode: 'cards' },
+          { btn: els.adminViewEmailGatewayBtn, mode: 'email_gateway' },
+          { btn: els.adminViewLogsBtn, mode: 'logs' },
+          { btn: els.adminViewJsonBtn, mode: 'json' }
+        ];
 
-      if (els.adminViewEmailGatewayBtn) {
-        els.adminViewEmailGatewayBtn.addEventListener('click', () => {
-          adminState.viewMode = 'email_gateway';
-          els.adminViewEmailGatewayBtn.classList.add('active');
-          els.adminViewCardsBtn.classList.remove('active');
-          els.adminViewJsonBtn.classList.remove('active');
-          renderAdminUsersView();
-          loadEmailGatewaySettings();
+        navBtns.forEach(item => {
+          if (item.btn) {
+            if (item.mode === mode) item.btn.classList.add('active');
+            else item.btn.classList.remove('active');
+          }
         });
+
+        // Hide all views first
+        if (els.adminCardsContainer) els.adminCardsContainer.style.display = 'none';
+        if (els.adminRawJsonContainer) els.adminRawJsonContainer.style.display = 'none';
+        if (els.adminEmailGatewayContainer) els.adminEmailGatewayContainer.style.display = 'none';
+        if (els.adminEmailLogsContainer) els.adminEmailLogsContainer.style.display = 'none';
+        if (els.adminUserDetailView) els.adminUserDetailView.style.display = 'none';
+        if (els.adminFiltersBar) els.adminFiltersBar.style.display = (mode === 'cards' || mode === 'json') ? 'flex' : 'none';
+
+        if (mode === 'cards') {
+          if (els.adminCardsContainer) els.adminCardsContainer.style.display = 'flex';
+          renderAdminUsersView();
+        } else if (mode === 'email_gateway') {
+          if (els.adminEmailGatewayContainer) els.adminEmailGatewayContainer.style.display = 'flex';
+          loadEmailGatewaySettings();
+        } else if (mode === 'logs') {
+          if (els.adminEmailLogsContainer) els.adminEmailLogsContainer.style.display = 'flex';
+          loadAdminEmailLogs();
+        } else if (mode === 'json') {
+          if (els.adminRawJsonContainer) els.adminRawJsonContainer.style.display = 'flex';
+          renderAdminUsersView();
+        }
       }
+
+      if (els.adminViewCardsBtn) els.adminViewCardsBtn.addEventListener('click', () => switchAdminView('cards'));
+      if (els.adminViewEmailGatewayBtn) els.adminViewEmailGatewayBtn.addEventListener('click', () => switchAdminView('email_gateway'));
+      if (els.adminViewLogsBtn) els.adminViewLogsBtn.addEventListener('click', () => switchAdminView('logs'));
+      if (els.adminViewJsonBtn) els.adminViewJsonBtn.addEventListener('click', () => switchAdminView('json'));
+      if (els.adminRefreshLogsBtn) els.adminRefreshLogsBtn.addEventListener('click', () => loadAdminEmailLogs());
 
       // Copy all structured JSON
       function copyAllStructuredJson() {
@@ -3961,7 +4127,8 @@
           // Status filter
           if (f === 'online' && !u.isOnline) return false;
           if (f === 'in-call' && u.status !== 'in-call') return false;
-          if (f === 'offline' && (u.isOnline || u.status === 'in-call')) return false;
+          if (f === 'pending' && u.isVerified && u.status !== 'pending_verification') return false;
+          if (f === 'offline' && (u.isOnline || u.status === 'in-call' || !u.isVerified)) return false;
 
           // Search query
           if (!q) return true;
@@ -4010,14 +4177,24 @@
           const initials = (u.displayName || 'U').slice(0, 2).toUpperCase();
           const isOnline = u.isOnline;
           const isInCall = u.status === 'in-call';
-          const statusClass = isInCall ? 'in-call' : (isOnline ? 'online' : 'offline');
-          const statusLabel = isInCall ? '📞 In-Call' : (isOnline ? '🟢 Online' : '⚪ Offline');
+          const isPending = !u.isVerified || u.status === 'pending_verification';
+          const statusClass = isInCall ? 'in-call' : (isOnline ? 'online' : (isPending ? 'pending' : 'offline'));
+          const statusLabel = isInCall ? '📞 In-Call' : (isOnline ? '🟢 Online' : (isPending ? '⏳ Pending OTP' : '⚪ Offline'));
 
           const prof = u.profile || {};
           const login = u.loginInfo || {};
           const summary = u.activitySummary24h || {};
 
           const userJsonStr = JSON.stringify(u, null, 2);
+
+          const pendingButtons = isPending ? `
+            <button class="admin-btn btn-activate-user" data-code="${escapeHtml(u.userCode)}" data-name="${escapeHtml(u.displayName)}">
+              ⚡ Activate Account
+            </button>
+            <button class="admin-btn btn-resend-user-otp" data-code="${escapeHtml(u.userCode)}" data-name="${escapeHtml(u.displayName)}">
+              ✉️ Resend OTP
+            </button>
+          ` : '';
 
           html += `
             <div class="admin-user-card" data-user-code="${escapeHtml(u.userCode)}">
@@ -4100,6 +4277,7 @@
               <!-- Actions Row -->
               <div class="admin-card-actions">
                 <div class="admin-card-actions-left">
+                  ${pendingButtons}
                   <button class="admin-btn primary btn-view-24h" data-code="${escapeHtml(u.userCode)}">
                     📊 24h Activity History
                   </button>
@@ -4129,6 +4307,46 @@
 
       // Delegate card actions
       els.adminCardsContainer.addEventListener('click', async (e) => {
+        // Activate user directly (admin bypass)
+        const activateUserBtn = e.target.closest('.btn-activate-user');
+        if (activateUserBtn) {
+          e.stopPropagation();
+          const userCode = activateUserBtn.dataset.code;
+          const userName = activateUserBtn.dataset.name;
+          activateUserBtn.disabled = true;
+          activateUserBtn.textContent = 'Activating...';
+          try {
+            const res = await adminFetch(`/api/admin/users/${userCode}/activate`, { method: 'POST' });
+            showToast('🎉', 'Account Activated', res.message || `Activated account #${userCode} (${userName})`);
+            await loadAdminUsers();
+          } catch (err) {
+            showToast('❌', 'Activation Failed', err.message);
+            activateUserBtn.disabled = false;
+            activateUserBtn.textContent = '⚡ Activate Account';
+          }
+          return;
+        }
+
+        // Resend verification OTP directly
+        const resendUserOtpBtn = e.target.closest('.btn-resend-user-otp');
+        if (resendUserOtpBtn) {
+          e.stopPropagation();
+          const userCode = resendUserOtpBtn.dataset.code;
+          const userName = resendUserOtpBtn.dataset.name;
+          resendUserOtpBtn.disabled = true;
+          resendUserOtpBtn.textContent = 'Sending...';
+          try {
+            const res = await adminFetch(`/api/admin/users/${userCode}/resend-verification`, { method: 'POST' });
+            showToast('✉️', 'OTP Dispatched', res.message || `Verification OTP sent for #${userCode}`);
+          } catch (err) {
+            showToast('❌', 'Dispatch Failed', err.message);
+          } finally {
+            resendUserOtpBtn.disabled = false;
+            resendUserOtpBtn.textContent = '✉️ Resend OTP';
+          }
+          return;
+        }
+
         // 1. View 24h Activity
         const view24hBtn = e.target.closest('.btn-view-24h');
         if (view24hBtn) {
@@ -4189,14 +4407,33 @@
           e.stopPropagation();
           const userCode = deleteBtn.dataset.code;
           const userName = deleteBtn.dataset.name || 'User #' + userCode;
-          if (confirm(`Are you sure you want to permanently delete account #${userCode} (${userName})? This cannot be undone.`)) {
-            try {
-              await adminFetch(`/api/admin/users/${userCode}`, { method: 'DELETE' });
-              showToast('🗑️', 'Account Deleted', `Account #${userCode} has been removed`);
-              loadAdminUsers();
-            } catch (err) {
-              showToast('❌', 'Delete Failed', err.message);
-            }
+          
+          if (!deleteBtn.dataset.confirming) {
+            deleteBtn.dataset.confirming = 'true';
+            deleteBtn.dataset.originalHtml = deleteBtn.innerHTML;
+            deleteBtn.innerHTML = '⚠️ Confirm?';
+            deleteBtn.style.background = '#dc2626';
+            deleteBtn.style.color = '#ffffff';
+            setTimeout(() => {
+              if (deleteBtn && deleteBtn.dataset.confirming) {
+                delete deleteBtn.dataset.confirming;
+                deleteBtn.innerHTML = deleteBtn.dataset.originalHtml || '🗑️';
+                deleteBtn.style.background = '';
+                deleteBtn.style.color = '';
+              }
+            }, 4000);
+            return;
+          }
+
+          delete deleteBtn.dataset.confirming;
+          deleteBtn.innerHTML = '⏳ Deleting...';
+          try {
+            await adminFetch(`/api/admin/users/${userCode}`, { method: 'DELETE' });
+            showToast('🗑️', 'Account Deleted', `Account #${userCode} has been removed`);
+            loadAdminUsers();
+          } catch (err) {
+            showToast('❌', 'Delete Failed', err.message);
+            if (deleteBtn.dataset.originalHtml) deleteBtn.innerHTML = deleteBtn.dataset.originalHtml;
           }
           return;
         }
@@ -4338,57 +4575,163 @@
           const userCode = adminState.inspectingUserCode;
           if (!userCode) return;
           const userName = (els.adminDetailName ? els.adminDetailName.textContent : 'User #' + userCode).trim();
-          if (confirm(`Are you sure you want to permanently delete student account #${userCode} (${userName})? All user sessions, OTPs, and activity history will be erased.`)) {
-            try {
-              await adminFetch(`/api/admin/users/${userCode}`, { method: 'DELETE' });
-              showToast('🗑️', 'Student Deleted', `Account #${userCode} permanently deleted`);
-              adminState.inspectingUserCode = null;
-              adminState.user24hData = null;
-              loadAdminUsers();
-            } catch (err) {
-              showToast('❌', 'Delete Failed', err.message);
+          
+          if (!els.adminDetailDeleteUserBtn.dataset.confirming) {
+            els.adminDetailDeleteUserBtn.dataset.confirming = 'true';
+            els.adminDetailDeleteUserBtn.dataset.originalHtml = els.adminDetailDeleteUserBtn.innerHTML;
+            els.adminDetailDeleteUserBtn.innerHTML = '⚠️ Click Again to Confirm Delete';
+            setTimeout(() => {
+              if (els.adminDetailDeleteUserBtn && els.adminDetailDeleteUserBtn.dataset.confirming) {
+                delete els.adminDetailDeleteUserBtn.dataset.confirming;
+                els.adminDetailDeleteUserBtn.innerHTML = els.adminDetailDeleteUserBtn.dataset.originalHtml || '🗑️ Delete User';
+              }
+            }, 4000);
+            return;
+          }
+
+          delete els.adminDetailDeleteUserBtn.dataset.confirming;
+          els.adminDetailDeleteUserBtn.innerHTML = '⏳ Deleting...';
+          try {
+            await adminFetch(`/api/admin/users/${userCode}`, { method: 'DELETE' });
+            showToast('🗑️', 'Student Deleted', `Account #${userCode} (${userName}) permanently deleted`);
+            adminState.inspectingUserCode = null;
+            adminState.user24hData = null;
+            loadAdminUsers();
+          } catch (err) {
+            showToast('❌', 'Delete Failed', err.message);
+            if (els.adminDetailDeleteUserBtn.dataset.originalHtml) {
+              els.adminDetailDeleteUserBtn.innerHTML = els.adminDetailDeleteUserBtn.dataset.originalHtml;
             }
           }
         });
       }
 
-      // Purge / bulk delete student accounts
-      if (els.adminPurgeStudentsBtn) {
-        els.adminPurgeStudentsBtn.addEventListener('click', async () => {
-          const choice = prompt(
-            "🗑️ DELETE STUDENTS FROM DATABASE:\n\n" +
-            "Type '1' to delete all UNVERIFIED / TEST accounts\n" +
-            "Type '2' to delete ALL student accounts (admin accounts kept safe)\n\n" +
-            "Enter choice (1 or 2):"
-          );
-          if (!choice) return;
+      // Clean Students / Bulk delete student accounts modal & handlers
+      function openCleanStudentsModal() {
+        if (!els.adminCleanStudentsModal) return;
+        let unverifiedCount = 0;
+        if (adminState.usersData && Array.isArray(adminState.usersData.users)) {
+          const adminEmails = [
+            'chandrashekharbansal.2006@gmail.com',
+            'chandrashekharb.2405@gmail.com'
+          ];
+          unverifiedCount = adminState.usersData.users.filter(u => 
+            !u.isVerified && !adminEmails.includes((u.email || '').toLowerCase())
+          ).length;
+        }
+        if (els.cleanUnverifiedCount) {
+          els.cleanUnverifiedCount.textContent = unverifiedCount;
+        }
+        if (els.cleanFeedbackBox) {
+          els.cleanFeedbackBox.style.display = 'none';
+          els.cleanFeedbackBox.className = 'clean-status-feedback';
+          els.cleanFeedbackBox.innerHTML = '';
+        }
+        if (els.btnExecuteCleanUnverified) {
+          els.btnExecuteCleanUnverified.disabled = false;
+          els.btnExecuteCleanUnverified.innerHTML = `🧹 Clean Unverified (${unverifiedCount})`;
+        }
+        if (els.btnExecuteCleanAll) {
+          els.btnExecuteCleanAll.disabled = false;
+          els.btnExecuteCleanAll.innerHTML = `💥 Delete All Students`;
+          delete els.btnExecuteCleanAll.dataset.confirmState;
+        }
+        els.adminCleanStudentsModal.style.display = 'flex';
+      }
 
-          if (choice.trim() === '1') {
-            if (!confirm("Are you sure you want to permanently delete all unverified & test student accounts?")) return;
-            try {
-              const res = await adminFetch('/api/admin/users/purge', {
-                method: 'POST',
-                body: JSON.stringify({ mode: 'unverified' })
-              });
-              showToast('🗑️', 'Cleanup Complete', res.message || 'Deleted unverified accounts');
-              loadAdminUsers();
-            } catch (err) {
-              showToast('❌', 'Delete Failed', err.message);
+      function closeCleanStudentsModal() {
+        if (els.adminCleanStudentsModal) {
+          els.adminCleanStudentsModal.style.display = 'none';
+        }
+      }
+
+      if (els.adminPurgeStudentsBtn) {
+        els.adminPurgeStudentsBtn.addEventListener('click', openCleanStudentsModal);
+      }
+      if (els.closeCleanStudentsModalBtn) {
+        els.closeCleanStudentsModalBtn.addEventListener('click', closeCleanStudentsModal);
+      }
+      if (els.cancelCleanStudentsBtn) {
+        els.cancelCleanStudentsBtn.addEventListener('click', closeCleanStudentsModal);
+      }
+      if (els.adminCleanStudentsModal) {
+        els.adminCleanStudentsModal.addEventListener('click', (e) => {
+          if (e.target === els.adminCleanStudentsModal) closeCleanStudentsModal();
+        });
+      }
+
+      if (els.btnExecuteCleanUnverified) {
+        els.btnExecuteCleanUnverified.addEventListener('click', async () => {
+          try {
+            els.btnExecuteCleanUnverified.disabled = true;
+            els.btnExecuteCleanUnverified.innerHTML = `⏳ Cleaning unverified accounts...`;
+            const res = await adminFetch('/api/admin/users/purge', {
+              method: 'POST',
+              body: JSON.stringify({ mode: 'unverified' })
+            });
+            if (els.cleanFeedbackBox) {
+              els.cleanFeedbackBox.className = 'clean-status-feedback success';
+              els.cleanFeedbackBox.innerHTML = `✅ ${res.message || 'Cleanup complete!'}`;
+              els.cleanFeedbackBox.style.display = 'block';
             }
-          } else if (choice.trim() === '2') {
-            if (!confirm("⚠️ WARNING: This will permanently delete ALL student accounts from the database. Are you absolutely sure?")) return;
-            try {
-              const res = await adminFetch('/api/admin/users/purge', {
-                method: 'POST',
-                body: JSON.stringify({ mode: 'all' })
-              });
-              showToast('🗑️', 'Students Cleared', res.message || 'All student accounts deleted');
-              loadAdminUsers();
-            } catch (err) {
-              showToast('❌', 'Delete Failed', err.message);
+            showToast('🗑️', 'Cleanup Complete', res.message || 'Deleted unverified accounts');
+            loadAdminUsers();
+            setTimeout(() => {
+              closeCleanStudentsModal();
+            }, 1200);
+          } catch (err) {
+            if (els.cleanFeedbackBox) {
+              els.cleanFeedbackBox.className = 'clean-status-feedback error';
+              els.cleanFeedbackBox.innerHTML = `❌ ${err.message || 'Failed to clean accounts'}`;
+              els.cleanFeedbackBox.style.display = 'block';
             }
-          } else {
-            showToast('ℹ️', 'Cancelled', 'Invalid choice entered');
+            showToast('❌', 'Clean Failed', err.message);
+            els.btnExecuteCleanUnverified.disabled = false;
+            els.btnExecuteCleanUnverified.innerHTML = `🧹 Retry Clean Unverified`;
+          }
+        });
+      }
+
+      if (els.btnExecuteCleanAll) {
+        els.btnExecuteCleanAll.addEventListener('click', async () => {
+          if (!els.btnExecuteCleanAll.dataset.confirmState) {
+            els.btnExecuteCleanAll.dataset.confirmState = 'confirm';
+            els.btnExecuteCleanAll.innerHTML = `⚠️ Click AGAIN to Permanently Delete All`;
+            if (els.cleanFeedbackBox) {
+              els.cleanFeedbackBox.className = 'clean-status-feedback error';
+              els.cleanFeedbackBox.innerHTML = `⚠️ Warning: This will delete ALL student accounts. Click the button again to confirm.`;
+              els.cleanFeedbackBox.style.display = 'block';
+            }
+            return;
+          }
+
+          try {
+            els.btnExecuteCleanAll.disabled = true;
+            els.btnExecuteCleanAll.innerHTML = `⏳ Deleting all students...`;
+            const res = await adminFetch('/api/admin/users/purge', {
+              method: 'POST',
+              body: JSON.stringify({ mode: 'all' })
+            });
+            if (els.cleanFeedbackBox) {
+              els.cleanFeedbackBox.className = 'clean-status-feedback success';
+              els.cleanFeedbackBox.innerHTML = `✅ ${res.message || 'All student accounts deleted'}`;
+              els.cleanFeedbackBox.style.display = 'block';
+            }
+            showToast('🗑️', 'Students Cleared', res.message || 'All student accounts deleted');
+            loadAdminUsers();
+            setTimeout(() => {
+              closeCleanStudentsModal();
+            }, 1200);
+          } catch (err) {
+            if (els.cleanFeedbackBox) {
+              els.cleanFeedbackBox.className = 'clean-status-feedback error';
+              els.cleanFeedbackBox.innerHTML = `❌ ${err.message || 'Failed to delete accounts'}`;
+              els.cleanFeedbackBox.style.display = 'block';
+            }
+            showToast('❌', 'Delete Failed', err.message);
+            els.btnExecuteCleanAll.disabled = false;
+            els.btnExecuteCleanAll.innerHTML = `💥 Delete All Students`;
+            delete els.btnExecuteCleanAll.dataset.confirmState;
           }
         });
       }
@@ -4571,11 +4914,17 @@
           const res = await adminFetch('/api/admin/email-gateway');
           const cfg = res.config || {};
           if (els.gwGmailUser) els.gwGmailUser.value = cfg.gmailUser || '';
-          if (els.gwGmailPass) els.gwGmailPass.value = cfg.hasGmailPass ? '••••••••' : '';
+          if (els.gwGmailPass) {
+            els.gwGmailPass.value = '';
+            els.gwGmailPass.placeholder = cfg.hasGmailPass ? '•••••••• (Password Saved — type new to update)' : 'e.g. abcd efgh ijkl mnop';
+          }
           if (els.gwSmtpHost) els.gwSmtpHost.value = cfg.smtpHost || '';
           if (els.gwSmtpPort) els.gwSmtpPort.value = cfg.smtpPort || '587';
           if (els.gwFromEmail) els.gwFromEmail.value = cfg.customDomain || '';
-          if (els.gwResendKey) els.gwResendKey.value = cfg.hasResend ? '••••••••' : '';
+          if (els.gwResendKey) {
+            els.gwResendKey.value = '';
+            els.gwResendKey.placeholder = cfg.hasResend ? '•••••••• (Key Saved — type new to update)' : 're_...';
+          }
 
           if (cfg.activeProvider === 'gmail' || cfg.activeProvider === 'smtp') {
             els.gatewayStatusBadge.textContent = '🟢 Gmail SMTP Active (Delivers to ALL emails)';
@@ -4611,14 +4960,24 @@
 
       if (els.gwSaveBtn) {
         els.gwSaveBtn.addEventListener('click', async () => {
+          const enteredPass = els.gwGmailPass ? els.gwGmailPass.value.trim() : '';
+          const enteredKey = els.gwResendKey ? els.gwResendKey.value.trim() : '';
+
           const payload = {
             gmailUser: (els.gwGmailUser ? els.gwGmailUser.value.trim() : ''),
-            gmailAppPassword: (els.gwGmailPass ? els.gwGmailPass.value.trim() : ''),
             smtpHost: (els.gwSmtpHost ? els.gwSmtpHost.value.trim() : ''),
             smtpPort: parseInt((els.gwSmtpPort ? els.gwSmtpPort.value.trim() : '587') || '587', 10),
-            fromEmail: (els.gwFromEmail ? els.gwFromEmail.value.trim() : ''),
-            resendApiKey: (els.gwResendKey ? els.gwResendKey.value.trim() : '')
+            fromEmail: (els.gwFromEmail ? els.gwFromEmail.value.trim() : '')
           };
+
+          // Only send password if non-empty and not masked dots
+          if (enteredPass && !/^[\u2022\u25cf\*\s]+$/.test(enteredPass)) {
+            payload.gmailAppPassword = enteredPass.replace(/\s+/g, '');
+          }
+          if (enteredKey && !/^[\u2022\u25cf\*\s]+$/.test(enteredKey)) {
+            payload.resendApiKey = enteredKey.trim();
+          }
+
           els.gwSaveBtn.disabled = true;
           els.gwSaveBtn.textContent = 'Saving...';
           try {
@@ -4666,13 +5025,13 @@
                 els.gwTestResultBox.style.background = 'rgba(16,185,129,0.1)';
                 els.gwTestResultBox.style.border = '1px solid rgba(16,185,129,0.3)';
                 els.gwTestResultBox.style.color = '#34d399';
-                els.gwTestResultBox.innerHTML = `✅ <strong>Success!</strong> Email delivered to <strong>${escapeHtml(target)}</strong> via ${(delivery.provider || 'service').toUpperCase()}!<br>Recipient will receive the 6-digit test OTP in their inbox.`;
+                els.gwTestResultBox.innerHTML = `✅ <strong>Success!</strong> Email delivered to <strong>${escapeHtml(target)}</strong> via ${(delivery.provider || 'service').toUpperCase()}!<br>Recipient will receive the 6-digit test OTP in their Primary Inbox without going to spam.`;
                 showToast('✅', 'Email Delivered', `Test email dispatched to ${target}`);
               } else if (delivery.sandboxRestricted) {
                 els.gwTestResultBox.style.background = 'rgba(245,158,11,0.12)';
                 els.gwTestResultBox.style.border = '1px solid rgba(245,158,11,0.3)';
                 els.gwTestResultBox.style.color = '#fbbf24';
-                els.gwTestResultBox.innerHTML = `⚠️ <strong>Resend Sandbox Block:</strong> Resend refused delivery to <strong>${escapeHtml(target)}</strong> because it only sends to its registered account owner (chandrashekharbansal.2006@gmail.com).<br>👉 <strong>Solution:</strong> Fill your Gmail address and 16-character App Password above and click Save to deliver to ANY address!`;
+                els.gwTestResultBox.innerHTML = `⚠️ <strong>Resend Sandbox Block:</strong> Resend refused delivery to <strong>${escapeHtml(target)}</strong> because it only sends to its registered account owner (chandrashekharbansal.2006@gmail.com).<br>👉 <strong>Solution:</strong> Enter your Gmail address and 16-character App Password above and click Save to deliver to ANY email address!`;
                 showToast('⚠️', 'Sandbox Restricted', 'Resend only sends to account owner');
               } else {
                 els.gwTestResultBox.style.background = 'rgba(239,68,68,0.1)';
@@ -4694,6 +5053,71 @@
             els.gwSendTestBtn.textContent = '🚀 Send Test Email';
           }
         });
+      }
+
+      // ==========================================================
+      // EMAIL DELIVERY LOGS CONTROLLER
+      // ==========================================================
+      async function loadAdminEmailLogs() {
+        if (!els.adminEmailLogsTableBody) return;
+        els.adminEmailLogsTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:#94a3b8;">⏳ Loading outgoing email logs...</td></tr>';
+        try {
+          const res = await adminFetch('/api/admin/email-logs');
+          const logs = res.logs || [];
+          if (logs.length === 0) {
+            els.adminEmailLogsTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:28px; color:#94a3b8;">No emails dispatched yet.</td></tr>';
+            return;
+          }
+          let html = '';
+          logs.forEach(log => {
+            const timeStr = formatFullDate(log.timestamp);
+            
+            let typePill = '<span class="admin-log-pill type-verification">✉️ Verification</span>';
+            if (log.type === 'password_reset') typePill = '<span class="admin-log-pill type-reset">🔑 Reset OTP</span>';
+            else if (log.type === 'login_alert') typePill = '<span class="admin-log-pill type-alert">🛡️ Login Alert</span>';
+            else if (log.type === 'test_email') typePill = '<span class="admin-log-pill type-test">🧪 Test Dispatch</span>';
+
+            let providerPill = '<span class="admin-log-pill provider-smtp">🟢 Gmail SMTP</span>';
+            if (log.provider === 'resend') providerPill = '<span class="admin-log-pill provider-resend">🔵 Resend</span>';
+            else if (log.provider === 'console_fallback') providerPill = '<span class="admin-log-pill provider-console">⚪ Local Fallback</span>';
+
+            let statusPill = '<span class="admin-log-pill status-sent">✅ Delivered</span>';
+            if (log.status === 'sandbox_restricted') statusPill = '<span class="admin-log-pill status-sandbox">⚠️ Sandbox Blocked</span>';
+            else if (log.status === 'send_failed' || log.status === 'error') statusPill = `<span class="admin-log-pill status-failed" title="${escapeHtml(log.error || '')}">❌ Failed</span>`;
+            else if (log.status === 'delivered_local') statusPill = '<span class="admin-log-pill status-local">💻 Console Log</span>';
+
+            let spamHealth = '<span style="font-size:11.5px; color:#34d399; font-weight:600;">🟢 Primary Inbox (Google DKIM)</span>';
+            if (log.provider === 'resend') {
+              spamHealth = log.sandboxRestricted 
+                ? '<span style="font-size:11.5px; color:#fbbf24; font-weight:600;">🟡 Sandbox Restricted</span>'
+                : '<span style="font-size:11.5px; color:#34d399; font-weight:600;">🟢 Sent via Resend</span>';
+            } else if (log.provider === 'console_fallback') {
+              spamHealth = '<span style="font-size:11.5px; color:#94a3b8;">⚪ Dev Environment</span>';
+            }
+
+            const otp = (log.metadata && log.metadata.otp) ? log.metadata.otp : '';
+            const otpDisplay = otp ? `<strong style="font-family:monospace; color:#38bdf8; background:rgba(56,189,248,0.12); padding:2px 6px; border-radius:4px;">${escapeHtml(otp)}</strong>` : '-';
+
+            html += `
+              <tr>
+                <td style="white-space:nowrap; font-size:11.5px; color:#94a3b8; font-family:var(--font-mono);">${escapeHtml(timeStr)}</td>
+                <td><strong style="color:#ffffff;">${escapeHtml(log.to || '')}</strong></td>
+                <td>${typePill}</td>
+                <td>${providerPill}</td>
+                <td>${statusPill}</td>
+                <td>
+                  <div style="display:flex; flex-direction:column; gap:3px;">
+                    <div>${spamHealth}</div>
+                    <div style="font-size:11px; color:#94a3b8;">OTP: ${otpDisplay} ${log.error ? `<span style="color:#f87171;">(${escapeHtml(log.error.slice(0, 45))})</span>` : ''}</div>
+                  </div>
+                </td>
+              </tr>
+            `;
+          });
+          els.adminEmailLogsTableBody.innerHTML = html;
+        } catch (err) {
+          els.adminEmailLogsTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#f87171;">Error loading email logs: ${escapeHtml(err.message)}</td></tr>`;
+        }
       }
 
       console.log('🚀 VocaMate loaded successfully!');

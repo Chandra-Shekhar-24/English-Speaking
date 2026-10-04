@@ -42,32 +42,34 @@ function initTransporters() {
   if (!nodemailer) return;
   const cfg = loadEmailConfig();
 
-  const smtpHost = cfg.smtpHost || process.env.SMTP_HOST || process.env.EMAIL_HOST;
-  const smtpUser = cfg.smtpUser || process.env.SMTP_USER || process.env.EMAIL_USER;
-  const smtpPass = cfg.smtpPass || process.env.SMTP_PASS || process.env.EMAIL_PASS;
+  const smtpHost = (cfg.smtpHost || process.env.SMTP_HOST || process.env.EMAIL_HOST || '').trim();
+  const smtpUser = (cfg.smtpUser || process.env.SMTP_USER || process.env.EMAIL_USER || '').trim();
+  const smtpPass = (cfg.smtpPass || process.env.SMTP_PASS || process.env.EMAIL_PASS || '').trim();
   const smtpPort = parseInt(cfg.smtpPort || process.env.SMTP_PORT || process.env.EMAIL_PORT || '587', 10);
   const smtpSecure = cfg.smtpSecure === true || process.env.SMTP_SECURE === 'true' || smtpPort === 465;
 
-  const gmailUser = cfg.gmailUser || process.env.GMAIL_USER;
-  const gmailPass = cfg.gmailAppPassword || process.env.GMAIL_APP_PASSWORD;
+  const gmailUser = (cfg.gmailUser || process.env.GMAIL_USER || '').trim();
+  // Strip whitespace from Gmail App Passwords (e.g. "abcd efgh ijkl mnop" -> "abcdefghijklmnop")
+  const rawGmailPass = (cfg.gmailAppPassword || process.env.GMAIL_APP_PASSWORD || '').trim();
+  const cleanGmailPass = rawGmailPass.replace(/\s+/g, '');
 
-  if (smtpHost && smtpUser && smtpPass) {
+  if (gmailUser && cleanGmailPass) {
+    smtpTransporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: gmailUser,
+        pass: cleanGmailPass
+      }
+    });
+    console.log(`📧 Gmail SMTP Transporter initialized (${gmailUser}) ✅`);
+  } else if (smtpHost && smtpUser && smtpPass) {
     smtpTransporter = nodemailer.createTransport({
       host: smtpHost,
       port: smtpPort,
       secure: smtpSecure,
       auth: { user: smtpUser, pass: smtpPass }
     });
-    console.log(`📧 SMTP Transporter initialized (${smtpHost}:${smtpPort} as ${smtpUser})`);
-  } else if (gmailUser && gmailPass) {
-    smtpTransporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: gmailUser,
-        pass: gmailPass
-      }
-    });
-    console.log(`📧 Gmail SMTP Transporter initialized (${gmailUser})`);
+    console.log(`📧 SMTP Transporter initialized (${smtpHost}:${smtpPort} as ${smtpUser}) ✅`);
   } else {
     smtpTransporter = null;
   }
@@ -117,20 +119,42 @@ function scheduleSave() {
 
 loadLogs();
 
-function getSenderAddress() {
+function getSenderAddress(targetProvider) {
   const cfg = loadEmailConfig();
-  if (cfg.fromEmail && cfg.fromEmail.trim() && !cfg.fromEmail.includes('yourdomain.com')) {
+  const gmailUser = (cfg.gmailUser || process.env.GMAIL_USER || '').trim();
+  const smtpUser = (cfg.smtpUser || process.env.SMTP_USER || '').trim();
+
+  // If using SMTP/Gmail, From MUST match the authenticated user to pass SPF/DKIM/DMARC
+  if (targetProvider === 'smtp' || targetProvider === 'gmail' || (!targetProvider && smtpTransporter)) {
+    const user = gmailUser || smtpUser;
+    if (user) {
+      return `VocaMate <${user}>`;
+    }
+  }
+
+  // If custom verified domain is configured
+  if (cfg.fromEmail && cfg.fromEmail.trim() && !cfg.fromEmail.includes('resend.dev') && !cfg.fromEmail.includes('yourdomain.com')) {
     return cfg.fromEmail.trim();
   }
   const envFrom = (process.env.EMAIL_FROM || '').trim();
-  if (envFrom && !envFrom.includes('yourdomain.com') && !envFrom.includes('example.com')) {
+  if (envFrom && !envFrom.includes('resend.dev') && !envFrom.includes('yourdomain.com') && !envFrom.includes('example.com')) {
     return envFrom;
   }
-  const smtpUser = cfg.smtpUser || cfg.gmailUser || process.env.SMTP_USER || process.env.GMAIL_USER;
-  if (smtpUser) {
-    return `VocaMate <${smtpUser}>`;
-  }
+
+  if (gmailUser) return `VocaMate <${gmailUser}>`;
+  if (smtpUser) return `VocaMate <${smtpUser}>`;
+
+  // Fallback for Resend sandbox
   return 'VocaMate <onboarding@resend.dev>';
+}
+
+function getReplyToAddress() {
+  const cfg = loadEmailConfig();
+  const gmailUser = (cfg.gmailUser || process.env.GMAIL_USER || '').trim();
+  if (gmailUser) return gmailUser;
+  const smtpUser = (cfg.smtpUser || process.env.SMTP_USER || '').trim();
+  if (smtpUser && smtpUser.includes('@')) return smtpUser;
+  return 'chandrashekharbansal.2006@gmail.com';
 }
 
 function getResendApiKey() {
@@ -139,13 +163,16 @@ function getResendApiKey() {
 }
 
 /**
- * Core sendEmail dispatcher
+ * Core sendEmail dispatcher with Anti-Spam compliance
  */
 async function sendEmail({ to, subject, html, text, type = 'general', metadata = {} }) {
   const emailId = `mail_${Date.now()}_${nextEmailId++}`;
   const timestamp = new Date().toISOString();
-  const from = getSenderAddress();
   const resendApiKey = getResendApiKey();
+  const replyTo = getReplyToAddress();
+
+  const activeProvider = smtpTransporter ? 'smtp' : (resendApiKey ? 'resend' : 'console_fallback');
+  const from = getSenderAddress(activeProvider);
 
   const logEntry = {
     id: emailId,
@@ -155,7 +182,7 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
     subject,
     type,
     status: 'pending',
-    provider: smtpTransporter ? 'smtp' : (resendApiKey ? 'resend' : 'console_fallback'),
+    provider: activeProvider,
     error: null,
     metadata
   };
@@ -166,19 +193,32 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
   }
   scheduleSave();
 
-  // 1) Try SMTP first if configured (works for ANY recipient address)
+  // Standard Anti-Spam RFC Headers
+  const antiSpamHeaders = {
+    'X-Entity-Ref-ID': emailId,
+    'Auto-Submitted': 'auto-generated',
+    'X-Auto-Response-Suppress': 'All',
+    'Precedence': 'bulk',
+    'Feedback-ID': `auth:${type}:vocamate`
+  };
+
+  // 1) Try SMTP first if configured (delivers to ANY recipient address worldwide)
   if (smtpTransporter) {
     try {
+      const smtpFrom = getSenderAddress('smtp');
       const info = await smtpTransporter.sendMail({
-        from,
+        from: smtpFrom,
         to,
         subject,
         html,
-        text: text || undefined
+        text: text || undefined,
+        replyTo,
+        headers: antiSpamHeaders
       });
-      console.log(`✅ [SMTP EMAIL SENT] to: ${to} | ID: ${info.messageId} | "${subject}"`);
+      console.log(`✅ [SMTP EMAIL DELIVERED] to: ${to} | ID: ${info.messageId} | "${subject}"`);
       logEntry.status = 'sent';
       logEntry.provider = 'smtp';
+      logEntry.from = smtpFrom;
       logEntry.smtpId = info.messageId;
       scheduleSave();
       return { ok: true, delivered: true, id: emailId, provider: 'smtp', otp: metadata.otp };
@@ -192,6 +232,7 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
   // 2) Try Resend API if configured
   if (resendApiKey) {
     try {
+      const resendFrom = getSenderAddress('resend');
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -203,11 +244,13 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from,
+          from: resendFrom,
           to,
           subject,
           html,
-          text: text || undefined
+          text: text || undefined,
+          reply_to: replyTo,
+          headers: antiSpamHeaders
         })
       });
       clearTimeout(timeoutId);
@@ -218,6 +261,7 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
         console.log(`✅ [RESEND EMAIL SENT] ID: ${resBody.id} to: ${to} | "${subject}"`);
         logEntry.status = 'sent';
         logEntry.provider = 'resend';
+        logEntry.from = resendFrom;
         logEntry.resendId = resBody.id;
         scheduleSave();
         return { ok: true, delivered: true, id: emailId, provider: 'resend', resendId: resBody.id, otp: metadata.otp };
@@ -246,25 +290,24 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
               body: JSON.stringify({
                 from: 'VocaMate <onboarding@resend.dev>',
                 to: ownerEmail,
-                subject: `⚠️ [Resend Sandbox Relay] OTP for ${to}: ${metadata.otp || 'Action Required'}`,
+                subject: `[VocaMate Relay] OTP for ${to}: ${metadata.otp || 'Action Required'}`,
                 html: `
-                  <div style="font-family:sans-serif; padding:20px; background:#0f172a; color:#f8fafc; border-radius:12px;">
-                    <h3 style="color:#38bdf8; margin-top:0;">🗣️ VocaMate Email Gateway Sandbox Notice</h3>
-                    <p>A user just initiated an action with email: <strong style="color:#ffffff;">${to}</strong></p>
-                    <div style="background:rgba(245,158,11,0.15); border:1px solid #f59e0b; padding:14px; border-radius:8px; margin:16px 0;">
-                      <p style="margin:0 0 8px 0; color:#fbbf24; font-weight:700;">⚠️ Why this email went to your inbox instead of ${to}:</p>
-                      <p style="margin:0; font-size:13px; color:#cbd5e1; line-height:1.5;">Your Resend account is currently in <strong>free Sandbox mode</strong> without a verified domain. Resend strictly delivers only to your registered account address (${ownerEmail}).</p>
+                  <div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; padding:24px; background:#f8fafc; color:#1e293b; border-radius:12px; border:1px solid #e2e8f0; max-width:520px; margin:0 auto;">
+                    <h3 style="color:#0284c7; margin-top:0;">VocaMate Email Gateway Relay</h3>
+                    <p style="font-size:14px; color:#475569;">A user initiated verification with email: <strong style="color:#0f172a;">${to}</strong></p>
+                    <div style="background:#fffbeb; border:1px solid #fde68a; padding:12px 16px; border-radius:8px; margin:16px 0;">
+                      <p style="margin:0 0 6px 0; color:#b45309; font-weight:700; font-size:13px;">Why this went to your inbox instead of ${to}:</p>
+                      <p style="margin:0; font-size:12.5px; color:#78350f; line-height:1.5;">Resend is currently in free sandbox mode and only sends to your registered email (${ownerEmail}).</p>
                     </div>
-                    <div style="background:rgba(56,189,248,0.1); border:2px dashed #38bdf8; border-radius:10px; padding:16px; text-align:center; margin:18px 0;">
-                      <div style="font-size:12px; color:#94a3b8; text-transform:uppercase;">6-Digit OTP Code for ${to}</div>
-                      <div style="font-size:32px; font-weight:900; color:#38bdf8; letter-spacing:6px; font-family:monospace; margin-top:6px;">${metadata.otp || 'N/A'}</div>
+                    <div style="background:#f0f9ff; border:2px dashed #38bdf8; border-radius:10px; padding:16px; text-align:center; margin:18px 0;">
+                      <div style="font-size:11px; color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:1px;">6-Digit OTP for ${to}</div>
+                      <div style="font-size:32px; font-weight:900; color:#0284c7; letter-spacing:6px; font-family:monospace; margin-top:6px;">${metadata.otp || 'N/A'}</div>
                     </div>
-                    <p style="font-size:13px; color:#94a3b8; line-height:1.5;">👉 <strong>How to send directly to ANY email:</strong> Open VocaMate Admin 🛡️ &rarr; 📧 Email Gateway, and enter your Gmail & Google App Password! (100% free, 0 domain required).</p>
+                    <p style="font-size:12px; color:#64748b; line-height:1.5;">To send directly to ANY email without restrictions, configure free <strong>Gmail SMTP</strong> in VocaMate Admin &rarr; Email Gateway.</p>
                   </div>
                 `
               })
             });
-            console.log(`✅ [RESEND SANDBOX RELAY DISPATCHED] Owner ${ownerEmail} notified of OTP for ${to}`);
           } catch (relayErr) {
             console.warn('⚠️ [RESEND SANDBOX RELAY FAILED]:', relayErr.message);
           }
@@ -275,7 +318,8 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
           delivered: false,
           sandboxRestricted: isSandboxRestriction,
           error: errMsg,
-          id: emailId
+          id: emailId,
+          otp: metadata.otp
         };
       }
     } catch (err) {
@@ -285,7 +329,7 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
       logEntry.status = 'error';
       logEntry.error = errMsg;
       scheduleSave();
-      return { ok: false, delivered: false, error: errMsg, id: emailId };
+      return { ok: false, delivered: false, error: errMsg, id: emailId, otp: metadata.otp };
     }
   }
 
@@ -318,80 +362,68 @@ async function sendLoginAlertEmail({ user, ip, userAgent }) {
     timeZone: 'Asia/Kolkata'
   }) + ' IST';
 
-  const appUrl = process.env.APP_URL || 'http://localhost:3000';
+  const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
   const resetLink = `${appUrl}/reset-password.html`;
-  const subject = `🛡️ Security Alert: New Sign-in to your VocaMate Account`;
+  // Clean subject line without emojis to prevent spam filtering
+  const subject = `VocaMate Security Alert: New sign-in detected for your account`;
 
   const html = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #070b14; color: #f8fafc; margin: 0; padding: 24px; }
-    .container { max-width: 540px; margin: 0 auto; background: #0e1526; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 28px; box-shadow: 0 12px 36px rgba(0,0,0,0.5); }
-    .header { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; }
-    .title { font-size: 22px; font-weight: 800; color: #38bdf8; margin: 0; }
-    .badge { background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-    .greeting { font-size: 16px; font-weight: 600; color: #ffffff; margin-bottom: 12px; }
-    .text { font-size: 14px; line-height: 1.6; color: #94a3b8; margin-bottom: 18px; }
-    .info-card { background: #151f34; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.06); }
-    .info-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-    .info-row:last-child { border-bottom: none; }
-    .info-label { color: #64748b; font-weight: 600; }
-    .info-val { color: #ffffff; font-weight: 600; font-family: monospace; }
-    .warning-box { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #fbbf24; margin-bottom: 22px; }
-    .btn { display: inline-block; background: #0284c7; color: #ffffff !important; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-top: 6px; }
-    .footer { font-size: 11.5px; color: #475569; text-align: center; margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Alert</title>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 class="title">🗣️ VocaMate</h1>
-      <span class="badge">SECURITY NOTIFICATION</span>
-    </div>
-    <div class="greeting">Hello ${user.displayName || 'Learner'},</div>
-    <div class="text">
-      We noticed a new successful sign-in to your <strong>VocaMate</strong> account. Here are the sign-in details:
+<body style="margin:0; padding:24px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background-color:#f1f5f9; color:#0f172a;">
+  <div style="max-width:540px; margin:0 auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:32px 28px; box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+    <div style="border-bottom:1px solid #e2e8f0; padding-bottom:18px; margin-bottom:20px;">
+      <h2 style="margin:0; font-size:22px; font-weight:800; color:#0284c7; letter-spacing:-0.3px;">VocaMate</h2>
+      <p style="margin:4px 0 0 0; font-size:12px; color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Account Security Notification</p>
     </div>
 
-    <div class="info-card">
-      <div class="info-row">
-        <span class="info-label">Account User ID:</span>
-        <span class="info-val">#${user.userCode || '----'}</span>
+    <p style="font-size:15px; font-weight:600; color:#0f172a; margin:0 0 12px 0;">Hello ${user.displayName || 'Learner'},</p>
+    <p style="font-size:14px; line-height:1.6; color:#475569; margin:0 0 18px 0;">
+      A new successful sign-in to your <strong>VocaMate</strong> account was recorded with the following details:
+    </p>
+
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px 18px; margin-bottom:20px; font-size:13px;">
+      <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #f1f5f9;">
+        <span style="color:#64748b; font-weight:600;">Account ID:</span>
+        <span style="font-weight:700; color:#0f172a; font-family:monospace;">#${user.userCode || '----'}</span>
       </div>
-      <div class="info-row">
-        <span class="info-label">Account Email:</span>
-        <span class="info-val" style="font-family:sans-serif;">${user.email}</span>
+      <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #f1f5f9;">
+        <span style="color:#64748b; font-weight:600;">Account Email:</span>
+        <span style="font-weight:600; color:#0f172a;">${user.email}</span>
       </div>
-      <div class="info-row">
-        <span class="info-label">Date & Time:</span>
-        <span class="info-val" style="font-family:sans-serif;">${timeFormatted}</span>
+      <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #f1f5f9;">
+        <span style="color:#64748b; font-weight:600;">Date & Time:</span>
+        <span style="font-weight:600; color:#0f172a;">${timeFormatted}</span>
       </div>
-      <div class="info-row">
-        <span class="info-label">IP Address:</span>
-        <span class="info-val">${ip || '127.0.0.1'}</span>
+      <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #f1f5f9;">
+        <span style="color:#64748b; font-weight:600;">IP Address:</span>
+        <span style="font-weight:600; color:#0f172a; font-family:monospace;">${ip || '127.0.0.1'}</span>
       </div>
-      <div class="info-row">
-        <span class="info-label">Device / Browser:</span>
-        <span class="info-val" style="font-family:sans-serif; font-size:12px; max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${userAgent ? userAgent.slice(0, 45) : 'Web Browser'}</span>
+      <div style="display:flex; justify-content:space-between; padding:5px 0;">
+        <span style="color:#64748b; font-weight:600;">Browser / Device:</span>
+        <span style="font-weight:600; color:#0f172a; max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${userAgent ? userAgent.slice(0, 45) : 'Web Client'}</span>
       </div>
     </div>
 
-    <div class="text">
-      If this was you, you can safely disregard this message. Your session is active and secure.
+    <p style="font-size:13.5px; line-height:1.6; color:#475569; margin:0 0 16px 0;">
+      If this was you, you can safely ignore this notification. Your session is active and protected.
+    </p>
+
+    <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:12px 16px; font-size:13px; color:#92400e; margin-bottom:20px;">
+      <strong>Didn't sign in?</strong> If you did not perform this login, please secure your account immediately:
+      <div style="margin-top:10px;">
+        <a href="${resetLink}" style="display:inline-block; background:#0284c7; color:#ffffff; text-decoration:none; padding:9px 18px; border-radius:6px; font-size:12.5px; font-weight:700;">Reset Password & Secure Account</a>
+      </div>
     </div>
 
-    <div class="warning-box">
-      <strong>Didn't sign in?</strong> If you did not perform this login, someone else might have access to your account.
-      <br>
-      <a href="${resetLink}" class="btn" style="margin-top:10px;">Change Password & Secure Account</a>
-    </div>
-
-    <div class="footer">
-      This is an automated security notice from VocaMate AI English Speaking Platform.<br>
-      © ${now.getFullYear()} VocaMate. All rights reserved.
+    <div style="border-top:1px solid #e2e8f0; padding-top:16px; margin-top:24px; font-size:11.5px; color:#94a3b8; text-align:center; line-height:1.5;">
+      VocaMate Learning Platform • AI English Speaking & Peer Conversation Practice<br>
+      This is an automated transactional security email sent to ${user.email}.
     </div>
   </div>
 </body>
@@ -407,8 +439,10 @@ A new sign-in was detected for your VocaMate account:
 - Time: ${timeFormatted}
 - IP Address: ${ip || '127.0.0.1'}
 
-If this was you, you can safely disregard this message.
+If this was you, no action is needed.
 If you did not sign in, please secure your account immediately: ${resetLink}
+
+VocaMate Learning Platform
   `.trim();
 
   sendEmail({
@@ -449,67 +483,53 @@ async function sendPasswordResetEmail({ user, token, otp, appUrl }) {
   const resolvedAppUrl = (appUrl || process.env.APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
   const resetUrl = `${resolvedAppUrl}/reset-password.html?token=${token}`;
   const displayOtp = otp ? String(otp).trim() : token.slice(0, 6);
-  const subject = `🔑 Your VocaMate Password Reset Code: ${displayOtp}`;
+  // Anti-spam subject: clear, standard transactional style
+  const subject = `VocaMate: Your password reset code is ${displayOtp}`;
 
   const html = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #070b14; color: #f8fafc; margin: 0; padding: 24px; }
-    .container { max-width: 540px; margin: 0 auto; background: #0e1526; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 32px; box-shadow: 0 12px 36px rgba(0,0,0,0.5); }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; }
-    .title { font-size: 22px; font-weight: 800; color: #38bdf8; margin: 0; }
-    .badge { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-    .greeting { font-size: 17px; font-weight: 700; color: #ffffff; margin-bottom: 12px; }
-    .text { font-size: 14.5px; line-height: 1.6; color: #94a3b8; margin-bottom: 20px; }
-    .otp-box { background: rgba(56,189,248,0.1); border: 2px dashed #38bdf8; border-radius: 12px; padding: 20px; text-align: center; margin: 24px 0; }
-    .otp-label { font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
-    .otp-val { font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #38bdf8; font-family: monospace; }
-    .otp-hint { font-size: 12px; color: #64748b; margin-top: 8px; }
-    .btn-wrap { text-align: center; margin: 24px 0; }
-    .reset-btn { display: inline-block; background: linear-gradient(135deg, #38bdf8, #0284c7); color: #070b14 !important; font-size: 15px; font-weight: 800; text-decoration: none; padding: 14px 32px; border-radius: 10px; box-shadow: 0 4px 18px rgba(56,189,248,0.35); }
-    .link-fallback { background: #151f34; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; color: #38bdf8; word-break: break-all; margin: 16px 0; }
-    .notice { font-size: 13px; color: #64748b; line-height: 1.5; margin-top: 20px; }
-    .footer { font-size: 11.5px; color: #475569; text-align: center; margin-top: 28px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Reset Code</title>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 class="title">🗣️ VocaMate</h1>
-      <span class="badge">PASSWORD RESET</span>
-    </div>
-    <div class="greeting">Hello ${user.displayName || 'Learner'},</div>
-    <div class="text">
-      We received a request to reset your password for your <strong>VocaMate</strong> account (User ID: <strong>#${user.userCode || '----'}</strong>).
-      Enter the 6-digit OTP code below directly on the password reset screen:
+<body style="margin:0; padding:24px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background-color:#f1f5f9; color:#0f172a;">
+  <div style="max-width:540px; margin:0 auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:32px 28px; box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+    <div style="border-bottom:1px solid #e2e8f0; padding-bottom:18px; margin-bottom:20px;">
+      <h2 style="margin:0; font-size:22px; font-weight:800; color:#0284c7; letter-spacing:-0.3px;">VocaMate</h2>
+      <p style="margin:4px 0 0 0; font-size:12px; color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Password Reset Request</p>
     </div>
 
-    <div class="otp-box">
-      <div class="otp-label">Your 6-Digit Password Reset OTP</div>
-      <div class="otp-val">${displayOtp}</div>
-      <div class="otp-hint">Valid for 15 minutes • Do not share this code</div>
+    <p style="font-size:15px; font-weight:600; color:#0f172a; margin:0 0 12px 0;">Hello ${user.displayName || 'Learner'},</p>
+    <p style="font-size:14px; line-height:1.6; color:#475569; margin:0 0 18px 0;">
+      We received a request to reset the password for your VocaMate account (User ID: <strong>#${user.userCode || '----'}</strong>).
+      Please enter the 6-digit verification code below on the password reset screen:
+    </p>
+
+    <!-- Clear, High-Contrast OTP Code Card -->
+    <div style="background:#f0f9ff; border:2px dashed #0284c7; border-radius:10px; padding:22px 16px; text-align:center; margin:22px 0;">
+      <div style="font-size:12px; font-weight:700; color:#0369a1; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Your 6-Digit Password Reset Code</div>
+      <div style="font-size:36px; font-weight:800; color:#0f172a; letter-spacing:8px; font-family:'Courier New',Courier,monospace;">${displayOtp}</div>
+      <div style="font-size:12px; color:#64748b; margin-top:8px;">Valid for 15 minutes • Do not share this code with anyone</div>
     </div>
 
-    <div class="btn-wrap">
-      <a href="${resetUrl}" class="reset-btn">👉 Open Password Reset Page</a>
+    <div style="text-align:center; margin:24px 0 18px 0;">
+      <a href="${resetUrl}" style="display:inline-block; background:#0284c7; color:#ffffff; font-size:14px; font-weight:700; text-decoration:none; padding:12px 28px; border-radius:8px;">Open Password Reset Page</a>
     </div>
 
-    <div class="text" style="font-size:13px; margin-bottom:8px;">
-      Or use this direct link in your browser:
-    </div>
-    <div class="link-fallback">${resetUrl}</div>
-
-    <div class="notice">
-      ⏱️ <strong>This reset code is valid for 15 minutes</strong> and can only be used once.<br>
-      🛡️ If you did not request a password reset, you can safely ignore this email — your account remains completely secure.
+    <p style="font-size:12.5px; color:#64748b; margin:16px 0 4px 0;">Or copy and paste this link in your browser:</p>
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:10px; font-family:monospace; font-size:11.5px; color:#0284c7; word-break:break-all;">
+      ${resetUrl}
     </div>
 
-    <div class="footer">
-      VocaMate AI English Speaking Platform • Real-time Conversation Practice<br>
-      © ${new Date().getFullYear()} VocaMate.
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#64748b; line-height:1.5; margin-top:20px;">
+      If you did not request a password reset, you can safely disregard this email — your account remains secure.
+    </div>
+
+    <div style="border-top:1px solid #e2e8f0; padding-top:16px; margin-top:24px; font-size:11.5px; color:#94a3b8; text-align:center; line-height:1.5;">
+      VocaMate Learning Platform • AI English Speaking & Peer Conversation Practice<br>
+      This is an automated transactional security email sent to ${user.email}.
     </div>
   </div>
 </body>
@@ -522,12 +542,14 @@ Hello ${user.displayName || 'Learner'},
 We received a request to reset your password for your VocaMate account (#${user.userCode}).
 
 Your 6-Digit Password Reset OTP: ${displayOtp}
-(Valid for 15 minutes)
+(This code is valid for 15 minutes)
 
-Direct Reset Link:
+Direct Password Reset Link:
 ${resetUrl}
 
 If you did not request a password reset, you can safely ignore this message.
+
+VocaMate Learning Platform
   `.trim();
 
   const sendRes = await sendEmail({
@@ -578,79 +600,53 @@ async function sendVerificationEmail({ user, token, otp, appUrl }) {
   const resolvedAppUrl = (appUrl || process.env.APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
   const verifyUrl = `${resolvedAppUrl}/verify-email.html?token=${token}`;
   const displayOtp = otp ? String(otp).trim() : token.slice(0, 6);
-  const subject = `✉️ Your VocaMate Verification Code: ${displayOtp} (User ID: #${user.userCode})`;
+  // Anti-spam subject: clear, standard transactional style without emojis
+  const subject = `VocaMate: Your verification code is ${displayOtp}`;
 
   const html = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #070b14; color: #f8fafc; margin: 0; padding: 24px; }
-    .container { max-width: 540px; margin: 0 auto; background: #0e1526; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 32px; box-shadow: 0 12px 36px rgba(0,0,0,0.5); }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; }
-    .title { font-size: 22px; font-weight: 800; color: #10b981; margin: 0; }
-    .badge { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-    .greeting { font-size: 17px; font-weight: 700; color: #ffffff; margin-bottom: 12px; }
-    .text { font-size: 14.5px; line-height: 1.6; color: #94a3b8; margin-bottom: 20px; }
-    .id-box { background: rgba(16,185,129,0.08); border: 1.5px dashed rgba(16,185,129,0.35); border-radius: 12px; padding: 14px 18px; margin: 18px 0; text-align: center; }
-    .id-box .id-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px; }
-    .id-box .id-val { font-size: 24px; font-weight: 800; color: #10b981; letter-spacing: 2px; font-family: monospace; }
-    .otp-box { background: rgba(16,185,129,0.1); border: 2px dashed #10b981; border-radius: 12px; padding: 20px; text-align: center; margin: 24px 0; }
-    .otp-label { font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
-    .otp-val { font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #10b981; font-family: monospace; }
-    .otp-hint { font-size: 12px; color: #64748b; margin-top: 8px; }
-    .btn-wrap { text-align: center; margin: 24px 0; }
-    .verify-btn { display: inline-block; background: linear-gradient(135deg, #10b981, #0d9488); color: #ffffff !important; font-size: 15px; font-weight: 800; text-decoration: none; padding: 14px 34px; border-radius: 12px; box-shadow: 0 4px 18px rgba(16,185,129,0.35); }
-    .link-fallback { background: #151f34; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; color: #38bdf8; word-break: break-all; margin: 16px 0; }
-    .notice { font-size: 13px; color: #64748b; line-height: 1.5; margin-top: 20px; }
-    .footer { font-size: 11.5px; color: #475569; text-align: center; margin-top: 28px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify your VocaMate Account</title>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 class="title">🗣️ VocaMate</h1>
-      <span class="badge">EMAIL VERIFICATION</span>
-    </div>
-    <div class="greeting">Welcome, ${user.displayName || 'Learner'}!</div>
-    <div class="text">
-      Thank you for joining <strong>VocaMate</strong>, your AI English Speaking & Peer Conversation platform.
-      Your permanent 4-digit User ID has been automatically assigned:
+<body style="margin:0; padding:24px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background-color:#f1f5f9; color:#0f172a;">
+  <div style="max-width:540px; margin:0 auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:32px 28px; box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+    <div style="border-bottom:1px solid #e2e8f0; padding-bottom:18px; margin-bottom:20px;">
+      <h2 style="margin:0; font-size:22px; font-weight:800; color:#0284c7; letter-spacing:-0.3px;">VocaMate</h2>
+      <p style="margin:4px 0 0 0; font-size:12px; color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Account Verification</p>
     </div>
 
-    <div class="id-box">
-      <div class="id-label">Your Unique 4-Digit User ID</div>
-      <div class="id-val">#${user.userCode}</div>
+    <p style="font-size:15px; font-weight:600; color:#0f172a; margin:0 0 12px 0;">Welcome, ${user.displayName || 'Learner'}!</p>
+    <p style="font-size:14px; line-height:1.6; color:#475569; margin:0 0 18px 0;">
+      Thank you for creating an account on <strong>VocaMate</strong>. Your permanent User ID is <strong>#${user.userCode}</strong>.
+      Please use the 6-digit verification code below to activate your account:
+    </p>
+
+    <!-- Clear, High-Contrast OTP Code Card -->
+    <div style="background:#f0fdf4; border:2px dashed #16a34a; border-radius:10px; padding:22px 16px; text-align:center; margin:22px 0;">
+      <div style="font-size:12px; font-weight:700; color:#15803d; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Your 6-Digit Verification Code</div>
+      <div style="font-size:36px; font-weight:800; color:#0f172a; letter-spacing:8px; font-family:'Courier New',Courier,monospace;">${displayOtp}</div>
+      <div style="font-size:12px; color:#64748b; margin-top:8px;">Enter this code on the verification screen to activate your account</div>
     </div>
 
-    <div class="otp-box">
-      <div class="otp-label">Your 6-Digit Verification Code (OTP)</div>
-      <div class="otp-val">${displayOtp}</div>
-      <div class="otp-hint">Enter this 6-digit code on the screen to activate your account instantly</div>
+    <div style="text-align:center; margin:24px 0 18px 0;">
+      <a href="${verifyUrl}" style="display:inline-block; background:#16a34a; color:#ffffff; font-size:14px; font-weight:700; text-decoration:none; padding:12px 28px; border-radius:8px;">Verify Email Address</a>
     </div>
 
-    <div class="text">
-      You can also click the activation button below to verify your account in one click:
+    <p style="font-size:12.5px; color:#64748b; margin:16px 0 4px 0;">Or copy and paste this link in your browser:</p>
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:10px; font-family:monospace; font-size:11.5px; color:#0284c7; word-break:break-all;">
+      ${verifyUrl}
     </div>
 
-    <div class="btn-wrap">
-      <a href="${verifyUrl}" class="verify-btn">👉 Verify Email & Activate Account</a>
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#64748b; line-height:1.5; margin-top:20px;">
+      ⏱️ This code is valid for 15 minutes. If you did not sign up for a VocaMate account, please disregard this email.
     </div>
 
-    <div class="text" style="font-size:13px; margin-bottom:8px;">
-      Or copy and paste this link in your browser:
-    </div>
-    <div class="link-fallback">${verifyUrl}</div>
-
-    <div class="notice">
-      ⏱️ <strong>This OTP code is valid for 15 minutes</strong> (link valid for 24 hours).<br>
-      🛡️ If you did not create a VocaMate account, please disregard this email.
-    </div>
-
-    <div class="footer">
-      VocaMate AI English Speaking Platform • Real-time Conversation Practice<br>
-      © ${new Date().getFullYear()} VocaMate.
+    <div style="border-top:1px solid #e2e8f0; padding-top:16px; margin-top:24px; font-size:11.5px; color:#94a3b8; text-align:center; line-height:1.5;">
+      VocaMate Learning Platform • AI English Speaking & Peer Conversation Practice<br>
+      This is an automated transactional security email sent to ${user.email}.
     </div>
   </div>
 </body>
@@ -662,13 +658,15 @@ Welcome to VocaMate, ${user.displayName || 'Learner'}!
 
 Your unique 4-digit User ID has been automatically assigned: #${user.userCode}
 
-Your 6-Digit Verification OTP: ${displayOtp}
+Your 6-Digit Verification Code (OTP): ${displayOtp}
 (Enter this code on the screen to activate your account)
 
 Direct Activation Link:
 ${verifyUrl}
 
-© VocaMate AI English Speaking Platform
+This code is valid for 15 minutes. If you did not create a VocaMate account, please disregard this email.
+
+VocaMate Learning Platform
   `.trim();
 
   const sendRes = await sendEmail({
@@ -736,23 +734,36 @@ function getEmailGatewayConfig() {
   };
 }
 
+function isMaskedValue(val) {
+  if (val === undefined || val === null) return true;
+  const s = String(val).trim();
+  if (!s) return false;
+  return /^[\u2022\u25cf\*\s]+$/.test(s) || s.includes('••••••••') || s.includes('********');
+}
+
 function updateEmailGatewayConfig(newCfg = {}) {
   const existing = loadEmailConfig();
   const merged = { ...existing };
 
   if (newCfg.fromEmail !== undefined) merged.fromEmail = (newCfg.fromEmail || '').trim();
-  if (newCfg.resendApiKey !== undefined && newCfg.resendApiKey !== '********') {
+  if (newCfg.resendApiKey !== undefined && !isMaskedValue(newCfg.resendApiKey)) {
     merged.resendApiKey = (newCfg.resendApiKey || '').trim();
   }
   if (newCfg.gmailUser !== undefined) merged.gmailUser = (newCfg.gmailUser || '').trim();
-  if (newCfg.gmailAppPassword !== undefined && newCfg.gmailAppPassword !== '********') {
-    merged.gmailAppPassword = (newCfg.gmailAppPassword || '').trim();
+  if (newCfg.gmailAppPassword !== undefined && !isMaskedValue(newCfg.gmailAppPassword)) {
+    // Strip spaces since users copy Google App Passwords like 'abcd efgh ijkl mnop'
+    merged.gmailAppPassword = String(newCfg.gmailAppPassword || '').replace(/\s+/g, '');
   }
   if (newCfg.smtpHost !== undefined) merged.smtpHost = (newCfg.smtpHost || '').trim();
   if (newCfg.smtpPort !== undefined) merged.smtpPort = parseInt(newCfg.smtpPort || '587', 10);
   if (newCfg.smtpUser !== undefined) merged.smtpUser = (newCfg.smtpUser || '').trim();
-  if (newCfg.smtpPass !== undefined && newCfg.smtpPass !== '********') {
-    merged.smtpPass = (newCfg.smtpPass || '').trim();
+  if (newCfg.smtpPass !== undefined && !isMaskedValue(newCfg.smtpPass)) {
+    merged.smtpPass = String(newCfg.smtpPass || '').trim();
+  }
+
+  // If user entered a gmailUser, auto-set fromEmail if not set
+  if (merged.gmailUser && (!merged.fromEmail || merged.fromEmail.includes('resend.dev'))) {
+    merged.fromEmail = `VocaMate <${merged.gmailUser}>`;
   }
 
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(merged, null, 2), 'utf8');
@@ -769,17 +780,40 @@ async function sendTestEmail(toEmail) {
   const testOtp = String(Math.floor(100000 + Math.random() * 900000));
   const res = await sendEmail({
     to: target,
-    subject: `🧪 VocaMate Email Gateway Test (OTP: ${testOtp})`,
+    subject: `VocaMate: Your email test code is ${testOtp}`,
     html: `
-      <div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; max-width:520px; margin:0 auto; padding:28px; background:#0f172a; color:#f8fafc; border-radius:14px; border:1px solid rgba(255,255,255,0.1);">
-        <h2 style="color:#38bdf8; margin-top:0;">🗣️ VocaMate Email Gateway Test</h2>
-        <p style="font-size:15px; color:#cbd5e1; line-height:1.6;">This test email confirms that your email gateway is successfully delivering messages to: <strong style="color:#ffffff;">${target}</strong></p>
-        <div style="background:rgba(56,189,248,0.1); border:2px dashed #38bdf8; border-radius:10px; padding:18px; text-align:center; margin:22px 0;">
-          <div style="font-size:12px; color:#94a3b8; text-transform:uppercase; font-weight:700; letter-spacing:1px;">Test Verification OTP</div>
-          <div style="font-size:34px; font-weight:900; color:#38bdf8; letter-spacing:8px; font-family:monospace; margin-top:6px;">${testOtp}</div>
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>VocaMate Email Test</title>
+      </head>
+      <body style="margin:0; padding:24px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background-color:#f1f5f9; color:#0f172a;">
+        <div style="max-width:520px; margin:0 auto; padding:32px 28px; background:#ffffff; color:#0f172a; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+          <div style="border-bottom:1px solid #e2e8f0; padding-bottom:14px; margin-bottom:18px;">
+            <h2 style="color:#0284c7; margin:0; font-size:20px; font-weight:800;">VocaMate Email Gateway Test</h2>
+            <p style="margin:4px 0 0 0; font-size:12px; color:#64748b; text-transform:uppercase; font-weight:700;">Delivery & Anti-Spam Check</p>
+          </div>
+          <p style="font-size:14.5px; color:#475569; line-height:1.6; margin:0 0 16px 0;">
+            This test verifies that your VocaMate email gateway is successfully dispatching messages to:
+            <br><strong style="color:#0f172a; font-size:15px;">${target}</strong>
+          </p>
+          <div style="background:#f0f9ff; border:2px dashed #0284c7; border-radius:10px; padding:20px; text-align:center; margin:20px 0;">
+            <div style="font-size:11.5px; color:#0369a1; text-transform:uppercase; font-weight:700; letter-spacing:1px;">Test Verification OTP</div>
+            <div style="font-size:36px; font-weight:800; color:#0f172a; letter-spacing:8px; font-family:'Courier New',Courier,monospace; margin-top:6px;">${testOtp}</div>
+            <div style="font-size:11.5px; color:#64748b; margin-top:6px;">Valid for 15 minutes</div>
+          </div>
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px 14px; font-size:13px; color:#166534; line-height:1.5;">
+            <strong>Inbox Placement Confirmed:</strong> Because this email reached your inbox, all student registrations and password resets will reach their devices reliably.
+          </div>
+          <div style="border-top:1px solid #e2e8f0; padding-top:14px; margin-top:22px; font-size:11.5px; color:#94a3b8; text-align:center;">
+            VocaMate Learning Platform • Automated Dispatcher<br>
+            If you did not request this test, you can safely ignore this email.
+          </div>
         </div>
-        <p style="font-size:13px; color:#94a3b8; line-height:1.5;">✅ If this email reached your inbox, all new users registering with this domain or email will receive their 6-digit OTP codes instantly!</p>
-      </div>
+      </body>
+      </html>
     `,
     text: `VocaMate Email Gateway Test\nTarget: ${target}\nTest OTP: ${testOtp}\nYour email gateway is working!`,
     type: 'test_email',

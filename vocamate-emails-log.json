@@ -1,6 +1,148 @@
 {
   "logs": [
     {
+      "id": "mail_1791088319546_291",
+      "timestamp": "2026-10-04T04:31:59.546Z",
+      "to": "chandrashekharbansal.2006@gmail.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your email test code is 610982",
+      "type": "test_email",
+      "status": "sent",
+      "provider": "smtp",
+      "error": null,
+      "metadata": {
+        "test": true,
+        "otp": "610982"
+      },
+      "smtpId": "<f3ace044-a392-1a43-7b8b-41afac1ea1a1@gmail.com>"
+    },
+    {
+      "id": "mail_1791087756507_290",
+      "timestamp": "2026-10-04T04:22:36.507Z",
+      "to": "chandra.bansal.24@gmail.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your verification code is 260322",
+      "type": "email_verification",
+      "status": "sent",
+      "provider": "smtp",
+      "error": null,
+      "metadata": {
+        "userId": 12,
+        "userCode": "8728",
+        "displayName": "Chandrashekhar Bansal",
+        "otp": "260322",
+        "verifyUrl": "https://ais-dev-wjfzh3wblmsfylzyd4kbch-765595495038.asia-southeast1.run.app/verify-email.html?token=a09788c6531d0b9d515e28dd5b3f3c2022b814e991cc604c0815e47123d781f5",
+        "tokenPrefix": "a09788c6"
+      },
+      "smtpId": "<aff11c59-1640-1233-5ca4-de36485c5d44@gmail.com>"
+    },
+    {
+      "id": "mail_1791086642893_289",
+      "timestamp": "2026-10-04T04:04:02.893Z",
+      "to": "student_manual_activate@gmail.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your verification code is 169304",
+      "type": "email_verification",
+      "status": "delivered_local",
+      "provider": "console_fallback",
+      "error": null,
+      "metadata": {
+        "userId": 15,
+        "userCode": "6214",
+        "displayName": "Karan Patel",
+        "otp": "169304",
+        "verifyUrl": "http://127.0.0.1:3000/verify-email.html?token=e70d1131f1309b6940ca6fe0a1a40134d250dcda8182ef6b5d455a076f55d5e1",
+        "tokenPrefix": "e70d1131"
+      }
+    },
+    {
+      "id": "mail_1791086631519_288",
+      "timestamp": "2026-10-04T04:03:51.519Z",
+      "to": "phone_learner_test@gmail.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your verification code is 814456",
+      "type": "email_verification",
+      "status": "delivered_local",
+      "provider": "console_fallback",
+      "error": null,
+      "metadata": {
+        "userId": 14,
+        "userCode": "4313",
+        "displayName": "Pooja Sharma",
+        "otp": "814456",
+        "verifyUrl": "http://127.0.0.1:3000/verify-email.html?token=4d8af75bfe6266265cdda9556027c2c69a7dac00d5c1f2e52ef67d6168991657",
+        "tokenPrefix": "4d8af75b"
+      }
+    },
+    {
+      "id": "mail_1791086587354_287",
+      "timestamp": "2026-10-04T04:03:07.354Z",
+      "to": "testphoneuser@gmail.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your verification code is 152343",
+      "type": "email_verification",
+      "status": "delivered_local",
+      "provider": "console_fallback",
+      "error": null,
+      "metadata": {
+        "userId": 13,
+        "userCode": "1627",
+        "displayName": "Mobile Student",
+        "otp": "152343",
+        "verifyUrl": "http://127.0.0.1:3000/verify-email.html?token=3d1388a0c35ad77759c7dc0e87bdc3190e2dba29b3c9f6f376c5edbdba01e719",
+        "tokenPrefix": "3d1388a0"
+      }
+    },
+    {
+      "id": "mail_1791086252182_286",
+      "timestamp": "2026-10-04T03:57:32.182Z",
+      "to": "chandrashekharb.2405@gmail.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "🧪 VocaMate Email Gateway Test (OTP: 246629)",
+      "type": "test_email",
+      "status": "delivered_local",
+      "provider": "console_fallback",
+      "error": "SMTP: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-cc9f739a977sm2467692a12.26 - gsmtp",
+      "metadata": {
+        "test": true,
+        "otp": "246629"
+      }
+    },
+    {
+      "id": "mail_1791086234384_285",
+      "timestamp": "2026-10-04T03:57:14.384Z",
+      "to": "chandrashekharb.2405@gmail.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "🧪 VocaMate Email Gateway Test (OTP: 689663)",
+      "type": "test_email",
+      "status": "delivered_local",
+      "provider": "console_fallback",
+      "error": "SMTP: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-3a78e4c6135sm5151612a91.13 - gsmtp",
+      "metadata": {
+        "test": true,
+        "otp": "689663"
+      }
+    },
+    {
+      "id": "mail_1791085981408_284",
+      "timestamp": "2026-10-04T03:53:01.408Z",
+      "to": "chandra.bansal.24@gmail.com",
+      "from": "VocaMate <onboarding@resend.dev>",
+      "subject": "✉️ Your VocaMate Verification Code: 471060 (User ID: #8728)",
+      "type": "email_verification",
+      "status": "delivered_local",
+      "provider": "console_fallback",
+      "error": null,
+      "metadata": {
+        "userId": 12,
+        "userCode": "8728",
+        "displayName": "Chandrashekhar Bansal",
+        "otp": "471060",
+        "verifyUrl": "https://ais-dev-wjfzh3wblmsfylzyd4kbch-765595495038.asia-southeast1.run.app/verify-email.html?token=5d9679a67da3ac3c590d5fc8b811849988f7a8a720668011686ea23ee071e040",
+        "tokenPrefix": "5d9679a6"
+      }
+    },
+    {
       "id": "mail_1791082462423_283",
       "timestamp": "2026-10-04T02:54:22.423Z",
       "to": "student_test_1791082461923@gmail.com",
@@ -4866,5 +5008,5 @@
       }
     }
   ],
-  "nextEmailId": 284
+  "nextEmailId": 292
 }
