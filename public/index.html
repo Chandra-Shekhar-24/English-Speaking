@@ -10,6 +10,19 @@
   <meta property="og:description" content="AI English conversation practice with text chat, 20 voices, and real-time audio and video calls with friends." />
   <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('vocamate_theme');
+        if (saved === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+          document.documentElement.classList.add('light-theme');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch(e) {}
+    })();
+  </script>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 
@@ -26,7 +39,7 @@
         <button type="button" class="call-type-btn" id="groupVideoTypeBtn"><span class="call-type-icon">🎥</span>Video</button>
       </div>
       <div class="friend-row">
-        <input id="groupIdInput" placeholder="Enter 4-digit ID" maxlength="4" />
+        <input id="groupIdInput" placeholder="Enter User ID" maxlength="10" />
         <button class="connect-btn" id="addGroupIdBtn">+ Add</button>
       </div>
       <div class="group-chip-list" id="groupChipList"></div>
@@ -60,7 +73,7 @@
     </div>
     <div class="group-call-grid" id="groupCallGrid"></div>
     <div class="group-add-participant-box" id="groupAddParticipantBox" style="display:none;">
-      <input id="groupAddParticipantInput" placeholder="Friend ID" maxlength="4" />
+      <input id="groupAddParticipantInput" placeholder="Enter User ID" maxlength="10" />
       <button id="confirmAddParticipantBtn">Invite</button>
     </div>
     <div class="group-call-controls">
@@ -279,17 +292,21 @@
         <div class="admin-header-title">
           <div class="admin-brand-icon">🛡️</div>
           <div class="admin-brand-texts">
-            <h3>VocaMate Admin</h3>
-            <span class="admin-brand-sub">Learner Activity & Gateway Center</span>
+            <div class="admin-brand-top-row">
+              <h3>VocaMate Admin</h3>
+              <span class="admin-active-badge" id="adminAuthStatusBadge">Authorized</span>
+            </div>
+            <span class="admin-brand-sub">Learner Activity & Email Delivery Gateway</span>
           </div>
-          <span class="admin-active-badge" id="adminAuthStatusBadge">Authorized</span>
         </div>
         <div class="admin-header-actions">
-          <button class="admin-btn" id="adminRefreshBtn" title="Refresh user list & activity">🔄 Refresh</button>
-          <button class="admin-btn" id="adminCopyAllJsonBtn" title="Copy full structured JSON of all users">📋 Copy JSON</button>
-          <button class="admin-btn danger" id="adminPurgeStudentsBtn" title="Delete unverified or test student accounts">🗑️ Clean Students</button>
-          <button class="admin-btn" id="adminLogoutBtn" title="Lock Admin Console">🔒 Lock</button>
-          <button class="admin-modal-close" id="closeAdminModalBtn" title="Close Console">✕</button>
+          <button class="admin-btn primary" id="adminRefreshBtn" title="Refresh user list & activity">🔄 Refresh</button>
+          <button class="admin-btn danger-soft" id="adminPurgeStudentsBtn" title="Clean unverified or test student accounts">🗑️ Clean</button>
+          <div class="admin-header-divider"></div>
+          <button class="admin-btn icon-btn" id="adminCopyAllJsonBtn" title="Copy full structured JSON of all users" aria-label="Copy JSON">📋 JSON</button>
+          <button class="admin-btn icon-btn" id="adminThemeToggleBtn" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">🌓</button>
+          <button class="admin-btn icon-btn" id="adminLogoutBtn" title="Lock Admin Console" aria-label="Lock Console">🔒 Lock</button>
+          <button class="admin-modal-close" id="closeAdminModalBtn" title="Close Console" aria-label="Close">✕</button>
         </div>
       </div>
 
@@ -316,28 +333,46 @@
 
       <!-- STATS RIBBON -->
       <div class="admin-stats-ribbon" id="adminStatsRibbon">
-        <div class="admin-stat-chip">
-          <span class="chip-label">Total Users</span>
+        <div class="admin-stat-chip stat-users">
+          <div class="chip-top">
+            <span class="chip-icon">👥</span>
+            <span class="chip-label">Total Students</span>
+          </div>
           <span class="chip-value" id="adminStatTotalUsers">0</span>
         </div>
-        <div class="admin-stat-chip live">
-          <span class="chip-label">🟢 Online Live</span>
+        <div class="admin-stat-chip live stat-online">
+          <div class="chip-top">
+            <span class="live-dot-pulse"></span>
+            <span class="chip-label">Live Online</span>
+          </div>
           <span class="chip-value" id="adminStatOnlineUsers">0</span>
         </div>
-        <div class="admin-stat-chip">
-          <span class="chip-label">📞 In-Call Active</span>
+        <div class="admin-stat-chip stat-incall">
+          <div class="chip-top">
+            <span class="chip-icon">📞</span>
+            <span class="chip-label">In-Call Active</span>
+          </div>
           <span class="chip-value" id="adminStatInCall">0</span>
         </div>
-        <div class="admin-stat-chip">
-          <span class="chip-label">⚡ 24h Events</span>
+        <div class="admin-stat-chip stat-events">
+          <div class="chip-top">
+            <span class="chip-icon">⚡</span>
+            <span class="chip-label">24h Events</span>
+          </div>
           <span class="chip-value" id="adminStat24hEvents">0</span>
         </div>
-        <div class="admin-stat-chip">
-          <span class="chip-label">🤖 AI Practices</span>
+        <div class="admin-stat-chip stat-ai">
+          <div class="chip-top">
+            <span class="chip-icon">🤖</span>
+            <span class="chip-label">AI Practices</span>
+          </div>
           <span class="chip-value" id="adminStatAiPractices">0</span>
         </div>
-        <div class="admin-stat-chip">
-          <span class="chip-label">⏱️ Total Spoken Min</span>
+        <div class="admin-stat-chip stat-minutes">
+          <div class="chip-top">
+            <span class="chip-icon">⏱️</span>
+            <span class="chip-label">Spoken Min</span>
+          </div>
           <span class="chip-value" id="adminStatCallMinutes">0</span>
         </div>
       </div>
@@ -483,9 +518,15 @@
               <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Your Gmail Address</label>
               <input type="email" id="gwGmailUser" placeholder="e.g. yourname@gmail.com" style="width:100%; margin-top:4px; margin-bottom:12px;" />
               
-              <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Google 16-Character App Password</label>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Google 16-Character App Password</label>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span id="gwGmailPassStatus" style="font-size:11px; font-weight:700;"></span>
+                  <button type="button" id="gwClearPassBtn" class="admin-btn text-btn" style="display:none; padding:2px 8px; font-size:10.5px; color:#f87171;" title="Clear saved password">🗑️ Clear</button>
+                </div>
+              </div>
               <div class="password-input-wrap" style="margin-top:4px; margin-bottom:8px;">
-                <input type="password" id="gwGmailPass" placeholder="e.g. abcd efgh ijkl mnop" style="margin-bottom:0;" />
+                <input type="password" id="gwGmailPass" placeholder="e.g. abcd efgh ijkl mnop" style="margin-bottom:0;" autocomplete="off" />
                 <button type="button" class="password-toggle-btn" data-target="gwGmailPass" title="Show password" aria-label="Toggle password visibility">
                   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 </button>
@@ -497,7 +538,11 @@
                 3. Name it "VocaMate", copy the 16 characters, and paste here!
               </div>
 
-              <button class="admin-btn primary" id="gwSaveBtn" style="width:100%; padding:11px; font-weight:700; font-size:13.5px;">💾 Save Gmail SMTP Settings</button>
+              <div style="display:flex; gap:8px;">
+                <button class="admin-btn primary" id="gwSaveBtn" style="flex:2; padding:11px; font-weight:700; font-size:13px;">💾 Save Gmail SMTP</button>
+                <button type="button" class="admin-btn" id="gwVerifyBtn" style="flex:1; padding:11px; font-weight:600; font-size:12.5px;">⚡ Test Connection</button>
+              </div>
+              <div id="gwVerifyResultBox" style="display:none; margin-top:10px; font-size:12px; padding:10px 12px; border-radius:8px; line-height:1.4;"></div>
             </div>
 
             <!-- Option B: Custom SMTP or Resend Domain -->
@@ -634,6 +679,7 @@
 
   <div class="onboarding-overlay" id="authOverlay" style="display:none;">
     <div class="onboarding-card">
+      <button type="button" id="authThemeToggleBtn" class="theme-corner-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">🌓 Theme</button>
       <button type="button" id="adminPortalBtn" class="admin-corner-btn" title="Admin Security Console">🛡️ Admin</button>
       <h2>🗣️ VocaMate</h2>
       <p class="subtitle" id="authSubtitle">Sign in to continue</p>
@@ -792,6 +838,10 @@
         <div class="header-badge">
           <div class="user-id-badge" id="userIdDisplay">ID: ----</div>
           <div class="online-count"><span class="dot"></span> <span id="onlineCount">0</span> online</div>
+          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Switch Theme (Light / Dark)" aria-label="Toggle Theme">
+            <span class="theme-toggle-icon">🌙</span>
+            <span class="theme-toggle-label">Dark</span>
+          </button>
         </div>
       </div>
     </div>
@@ -909,19 +959,30 @@
         <div class="friend-dashboard-grid">
           <!-- Column 1: Identity & Direct 1-on-1 Call Controls -->
           <div class="friend-card">
-            <div class="friend-info">
-              <div class="friend-avatar-ring">🎧</div>
-              <div class="label">Your Practice ID</div>
-              <div class="value" id="friendUserId">----</div>
-              <div class="status" id="friendStatus">Online</div>
-              <div class="account-actions">
-                <button id="changeIdBtn" class="account-link-btn">✏️ Change ID</button>
-                <button id="logoutBtn" class="account-link-btn">🚪 Logout</button>
+            <div class="friend-info account-security-box">
+              <!-- Left top corner Logout Icon Button -->
+              <button id="logoutBtn" class="account-logout-icon-btn" title="Logout from VocaMate" aria-label="Logout">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+              </button>
+
+              <!-- Security Shield Icon (Shield + Lock + User symbol) -->
+              <div class="account-security-shield-icon" title="Account Security">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <circle cx="12" cy="10" r="2.5"/>
+                  <path d="M8.5 16.5a3.5 3.5 0 0 1 7 0"/>
+                </svg>
               </div>
-              <div class="change-id-box" id="changeIdBox" style="display:none;">
-                <input id="newUserCodeInput" placeholder="New ID" maxlength="4" inputmode="numeric" />
-                <button id="confirmChangeIdBtn">Save</button>
+
+              <!-- Clean Read-Only User ID -->
+              <div class="account-readonly-user-id">
+                User ID: <span id="friendUserId">----</span>
               </div>
+              <div class="status" id="friendStatus"><span class="status-live-dot"></span> Online</div>
             </div>
 
             <div class="video-call-container" id="videoCallContainer" style="display:none;">
@@ -936,7 +997,7 @@
                 <button type="button" class="call-type-btn" id="videoTypeBtn"><span class="call-type-icon">🎥</span>Video Call</button>
               </div>
               <div class="friend-row">
-                <input id="friendIdInput" placeholder="Enter 4-digit ID" maxlength="4" inputmode="numeric" />
+                <input id="friendIdInput" placeholder="Enter User ID (e.g. 67208)" maxlength="10" inputmode="numeric" />
                 <button class="connect-btn" id="connectBtn">Connect</button>
               </div>
               <div class="friend-actions-grid" id="chatEntryRow">
@@ -955,39 +1016,44 @@
             <div class="call-timer" id="callTimerDisplay">00:00</div>
           </div>
 
-          <!-- Column 2: Instant Peer Practice Hub & Online Learners -->
-          <div class="friend-card">
-            <!-- VocaMate Instant Peer Practice Hub -->
-            <div class="random-call-card">
-              <div class="random-call-header">
-                <div class="random-call-icon-box" style="background:rgba(16,185,129,0.15); color:var(--voca-emerald);">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+          <!-- Column 2: GLOBAL PEER PRACTICE (Merged & Prominent) -->
+          <div class="friend-card global-peer-card">
+            <div class="global-peer-container">
+              <!-- Section Header -->
+              <div class="global-peer-header">
+                <div class="global-peer-title-wrap">
+                  <span class="global-peer-globe">🌐</span>
+                  <div>
+                    <h3 class="global-peer-title">GLOBAL PEER PRACTICE</h3>
+                    <p class="global-peer-sub"><span class="live-dot-pulse"></span> Instant 1-on-1 English speaking with active learners worldwide</p>
+                  </div>
+                </div>
+                <span class="global-peer-badge"><span id="peerOnlineCount">0</span> Online</span>
+              </div>
+
+              <!-- Prominent "Find Practice Partner Now" Button -->
+              <div class="global-peer-match-wrap">
+                <button class="voca-primary-random-btn wa-primary-random-btn" id="randomMatchBtn">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-2.2 2.2a15.045 15.045 0 0 1-6.59-6.59l2.2-2.21a.96.96 0 0 0 .25-1.01A11.36 11.36 0 0 1 8.57 3.9c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.51c.01-.56-.44-1.01-.99-1.01z"/>
                   </svg>
-                </div>
-                <div class="random-call-title-box">
-                  <div class="random-call-title">Instant Peer Practice Match</div>
-                  <div class="random-call-sub"><span class="live-dot-pulse"></span> Live 1-on-1 speaking practice with active learners</div>
-                </div>
+                  <span>Find Practice Partner Now</span>
+                </button>
               </div>
-              <button class="voca-primary-random-btn wa-primary-random-btn" id="randomMatchBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-2.2 2.2a15.045 15.045 0 0 1-6.59-6.59l2.2-2.21a.96.96 0 0 0 .25-1.01A11.36 11.36 0 0 1 8.57 3.9c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.51c.01-.56-.44-1.01-.99-1.01z"/>
-                </svg>
-                <span>Find Practice Partner Now</span>
-              </button>
-            </div>
 
-            <div class="online-users">
-              <div class="title">
-                <span>👤 Online Learners</span>
-                <span class="online-users-sub">1-Click Practice</span>
-              </div>
-              <div class="list" id="onlineUsersList">
-                <div class="empty">No users online</div>
+              <!-- Online Available Peers List -->
+              <div class="global-peer-list-box">
+                <div class="global-peer-list-header">
+                  <span>👥 Online Available Peers</span>
+                  <span class="sub-hint">1-Click Practice Call</span>
+                </div>
+                <div class="list" id="onlineUsersList">
+                  <div class="empty">No peers online right now</div>
+                </div>
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
@@ -1055,6 +1121,7 @@
         'groupMuteBtn', 'groupCameraBtn', 'leaveGroupCallBtn',
         'groupAddParticipantBox', 'groupAddParticipantInput', 'groupAddParticipantBtn', 'confirmAddParticipantBtn',
         'toastContainer',
+        'themeToggleBtn', 'authThemeToggleBtn', 'adminThemeToggleBtn',
         'authOverlay', 'authSubtitle', 'authError',
         'authLoginView', 'loginEmail', 'loginPassword', 'loginSubmitBtn', 'showForgotBtn', 'showSignupBtn',
         'authSignupView', 'signupName', 'signupEmail', 'signupPassword', 'signupConfirmPassword', 'signupSubmitBtn', 'showLoginFromSignupBtn',
@@ -1072,13 +1139,65 @@
         'adminCleanStudentsModal', 'closeCleanStudentsModalBtn', 'cancelCleanStudentsBtn', 'btnExecuteCleanUnverified', 'btnExecuteCleanAll', 'cleanUnverifiedCount', 'cleanFeedbackBox',
         'tabCountUsers', 'adminCardsContainer', 'adminRawJsonContainer', 'adminEmailGatewayContainer', 'adminEmailLogsContainer',
         'adminEmailLogsTableBody', 'adminRefreshLogsBtn', 'adminJsonSummaryLabel', 'adminCopyRawJsonBtn', 'adminRawJsonPre',
-        'gatewayStatusBadge', 'gatewaySandboxNotice', 'gwGmailUser', 'gwGmailPass', 'gwSmtpHost', 'gwSmtpPort', 'gwFromEmail', 'gwResendKey', 'gwSaveBtn', 'gwTestEmailInput', 'gwSendTestBtn', 'gwTestResultBox',
+        'gatewayStatusBadge', 'gatewaySandboxNotice', 'gwGmailUser', 'gwGmailPass', 'gwGmailPassStatus', 'gwClearPassBtn', 'gwSmtpHost', 'gwSmtpPort', 'gwFromEmail', 'gwResendKey', 'gwSaveBtn', 'gwVerifyBtn', 'gwVerifyResultBox', 'gwTestEmailInput', 'gwSendTestBtn', 'gwTestResultBox',
         'adminUserDetailView', 'adminDetailAvatar', 'adminDetailName', 'adminDetailCode', 'adminDetailStatus', 'adminDetailEmail', 'adminDetailTimeWindow',
         'adminDetailBackBtn', 'adminDetailRefreshBtn', 'adminDetailCopyJsonBtn', 'adminDetailDeleteUserBtn',
         'adminDetailEventsCount', 'adminDetailAiCount', 'adminDetailCallsCount', 'adminDetailMinutesCount', 'adminDetailCorrectionsCount', 'adminDetailLoginsCount',
         'adminDetailActiveConv', 'adminDetailActiveConvContent',
         'adminTimelineFilters', 'tCountAll', 'tCountAi', 'tCountCalls', 'tCountAuth', 'tCountChat', 'adminDetailToggleAllPayloadsBtn', 'adminDetailTimeline'
       ].forEach(id => { els[id] = $(id); });
+
+      // ==========================================================
+      // GLOBAL THEME SYSTEM (LIGHT / DARK MODE)
+      // ==========================================================
+      function applyTheme(theme) {
+        const isLight = theme === 'light';
+        document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+        if (isLight) {
+          document.documentElement.classList.add('light-theme');
+        } else {
+          document.documentElement.classList.remove('light-theme');
+        }
+        try { localStorage.setItem('vocamate_theme', isLight ? 'light' : 'dark'); } catch(e) {}
+        
+        if (els.themeToggleBtn) {
+          const icon = els.themeToggleBtn.querySelector('.theme-toggle-icon');
+          const label = els.themeToggleBtn.querySelector('.theme-toggle-label');
+          if (icon) icon.textContent = isLight ? '☀️' : '🌙';
+          if (label) label.textContent = isLight ? 'Light' : 'Dark';
+          els.themeToggleBtn.setAttribute('title', isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode');
+        }
+        if (els.authThemeToggleBtn) {
+          els.authThemeToggleBtn.innerHTML = isLight ? '☀️ Light' : '🌙 Dark';
+          els.authThemeToggleBtn.setAttribute('title', isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode');
+        }
+        if (els.adminThemeToggleBtn) {
+          els.adminThemeToggleBtn.innerHTML = isLight ? '☀️ Light' : '🌙 Dark';
+          els.adminThemeToggleBtn.setAttribute('title', isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode');
+        }
+      }
+
+      function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+        const nextTheme = current === 'light' ? 'dark' : 'light';
+        applyTheme(nextTheme);
+        showToast(nextTheme === 'light' ? '☀️' : '🌙', 'Theme Switched', `${nextTheme.charAt(0).toUpperCase() + nextTheme.slice(1)} Mode Enabled`);
+      }
+
+      function initTheme() {
+        let currentTheme = 'dark';
+        try {
+          const saved = localStorage.getItem('vocamate_theme');
+          if (saved === 'light' || saved === 'dark') currentTheme = saved;
+        } catch(e) {}
+        applyTheme(currentTheme);
+      }
+
+      initTheme();
+
+      if (els.themeToggleBtn) els.themeToggleBtn.addEventListener('click', toggleTheme);
+      if (els.authThemeToggleBtn) els.authThemeToggleBtn.addEventListener('click', toggleTheme);
+      if (els.adminThemeToggleBtn) els.adminThemeToggleBtn.addEventListener('click', toggleTheme);
 
       // ==========================================================
       // ONBOARDING
@@ -3691,40 +3810,50 @@
         els.onboarding.style.display = 'flex';
       }
 
-      els.logoutBtn.addEventListener('click', async () => {
-        try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) { console.error('Logout error:', e); }
-        window.location.reload();
-      });
+      if (els.logoutBtn) {
+        els.logoutBtn.addEventListener('click', async () => {
+          try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) { console.error('Logout error:', e); }
+          window.location.reload();
+        });
+      }
 
-      els.changeIdBtn.addEventListener('click', () => {
-        const isHidden = els.changeIdBox.style.display === 'none';
-        els.changeIdBox.style.display = isHidden ? 'flex' : 'none';
-        if (isHidden) { els.newUserCodeInput.focus(); }
-      });
+      if (els.changeIdBtn) {
+        els.changeIdBtn.addEventListener('click', () => {
+          if (!els.changeIdBox) return;
+          const isHidden = els.changeIdBox.style.display === 'none';
+          els.changeIdBox.style.display = isHidden ? 'flex' : 'none';
+          if (isHidden && els.newUserCodeInput) { els.newUserCodeInput.focus(); }
+        });
+      }
 
-      els.confirmChangeIdBtn.addEventListener('click', async () => {
-        const newCode = els.newUserCodeInput.value.trim();
-        if (!/^[0-9]{4}$/.test(newCode)) { els.friendCallStatus.textContent = '⚠️ Enter a valid 4-digit ID'; return; }
-        els.confirmChangeIdBtn.disabled = true;
-        try {
-          const res = await fetch('/api/auth/change-user-id', {
-            method: 'POST', credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ newCode })
-          });
-          const data = await res.json();
-          if (!res.ok) { throw new Error(data.error || 'Could not change ID'); }
-          els.friendCallStatus.textContent = '✅ User ID changed to ' + newCode + '. Reconnecting...';
-          setTimeout(() => { window.location.reload(); }, 1200);
-        } catch (e) {
-          els.friendCallStatus.textContent = '❌ ' + e.message;
-          els.confirmChangeIdBtn.disabled = false;
-        }
-      });
+      if (els.confirmChangeIdBtn) {
+        els.confirmChangeIdBtn.addEventListener('click', async () => {
+          if (!els.newUserCodeInput) return;
+          const newCode = els.newUserCodeInput.value.trim();
+          if (!/^[0-9]{4}$/.test(newCode)) { if (els.friendCallStatus) els.friendCallStatus.textContent = '⚠️ Enter a valid 4-digit ID'; return; }
+          els.confirmChangeIdBtn.disabled = true;
+          try {
+            const res = await fetch('/api/auth/change-user-id', {
+              method: 'POST', credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ newCode })
+            });
+            const data = await res.json();
+            if (!res.ok) { throw new Error(data.error || 'Could not change ID'); }
+            if (els.friendCallStatus) els.friendCallStatus.textContent = '✅ User ID changed to ' + newCode + '. Reconnecting...';
+            setTimeout(() => { window.location.reload(); }, 1200);
+          } catch (e) {
+            if (els.friendCallStatus) els.friendCallStatus.textContent = '❌ ' + e.message;
+            els.confirmChangeIdBtn.disabled = false;
+          }
+        });
+      }
 
-      els.newUserCodeInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); els.confirmChangeIdBtn.click(); }
-      });
+      if (els.newUserCodeInput) {
+        els.newUserCodeInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); if (els.confirmChangeIdBtn) els.confirmChangeIdBtn.click(); }
+        });
+      }
 
       async function bootstrapAuth() {
         try {
@@ -4057,7 +4186,10 @@
         if (els.adminEmailGatewayContainer) els.adminEmailGatewayContainer.style.display = 'none';
         if (els.adminEmailLogsContainer) els.adminEmailLogsContainer.style.display = 'none';
         if (els.adminUserDetailView) els.adminUserDetailView.style.display = 'none';
-        if (els.adminFiltersBar) els.adminFiltersBar.style.display = (mode === 'cards' || mode === 'json') ? 'flex' : 'none';
+        
+        // Only show students overview ribbon & search filters when viewing learner cards
+        if (els.adminStatsRibbon) els.adminStatsRibbon.style.display = (mode === 'cards') ? 'grid' : 'none';
+        if (els.adminFiltersBar) els.adminFiltersBar.style.display = (mode === 'cards') ? 'flex' : 'none';
 
         if (mode === 'cards') {
           if (els.adminCardsContainer) els.adminCardsContainer.style.display = 'flex';
@@ -4214,44 +4346,14 @@
                 </div>
               </div>
 
-              <!-- Profile Details -->
-              <div class="admin-user-details-grid">
-                <div class="admin-detail-item">
-                  <span class="admin-detail-label">Skill Level</span>
-                  <span class="admin-detail-val">${escapeHtml(prof.level || 'Intermediate')}</span>
-                </div>
-                <div class="admin-detail-item">
-                  <span class="admin-detail-label">Role / Job</span>
-                  <span class="admin-detail-val">${escapeHtml(prof.profession || 'Learner')}</span>
-                </div>
-                <div class="admin-detail-item">
-                  <span class="admin-detail-label">Speaking Goal</span>
-                  <span class="admin-detail-val">${escapeHtml(prof.goal || 'Spoken English')}</span>
-                </div>
-                <div class="admin-detail-item">
-                  <span class="admin-detail-label">Voice Preference</span>
-                  <span class="admin-detail-val">${escapeHtml(prof.preferredVoice ? prof.preferredVoice.replace('Neural', '').replace('en-IN-', '🇮🇳 ') : '🇮🇳 Neerja')}</span>
-                </div>
-              </div>
-
-              <!-- Login & Session Details -->
-              <div class="admin-user-details-grid" style="background:rgba(255,255,255,0.02);">
-                <div class="admin-detail-item">
-                  <span class="admin-detail-label">Last Active</span>
-                  <span class="admin-detail-val" title="${escapeHtml(login.lastActiveTime)}">⏱️ ${formatRelativeTime(login.lastActiveTime)}</span>
-                </div>
-                <div class="admin-detail-item">
-                  <span class="admin-detail-label">Last Login Time</span>
-                  <span class="admin-detail-val" title="${escapeHtml(login.lastLoginTime)}">🔑 ${formatFullDate(login.lastLoginTime)}</span>
-                </div>
-                <div class="admin-detail-item">
-                  <span class="admin-detail-label">IP Address</span>
-                  <span class="admin-detail-val mono">🌐 ${escapeHtml(login.ipAddress || 'Offline')}</span>
-                </div>
-                <div class="admin-detail-item">
-                  <span class="admin-detail-label">Active Sessions</span>
-                  <span class="admin-detail-val mono">💻 ${login.activeSessionCount || 0} active</span>
-                </div>
+              <!-- Profile & Learning Attributes Tags -->
+              <div class="admin-user-tags-row">
+                <span class="admin-tag-pill">🎯 ${escapeHtml(prof.level || 'Intermediate')}</span>
+                <span class="admin-tag-pill">💼 ${escapeHtml(prof.profession || 'Learner')}</span>
+                <span class="admin-tag-pill">🗣️ ${escapeHtml(prof.goal || 'Spoken English')}</span>
+                <span class="admin-tag-pill">🎙️ ${escapeHtml(prof.preferredVoice ? prof.preferredVoice.replace('Neural', '').replace('en-IN-', '🇮🇳 ') : '🇮🇳 Neerja')}</span>
+                <span class="admin-tag-pill subtle" title="${escapeHtml(login.lastActiveTime)}">⏱️ ${formatRelativeTime(login.lastActiveTime)}</span>
+                <span class="admin-tag-pill subtle mono" title="User IP">🌐 ${escapeHtml(login.ipAddress || 'Offline')}</span>
               </div>
 
               <!-- 24h Activity Metrics -->
@@ -4265,12 +4367,16 @@
                   <strong>${summary.aiPractices || 0}</strong>
                 </div>
                 <div class="admin-metric-group">
-                  <span>📞 Calls (24h):</span>
+                  <span>📞 Calls:</span>
                   <strong>${summary.callsCount || 0}</strong>
                 </div>
                 <div class="admin-metric-group">
                   <span>⏱️ Spoken Time:</span>
                   <strong>${summary.totalMinutesSpoken || 0} min</strong>
+                </div>
+                <div class="admin-metric-group" style="margin-left:auto;">
+                  <span style="font-size:11px; color:#94a3b8;">Registered:</span>
+                  <span style="font-size:11.5px; color:#cbd5e1;">${formatFullDate(u.createdAt || login.lastLoginTime)}</span>
                 </div>
               </div>
 
@@ -4282,10 +4388,10 @@
                     📊 24h Activity History
                   </button>
                   <button class="admin-btn btn-toggle-user-json" data-code="${escapeHtml(u.userCode)}">
-                    📦 { } View JSON
+                    📦 { } JSON
                   </button>
                   <button class="admin-btn btn-copy-user-json" data-code="${escapeHtml(u.userCode)}">
-                    📋 Copy JSON
+                    📋 Copy
                   </button>
                 </div>
                 <button class="admin-btn danger btn-delete-user" data-code="${escapeHtml(u.userCode)}" data-name="${escapeHtml(u.displayName)}">
@@ -4915,19 +5021,33 @@
           const cfg = res.config || {};
           if (els.gwGmailUser) els.gwGmailUser.value = cfg.gmailUser || '';
           if (els.gwGmailPass) {
-            els.gwGmailPass.value = '';
-            els.gwGmailPass.placeholder = cfg.hasGmailPass ? '•••••••• (Password Saved — type new to update)' : 'e.g. abcd efgh ijkl mnop';
+            if (cfg.hasGmailPass) {
+              els.gwGmailPass.value = '••••••••••••••••';
+              els.gwGmailPass.dataset.hasSaved = 'true';
+              if (els.gwGmailPassStatus) {
+                els.gwGmailPassStatus.innerHTML = '<span style="color:#34d399;">🟢 Password Saved (16 chars)</span>';
+              }
+              if (els.gwClearPassBtn) els.gwClearPassBtn.style.display = 'inline-flex';
+            } else {
+              els.gwGmailPass.value = '';
+              els.gwGmailPass.dataset.hasSaved = 'false';
+              if (els.gwGmailPassStatus) {
+                els.gwGmailPassStatus.innerHTML = '<span style="color:#f59e0b;">⚠️ No password saved</span>';
+              }
+              if (els.gwClearPassBtn) els.gwClearPassBtn.style.display = 'none';
+            }
+            els.gwGmailPass.placeholder = 'e.g. abcd efgh ijkl mnop';
           }
           if (els.gwSmtpHost) els.gwSmtpHost.value = cfg.smtpHost || '';
           if (els.gwSmtpPort) els.gwSmtpPort.value = cfg.smtpPort || '587';
           if (els.gwFromEmail) els.gwFromEmail.value = cfg.customDomain || '';
           if (els.gwResendKey) {
-            els.gwResendKey.value = '';
-            els.gwResendKey.placeholder = cfg.hasResend ? '•••••••• (Key Saved — type new to update)' : 're_...';
+            els.gwResendKey.value = cfg.hasResend ? '••••••••' : '';
+            els.gwResendKey.placeholder = 're_...';
           }
 
           if (cfg.activeProvider === 'gmail' || cfg.activeProvider === 'smtp') {
-            els.gatewayStatusBadge.textContent = '🟢 Gmail SMTP Active (Delivers to ALL emails)';
+            els.gatewayStatusBadge.textContent = '🟢 Gmail SMTP Active (Delivers to ALL Primary Inboxes)';
             els.gatewayStatusBadge.style.background = 'rgba(16,185,129,0.15)';
             els.gatewayStatusBadge.style.color = '#34d399';
             els.gatewayStatusBadge.style.borderColor = 'rgba(16,185,129,0.3)';
@@ -4958,6 +5078,79 @@
         }
       }
 
+      if (els.gwGmailPass) {
+        els.gwGmailPass.addEventListener('focus', () => {
+          if (els.gwGmailPass.dataset.hasSaved === 'true' && els.gwGmailPass.value === '••••••••••••••••') {
+            els.gwGmailPass.value = '';
+          }
+        });
+        els.gwGmailPass.addEventListener('blur', () => {
+          if (!els.gwGmailPass.value && els.gwGmailPass.dataset.hasSaved === 'true') {
+            els.gwGmailPass.value = '••••••••••••••••';
+          }
+        });
+      }
+
+      if (els.gwClearPassBtn) {
+        els.gwClearPassBtn.addEventListener('click', async () => {
+          try {
+            await adminFetch('/api/admin/email-gateway', {
+              method: 'POST',
+              body: JSON.stringify({ clearGmailPassword: true })
+            });
+            showToast('🗑️', 'Password Removed', 'Saved Gmail App Password has been cleared');
+            if (els.gwVerifyResultBox) els.gwVerifyResultBox.style.display = 'none';
+            await loadEmailGatewaySettings();
+          } catch (e) {
+            showToast('⚠️', 'Error', e.message);
+          }
+        });
+      }
+
+      if (els.gwVerifyBtn) {
+        els.gwVerifyBtn.addEventListener('click', async () => {
+          els.gwVerifyBtn.disabled = true;
+          els.gwVerifyBtn.textContent = 'Checking...';
+          if (els.gwVerifyResultBox) {
+            els.gwVerifyResultBox.style.display = 'block';
+            els.gwVerifyResultBox.style.background = 'rgba(255,255,255,0.04)';
+            els.gwVerifyResultBox.style.border = '1px solid rgba(255,255,255,0.1)';
+            els.gwVerifyResultBox.style.color = '#cbd5e1';
+            els.gwVerifyResultBox.textContent = 'Connecting to Gmail SMTP & verifying credentials...';
+          }
+          try {
+            const res = await adminFetch('/api/admin/email-gateway/verify', { method: 'POST' });
+            if (res.ok) {
+              if (els.gwVerifyResultBox) {
+                els.gwVerifyResultBox.style.background = 'rgba(16,185,129,0.12)';
+                els.gwVerifyResultBox.style.border = '1px solid rgba(16,185,129,0.3)';
+                els.gwVerifyResultBox.style.color = '#34d399';
+                els.gwVerifyResultBox.innerHTML = `✅ <strong>Connected & Verified!</strong> ${escapeHtml(res.status && res.status.message || 'Gmail SMTP is operational and verified.')}`;
+              }
+              showToast('🟢', 'Connected', 'Gmail SMTP authenticated successfully!');
+            } else {
+              if (els.gwVerifyResultBox) {
+                els.gwVerifyResultBox.style.background = 'rgba(239,68,68,0.12)';
+                els.gwVerifyResultBox.style.border = '1px solid rgba(239,68,68,0.3)';
+                els.gwVerifyResultBox.style.color = '#f87171';
+                els.gwVerifyResultBox.innerHTML = `❌ <strong>Connection Failed:</strong> ${escapeHtml(res.error || (res.status && res.status.error) || 'Invalid credentials. Please verify your 16-character App Password.')}`;
+              }
+              showToast('❌', 'Verification Failed', res.error || 'Check password');
+            }
+          } catch (e) {
+            if (els.gwVerifyResultBox) {
+              els.gwVerifyResultBox.style.background = 'rgba(239,68,68,0.12)';
+              els.gwVerifyResultBox.style.border = '1px solid rgba(239,68,68,0.3)';
+              els.gwVerifyResultBox.style.color = '#f87171';
+              els.gwVerifyResultBox.textContent = 'Verification error: ' + e.message;
+            }
+          } finally {
+            els.gwVerifyBtn.disabled = false;
+            els.gwVerifyBtn.textContent = '⚡ Test Connection';
+          }
+        });
+      }
+
       if (els.gwSaveBtn) {
         els.gwSaveBtn.addEventListener('click', async () => {
           const enteredPass = els.gwGmailPass ? els.gwGmailPass.value.trim() : '';
@@ -4970,16 +5163,21 @@
             fromEmail: (els.gwFromEmail ? els.gwFromEmail.value.trim() : '')
           };
 
+          const isMaskedOrEmpty = (val) => {
+            if (!val) return true;
+            return /^[\u2022\u25cf\*\s]+$/.test(val) || val.includes('••••') || val.includes('****');
+          };
+
           // Only send password if non-empty and not masked dots
-          if (enteredPass && !/^[\u2022\u25cf\*\s]+$/.test(enteredPass)) {
+          if (enteredPass && !isMaskedOrEmpty(enteredPass)) {
             payload.gmailAppPassword = enteredPass.replace(/\s+/g, '');
           }
-          if (enteredKey && !/^[\u2022\u25cf\*\s]+$/.test(enteredKey)) {
+          if (enteredKey && !isMaskedOrEmpty(enteredKey)) {
             payload.resendApiKey = enteredKey.trim();
           }
 
           els.gwSaveBtn.disabled = true;
-          els.gwSaveBtn.textContent = 'Saving...';
+          els.gwSaveBtn.textContent = 'Saving & Verifying...';
           try {
             const res = await adminFetch('/api/admin/email-gateway', {
               method: 'POST',
@@ -4987,11 +5185,20 @@
             });
             showToast('✅', 'Settings Saved', res.message || 'Email gateway settings saved successfully!');
             await loadEmailGatewaySettings();
+            if (res.verification && res.verification.ok) {
+              if (els.gwVerifyResultBox) {
+                els.gwVerifyResultBox.style.display = 'block';
+                els.gwVerifyResultBox.style.background = 'rgba(16,185,129,0.12)';
+                els.gwVerifyResultBox.style.border = '1px solid rgba(16,185,129,0.3)';
+                els.gwVerifyResultBox.style.color = '#34d399';
+                els.gwVerifyResultBox.innerHTML = `✅ <strong>Verified!</strong> ${escapeHtml(res.verification.message || 'Connected to Gmail SMTP')}`;
+              }
+            }
           } catch (e) {
             showToast('⚠️', 'Save Error', e.message);
           } finally {
             els.gwSaveBtn.disabled = false;
-            els.gwSaveBtn.textContent = '💾 Save Email Gateway Settings';
+            els.gwSaveBtn.textContent = '💾 Save Gmail SMTP';
           }
         });
       }

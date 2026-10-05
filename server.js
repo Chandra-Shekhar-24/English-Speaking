@@ -1924,12 +1924,37 @@ app.get("/api/admin/email-gateway", requireAdmin, (req, res) => {
 });
 
 // POST /api/admin/email-gateway — Save email service provider configuration
-app.post("/api/admin/email-gateway", requireAdmin, (req, res) => {
+app.post("/api/admin/email-gateway", requireAdmin, async (req, res) => {
   try {
     const config = mailer.updateEmailGatewayConfig(req.body || {});
-    res.json({ ok: true, message: "Email gateway configuration saved successfully!", config });
+    let verifyStatus = null;
+    if (config.hasGmailPass || config.hasSmtp) {
+      try {
+        verifyStatus = await mailer.verifyEmailGatewayConnection();
+      } catch (ve) {
+        verifyStatus = { ok: false, error: ve.message };
+      }
+    }
+    res.json({
+      ok: true,
+      message: verifyStatus && verifyStatus.ok
+        ? "✅ Settings saved and Gmail SMTP verified successfully!"
+        : "Email gateway configuration saved successfully!",
+      config,
+      verification: verifyStatus
+    });
   } catch (err) {
     res.status(500).json({ error: "Failed to save email gateway configuration: " + err.message });
+  }
+});
+
+// POST /api/admin/email-gateway/verify — Check SMTP / Gateway connection
+app.post("/api/admin/email-gateway/verify", requireAdmin, async (req, res) => {
+  try {
+    const status = await mailer.verifyEmailGatewayConnection();
+    res.json({ ok: status.ok, status });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message || "Failed to verify connection" });
   }
 });
 

@@ -39,7 +39,7 @@ function generateToken() {
 }
 
 function isValidEmail(email) { return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
-function isValidUserCode(code) { return typeof code === 'string' && /^[0-9]{4}$/.test(code); }
+function isValidUserCode(code) { return typeof code === 'string' && /^[0-9]{4,8}$/.test(code.replace(/^#+/, '')); }
 function isValidPassword(pw) { return typeof pw === 'string' && pw.length >= 8; }
 
 // ------------------------------------------------------------
@@ -200,8 +200,9 @@ async function verifyOtp({ email, otp }, meta = {}) {
   if (!cleanOtp) throw httpError(400, 'Please enter the 6-digit OTP code');
 
   let user = null;
-  if (/^[0-9]{4}$/.test(cleanEmail)) {
-    const resByCode = await query('SELECT * FROM users WHERE user_code = $1', [cleanEmail]);
+  const strippedEmailCode = cleanEmail.replace(/^#+/, '');
+  if (/^[0-9]{4,8}$/.test(strippedEmailCode)) {
+    const resByCode = await query('SELECT * FROM users WHERE user_code = $1', [strippedEmailCode]);
     user = resByCode.rows && resByCode.rows[0];
   }
   if (!user) {
@@ -244,7 +245,7 @@ async function verifyOtp({ email, otp }, meta = {}) {
     category: 'auth',
     type: 'email_verified_otp',
     title: 'Account Activated via OTP',
-    summary: `Account #${user.user_code} (${user.email}) activated via OTP code ${cleanOtp}`
+    summary: `Account ${user.user_code} (${user.email}) activated via OTP code ${cleanOtp}`
   });
 
   return { user: publicUser(user), token };
@@ -283,7 +284,7 @@ async function verifyEmail(token) {
     category: 'auth',
     type: 'email_verified',
     title: 'Account Activated via Email Verification',
-    summary: `Account #${user.user_code} (${user.email}) is now active`
+    summary: `Account ${user.user_code} (${user.email}) is now active`
   });
 
   return publicUser(user);
@@ -291,11 +292,12 @@ async function verifyEmail(token) {
 
 async function resendVerificationEmail(identifier, appUrl) {
   const clean = (identifier || '').trim();
-  if (!clean) throw httpError(400, 'Please enter your email or 4-digit User ID');
+  if (!clean) throw httpError(400, 'Please enter your email or User ID');
 
   let user = null;
-  if (/^[0-9]{4}$/.test(clean)) {
-    const res = await query('SELECT * FROM users WHERE user_code = $1', [clean]);
+  const strippedCode = clean.replace(/^#+/, '');
+  if (/^[0-9]{4,8}$/.test(strippedCode)) {
+    const res = await query('SELECT * FROM users WHERE user_code = $1', [strippedCode]);
     user = res.rows && res.rows[0];
   }
   if (!user) {
@@ -400,8 +402,9 @@ async function requestPasswordReset(identifier, appUrl) {
   const clean = (identifier || '').trim();
   let user = null;
 
-  if (/^[0-9]{4}$/.test(clean)) {
-    const resByCode = await query('SELECT id, email, user_code, display_name FROM users WHERE user_code = $1', [clean]);
+  const strippedCode = clean.replace(/^#+/, '');
+  if (/^[0-9]{4,8}$/.test(strippedCode)) {
+    const resByCode = await query('SELECT id, email, user_code, display_name FROM users WHERE user_code = $1', [strippedCode]);
     user = resByCode.rows[0];
   }
   if (!user && clean) {
@@ -491,8 +494,9 @@ async function resetPassword(arg1, arg2, arg3) {
 
   if (cleanIdent && (cleanOtp || cleanToken)) {
     let targetUser = null;
-    if (/^[0-9]{4}$/.test(cleanIdent)) {
-      const uRes = await query('SELECT id FROM users WHERE user_code = $1', [cleanIdent]);
+    const strippedCode = cleanIdent.replace(/^#+/, '');
+    if (/^[0-9]{4,8}$/.test(strippedCode)) {
+      const uRes = await query('SELECT id FROM users WHERE user_code = $1', [strippedCode]);
       targetUser = uRes.rows && uRes.rows[0];
     }
     if (!targetUser) {
@@ -551,33 +555,34 @@ async function resetPassword(arg1, arg2, arg3) {
     category: 'auth',
     type: 'password_reset_success',
     title: 'Password Successfully Reset',
-    summary: `Password reset successfully for account #${user ? user.user_code : ''}`
+    summary: `Password reset successfully for account ${user ? user.user_code : ''}`
   });
 
   return { user: user ? publicUser(user) : null, token: sessionToken };
 }
 
 async function changeUserCode(userId, newCode) {
-  if (!isValidUserCode(newCode)) throw httpError(400, 'User ID must be exactly 4 digits');
-  const existing = await query('SELECT id FROM users WHERE user_code = $1 AND id != $2', [newCode, userId]);
+  const cleanCode = String(newCode || '').trim().replace(/^#+/, '');
+  if (!isValidUserCode(cleanCode)) throw httpError(400, 'User ID must be 4 to 8 digits');
+  const existing = await query('SELECT id FROM users WHERE user_code = $1 AND id != $2', [cleanCode, userId]);
   if (existing.rows.length) throw httpError(409, 'That User ID is already taken');
   const current = await query('SELECT user_code FROM users WHERE id = $1', [userId]);
   const oldCode = current.rows[0] ? current.rows[0].user_code : null;
   const result = await query(
     'UPDATE users SET user_code = $1, updated_at = now() WHERE id = $2 RETURNING id, user_code, email, display_name, avatar_url, created_at',
-    [newCode, userId]
+    [cleanCode, userId]
   );
   const user = publicUser(result.rows[0]);
   sheets.upsertUser(user, oldCode).catch(() => {});
-  return newCode;
+  return cleanCode;
 }
 
 async function deleteUser(userCode) {
-  const target = String(userCode || '').trim();
+  const target = String(userCode || '').trim().replace(/^#+/, '');
   if (!target) throw httpError(400, 'User ID is required');
   const userRes = await query('SELECT * FROM users WHERE user_code = $1', [target]);
   const user = userRes.rows && userRes.rows[0];
-  if (!user) throw httpError(404, 'No account found with User ID #' + target);
+  if (!user) throw httpError(404, 'No account found with User ID ' + target);
 
   await query('DELETE FROM sessions WHERE user_id = $1', [user.id]).catch(() => {});
   await query('DELETE FROM password_resets WHERE user_id = $1', [user.id]).catch(() => {});

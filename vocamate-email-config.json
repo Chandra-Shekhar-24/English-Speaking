@@ -1,8 +1,8 @@
 {
-  "fromEmail": "",
+  "fromEmail": "VocaMate <chandrashekharbansal.2006@gmail.com>",
   "resendApiKey": "",
   "gmailUser": "chandrashekharbansal.2006@gmail.com",
-  "gmailAppPassword": "",
+  "gmailAppPassword": "jmjzcwqamzxklhxy",
   "smtpHost": "smtp.gmail.com",
   "smtpPort": 587
 }

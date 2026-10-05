@@ -737,28 +737,71 @@ function getEmailGatewayConfig() {
 function isMaskedValue(val) {
   if (val === undefined || val === null) return true;
   const s = String(val).trim();
-  if (!s) return false;
-  return /^[\u2022\u25cf\*\s]+$/.test(s) || s.includes('••••••••') || s.includes('********');
+  if (!s) return true; // Empty string or whitespace is treated as NO NEW VALUE (preserves existing password)
+  return /^[\u2022\u25cf\*\s]+$/.test(s) || s.includes('••••••••') || s.includes('********') || s.includes('••••');
 }
 
 function updateEmailGatewayConfig(newCfg = {}) {
   const existing = loadEmailConfig();
   const merged = { ...existing };
 
-  if (newCfg.fromEmail !== undefined) merged.fromEmail = (newCfg.fromEmail || '').trim();
-  if (newCfg.resendApiKey !== undefined && !isMaskedValue(newCfg.resendApiKey)) {
-    merged.resendApiKey = (newCfg.resendApiKey || '').trim();
+  if (newCfg.fromEmail !== undefined && typeof newCfg.fromEmail === 'string') {
+    const trimmed = newCfg.fromEmail.trim();
+    if (trimmed) merged.fromEmail = trimmed;
   }
-  if (newCfg.gmailUser !== undefined) merged.gmailUser = (newCfg.gmailUser || '').trim();
-  if (newCfg.gmailAppPassword !== undefined && !isMaskedValue(newCfg.gmailAppPassword)) {
-    // Strip spaces since users copy Google App Passwords like 'abcd efgh ijkl mnop'
-    merged.gmailAppPassword = String(newCfg.gmailAppPassword || '').replace(/\s+/g, '');
+
+  // Resend API Key: only update if explicitly provided and not masked/empty
+  if (newCfg.clearResendKey === true) {
+    merged.resendApiKey = '';
+  } else if (newCfg.resendApiKey !== undefined) {
+    const rawKey = String(newCfg.resendApiKey || '').trim();
+    if (rawKey && !isMaskedValue(rawKey)) {
+      merged.resendApiKey = rawKey;
+    }
   }
-  if (newCfg.smtpHost !== undefined) merged.smtpHost = (newCfg.smtpHost || '').trim();
-  if (newCfg.smtpPort !== undefined) merged.smtpPort = parseInt(newCfg.smtpPort || '587', 10);
-  if (newCfg.smtpUser !== undefined) merged.smtpUser = (newCfg.smtpUser || '').trim();
-  if (newCfg.smtpPass !== undefined && !isMaskedValue(newCfg.smtpPass)) {
-    merged.smtpPass = String(newCfg.smtpPass || '').trim();
+
+  // Gmail User: update if non-empty
+  if (newCfg.gmailUser !== undefined) {
+    const gu = String(newCfg.gmailUser || '').trim();
+    if (gu) merged.gmailUser = gu;
+  }
+
+  // Gmail App Password:
+  // CRITICAL: NEVER overwrite with empty string, whitespace, or masked dots!
+  // Only update if a valid non-empty string is passed.
+  // If user wants to explicitly clear it, they must pass clearGmailPassword: true.
+  if (newCfg.clearGmailPassword === true) {
+    merged.gmailAppPassword = '';
+  } else if (newCfg.gmailAppPassword !== undefined) {
+    const rawPass = String(newCfg.gmailAppPassword || '').trim();
+    if (rawPass && !isMaskedValue(rawPass)) {
+      // Strip spaces since users copy Google App Passwords as 'abcd efgh ijkl mnop'
+      const cleanPass = rawPass.replace(/\s+/g, '');
+      if (cleanPass.length > 0) {
+        merged.gmailAppPassword = cleanPass;
+      }
+    }
+  }
+
+  if (newCfg.smtpHost !== undefined && typeof newCfg.smtpHost === 'string') {
+    const sh = newCfg.smtpHost.trim();
+    if (sh) merged.smtpHost = sh;
+  }
+  if (newCfg.smtpPort !== undefined) {
+    const sp = parseInt(newCfg.smtpPort || '587', 10);
+    if (!isNaN(sp) && sp > 0) merged.smtpPort = sp;
+  }
+  if (newCfg.smtpUser !== undefined) {
+    const su = String(newCfg.smtpUser || '').trim();
+    if (su) merged.smtpUser = su;
+  }
+  if (newCfg.clearSmtpPass === true) {
+    merged.smtpPass = '';
+  } else if (newCfg.smtpPass !== undefined) {
+    const sp = String(newCfg.smtpPass || '').trim();
+    if (sp && !isMaskedValue(sp)) {
+      merged.smtpPass = sp;
+    }
   }
 
   // If user entered a gmailUser, auto-set fromEmail if not set
@@ -769,6 +812,43 @@ function updateEmailGatewayConfig(newCfg = {}) {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(merged, null, 2), 'utf8');
   initTransporters();
   return getEmailGatewayConfig();
+}
+
+async function verifyEmailGatewayConnection() {
+  const cfg = loadEmailConfig();
+  const gmailUser = (cfg.gmailUser || process.env.GMAIL_USER || '').trim();
+  const rawGmailPass = (cfg.gmailAppPassword || process.env.GMAIL_APP_PASSWORD || '').trim();
+  const cleanGmailPass = rawGmailPass.replace(/\s+/g, '');
+
+  if (gmailUser && cleanGmailPass) {
+    if (!smtpTransporter) {
+      initTransporters();
+    }
+    if (smtpTransporter) {
+      try {
+        const verifyPromise = smtpTransporter.verify();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Connection check timed out after 6s')), 6000)
+        );
+        await Promise.race([verifyPromise, timeoutPromise]);
+        return { ok: true, connected: true, provider: 'gmail', message: `Connected to Gmail SMTP as ${gmailUser}` };
+      } catch (err) {
+        return { ok: false, connected: false, provider: 'gmail', error: err.message };
+      }
+    }
+  } else if (smtpTransporter) {
+    try {
+      const verifyPromise = smtpTransporter.verify();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Connection check timed out after 6s')), 6000)
+      );
+      await Promise.race([verifyPromise, timeoutPromise]);
+      return { ok: true, connected: true, provider: 'custom_smtp', message: 'Connected to custom SMTP server' };
+    } catch (err) {
+      return { ok: false, connected: false, provider: 'custom_smtp', error: err.message };
+    }
+  }
+  return { ok: false, connected: false, message: 'Gmail SMTP credentials not fully configured (needs email & 16-character App Password)' };
 }
 
 async function sendTestEmail(toEmail) {
@@ -830,5 +910,6 @@ module.exports = {
   getEmailLogs,
   getEmailGatewayConfig,
   updateEmailGatewayConfig,
+  verifyEmailGatewayConnection,
   sendTestEmail
 };

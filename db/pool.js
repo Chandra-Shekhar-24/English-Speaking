@@ -36,11 +36,13 @@ function stripSslModeParam(urlStr) {
 }
 
 const rawDatabaseUrl = process.env.DATABASE_URL;
+const cleanedUrl = sanitizeDatabaseUrl(rawDatabaseUrl);
+const isPostgresUrl = cleanedUrl && (cleanedUrl.startsWith('postgres://') || cleanedUrl.startsWith('postgresql://'));
 
-if (!rawDatabaseUrl) {
-  console.warn('ℹ️  DATABASE_URL is not set. In-memory data store active for accounts and sessions.');
+if (!isPostgresUrl) {
+  console.warn('ℹ️  DATABASE_URL is not a PostgreSQL connection URL. In-memory local data store active for accounts and sessions.');
+  pool = null;
 } else {
-  const cleanedUrl = sanitizeDatabaseUrl(rawDatabaseUrl);
   try {
     parseConnectionString(cleanedUrl);
     const wantsSslDisabled = /sslmode=disable/i.test(cleanedUrl);
@@ -48,6 +50,7 @@ if (!rawDatabaseUrl) {
     pool = new Pool({
       connectionString: connectionStringForPg,
       ssl: wantsSslDisabled ? false : { rejectUnauthorized: false },
+      connectionTimeoutMillis: 3000,
       max: parseInt(process.env.DATABASE_POOL_MAX || '10', 10)
     });
 
