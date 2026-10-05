@@ -78,6 +78,18 @@ function publicUser(row) {
   };
 }
 
+async function dispatchEmailQuick(sendFn) {
+  try {
+    const timeoutPromise = new Promise(resolve =>
+      setTimeout(() => resolve({ delivered: false, backgrounded: true }), 3500)
+    );
+    return await Promise.race([sendFn(), timeoutPromise]);
+  } catch (err) {
+    console.warn('⚠️ Email dispatch error:', err.message);
+    return { delivered: false, error: err.message };
+  }
+}
+
 async function generateUniqueUserCode() {
   for (let attempt = 0; attempt < 50; attempt++) {
     const code = String(crypto.randomInt(1000, 10000));
@@ -112,12 +124,12 @@ async function signup({ email, password, displayName }, appUrl) {
     const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await query('DELETE FROM email_verifications WHERE user_id = $1', [existing.id]).catch(() => {});
     await query('INSERT INTO email_verifications (user_id, token_hash, expires_at, otp_code) VALUES ($1, $2, $3, $4)', [existing.id, hashToken(verifyToken), verifyExpiresAt, verifyOtp]);
-    const emailRes = await mailer.sendVerificationEmail({
+    const emailRes = await dispatchEmailQuick(() => mailer.sendVerificationEmail({
       user: { id: existing.id, email: email.toLowerCase(), userCode: existing.user_code, displayName: existing.display_name },
       token: verifyToken,
       otp: verifyOtp,
       appUrl
-    });
+    }));
     return {
       user: publicUser(existing),
       needsVerification: true,
@@ -150,7 +162,7 @@ async function signup({ email, password, displayName }, appUrl) {
     [user.id, hashToken(verifyToken), verifyExpiresAt, verifyOtp]
   );
 
-  const emailRes = await mailer.sendVerificationEmail({
+  const emailRes = await dispatchEmailQuick(() => mailer.sendVerificationEmail({
     user: {
       id: user.id,
       email: user.email,
@@ -160,7 +172,7 @@ async function signup({ email, password, displayName }, appUrl) {
     token: verifyToken,
     otp: verifyOtp,
     appUrl
-  });
+  }));
 
   const pubUser = publicUser(user);
   sheets.upsertUser(pubUser).catch(() => {});
@@ -319,12 +331,12 @@ async function resendVerificationEmail(identifier, appUrl) {
     [user.id, hashToken(verifyToken), verifyExpiresAt, verifyOtp]
   );
 
-  const emailRes = await mailer.sendVerificationEmail({
+  const emailRes = await dispatchEmailQuick(() => mailer.sendVerificationEmail({
     user: { id: user.id, email: user.email, userCode: user.user_code, displayName: user.display_name },
     token: verifyToken,
     otp: verifyOtp,
     appUrl
-  });
+  }));
 
   const emailMasked = user.email.slice(0, 2) + '***@' + (user.email.split('@')[1] || '');
   const isDelivered = Boolean(emailRes && emailRes.delivered);
@@ -423,7 +435,7 @@ async function requestPasswordReset(identifier, appUrl) {
     `INSERT INTO password_resets (user_id, token_hash, expires_at, otp_code) VALUES ($1, $2, $3, $4)`,
     [user.id, hashToken(token), expiresAt, resetOtp]
   );
-  const emailRes = await mailer.sendPasswordResetEmail({
+  const emailRes = await dispatchEmailQuick(() => mailer.sendPasswordResetEmail({
     user: {
       id: user.id,
       email: user.email,
@@ -433,7 +445,7 @@ async function requestPasswordReset(identifier, appUrl) {
     token,
     otp: resetOtp,
     appUrl
-  });
+  }));
 
   let emailMasked = user.email || '';
   if (emailMasked.includes('@')) {

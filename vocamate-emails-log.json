@@ -1,6 +1,64 @@
 {
   "logs": [
     {
+      "id": "mail_1791201149783_294",
+      "timestamp": "2026-10-05T11:52:29.783Z",
+      "to": "selfdel1791201145392@gmail.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate Security Alert: New sign-in detected for your account",
+      "type": "login_alert",
+      "status": "pending",
+      "provider": "smtp",
+      "error": null,
+      "metadata": {
+        "userId": 14,
+        "userCode": "9357",
+        "displayName": "Self Deleter",
+        "ip": "127.0.0.1",
+        "userAgent": "node"
+      }
+    },
+    {
+      "id": "mail_1791201145878_293",
+      "timestamp": "2026-10-05T11:52:25.878Z",
+      "to": "selfdel1791201145392@gmail.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your verification code is 371352",
+      "type": "email_verification",
+      "status": "sandbox_restricted",
+      "provider": "smtp",
+      "error": "The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains",
+      "metadata": {
+        "userId": 14,
+        "userCode": "9357",
+        "displayName": "Self Deleter",
+        "otp": "371352",
+        "verifyUrl": "http://localhost:3000/verify-email.html?token=3e5d76752667086487ad8e7ea708df94112706271af6b8b2677dd9cf97072d5b",
+        "tokenPrefix": "3e5d7675"
+      },
+      "sandboxRestricted": true
+    },
+    {
+      "id": "mail_1791201110769_292",
+      "timestamp": "2026-10-05T11:51:50.769Z",
+      "to": "freshstudent99@gmail.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your verification code is 998342",
+      "type": "email_verification",
+      "status": "sent",
+      "provider": "smtp",
+      "error": null,
+      "metadata": {
+        "userId": 13,
+        "userCode": "3756",
+        "displayName": "Fresh Student",
+        "otp": "998342",
+        "verifyUrl": "http://localhost:3000/verify-email.html?token=9d0e3940014cfc80b9979bc49d6220a726702625a29b26b9953ca6e5f81eddaf",
+        "tokenPrefix": "9d0e3940"
+      },
+      "smtpId": "<20241486-d186-db3a-8a23-94b1c294cc29@gmail.com>"
+    },
+    {
       "id": "mail_1791088319546_291",
       "timestamp": "2026-10-04T04:31:59.546Z",
       "to": "chandrashekharbansal.2006@gmail.com",
@@ -5008,5 +5066,5 @@
       }
     }
   ],
-  "nextEmailId": 292
+  "nextEmailId": 295
 }

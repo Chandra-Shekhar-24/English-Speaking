@@ -468,6 +468,17 @@
             <div class="admin-active-conv-content" id="adminDetailActiveConvContent"></div>
           </div>
 
+          <!-- Timeframe Selector -->
+          <div class="admin-timeframe-toolbar">
+            <div class="admin-timeframe-pills" id="adminTimeframePills">
+              <span class="admin-timeframe-title">Period:</span>
+              <button type="button" class="admin-time-pill active" data-timeframe="24h">⏱️ Last 24 Hours</button>
+              <button type="button" class="admin-time-pill" data-timeframe="7d">📅 Last 7 Days</button>
+              <button type="button" class="admin-time-pill" data-timeframe="all">🌐 All-Time History</button>
+            </div>
+            <div id="adminActivityFallbackBanner" class="admin-activity-fallback-banner" style="display:none;"></div>
+          </div>
+
           <!-- Timeline Filters -->
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
             <div class="admin-history-filters" id="adminTimelineFilters">
@@ -673,6 +684,42 @@
 
       <div class="admin-clean-footer">
         <button type="button" class="admin-btn" id="cancelCleanStudentsBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Admin Delete Confirmation Modal -->
+  <div class="admin-confirm-overlay" id="adminConfirmDeleteModal" style="display:none;">
+    <div class="admin-confirm-card danger-zone">
+      <div class="admin-confirm-icon">🗑️</div>
+      <h3>Permanently Delete Student?</h3>
+      <p>
+        Are you sure you want to permanently delete student <strong id="adminDeleteUserName">Learner</strong> (<code id="adminDeleteUserCode">#0000</code>)?
+        <br><br>
+        This will immediately terminate any active voice/video call sessions, clear conversation memory, and purge their user record from the database.
+      </p>
+      <div class="admin-confirm-actions">
+        <button type="button" class="admin-btn" id="cancelAdminDeleteBtn">Cancel</button>
+        <button type="button" class="admin-btn danger" id="confirmAdminDeleteBtn">Yes, Delete Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Student Account Self-Deletion Modal -->
+  <div class="admin-confirm-overlay" id="studentDeleteModal" style="display:none;">
+    <div class="admin-confirm-card danger-zone">
+      <div class="admin-confirm-icon">⚠️</div>
+      <h3>Permanently Delete Your Account?</h3>
+      <p>
+        Are you sure you want to delete your VocaMate account (<strong id="studentDeleteUserId">#----</strong>)?
+        <br><br>
+        All your English practice progress, conversation memories with Madhu, direct call history, and account credentials will be <strong>permanently wiped from our servers</strong>.
+        <br><br>
+        This action <strong>cannot be undone</strong>.
+      </p>
+      <div class="admin-confirm-actions">
+        <button type="button" class="admin-btn" id="cancelStudentDeleteBtn">Cancel</button>
+        <button type="button" class="admin-btn danger" id="confirmStudentDeleteBtn">Yes, Delete My Account</button>
       </div>
     </div>
   </div>
@@ -969,6 +1016,16 @@
                 </svg>
               </button>
 
+              <!-- Right top corner Delete Account Button -->
+              <button id="studentDeleteAccountBtn" class="account-delete-icon-btn" title="Permanently Delete Account" aria-label="Delete Account">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </button>
+
               <!-- Security Shield Icon (Shield + Lock + User symbol) -->
               <div class="account-security-shield-icon" title="Account Security">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -983,6 +1040,12 @@
                 User ID: <span id="friendUserId">----</span>
               </div>
               <div class="status" id="friendStatus"><span class="status-live-dot"></span> Online</div>
+              <div class="account-actions-row">
+                <button type="button" id="studentDeleteAccountTextBtn" class="account-delete-text-btn" title="Permanently Delete Account">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  Delete Account
+                </button>
+              </div>
             </div>
 
             <div class="video-call-container" id="videoCallContainer" style="display:none;">
@@ -1129,7 +1192,8 @@
         'authForgotView', 'forgotEmail', 'forgotSubmitBtn', 'showLoginFromForgotBtn', 'showResetDirectLink', 'authForgotInfo',
         'authResetView', 'resetAccountBanner', 'resetWarningBanner', 'resetOtpInput', 'resetTokenInput', 'resetNewPassword', 'resetConfirmPassword', 'resetSubmitBtn', 'showLoginFromResetBtn', 'showForgotFromResetBtn',
         'voiceTextInput', 'voiceTextSendBtn',
-        'changeIdBtn', 'logoutBtn', 'changeIdBox', 'newUserCodeInput', 'confirmChangeIdBtn',
+        'changeIdBtn', 'logoutBtn', 'studentDeleteAccountBtn', 'studentDeleteAccountTextBtn', 'studentDeleteModal', 'studentDeleteUserId', 'cancelStudentDeleteBtn', 'confirmStudentDeleteBtn',
+        'changeIdBox', 'newUserCodeInput', 'confirmChangeIdBtn',
         'fluencyModal', 'fluencyScoreRing', 'fluencyStatsBody', 'closeFluencyModalBtn',
         'adminPortalBtn', 'adminAuthOverlay', 'adminAuthError', 'adminSecretInput', 'toggleAdminSecretVisibility', 'cancelAdminAuthBtn', 'adminAuthSubmitBtn',
         'adminModal', 'adminAuthStatusBadge', 'adminRefreshBtn', 'adminCopyAllJsonBtn', 'adminLogoutBtn', 'closeAdminModalBtn',
@@ -1137,6 +1201,7 @@
         'adminSearchInput', 'adminStatusFilters', 'countFilterAll', 'countFilterOnline', 'countFilterInCall', 'countFilterOffline',
         'adminViewCardsBtn', 'adminViewJsonBtn', 'adminViewEmailGatewayBtn', 'adminViewLogsBtn', 'adminPurgeStudentsBtn',
         'adminCleanStudentsModal', 'closeCleanStudentsModalBtn', 'cancelCleanStudentsBtn', 'btnExecuteCleanUnverified', 'btnExecuteCleanAll', 'cleanUnverifiedCount', 'cleanFeedbackBox',
+        'adminConfirmDeleteModal', 'adminDeleteUserName', 'adminDeleteUserCode', 'cancelAdminDeleteBtn', 'confirmAdminDeleteBtn',
         'tabCountUsers', 'adminCardsContainer', 'adminRawJsonContainer', 'adminEmailGatewayContainer', 'adminEmailLogsContainer',
         'adminEmailLogsTableBody', 'adminRefreshLogsBtn', 'adminJsonSummaryLabel', 'adminCopyRawJsonBtn', 'adminRawJsonPre',
         'gatewayStatusBadge', 'gatewaySandboxNotice', 'gwGmailUser', 'gwGmailPass', 'gwGmailPassStatus', 'gwClearPassBtn', 'gwSmtpHost', 'gwSmtpPort', 'gwFromEmail', 'gwResendKey', 'gwSaveBtn', 'gwVerifyBtn', 'gwVerifyResultBox', 'gwTestEmailInput', 'gwSendTestBtn', 'gwTestResultBox',
@@ -1144,6 +1209,7 @@
         'adminDetailBackBtn', 'adminDetailRefreshBtn', 'adminDetailCopyJsonBtn', 'adminDetailDeleteUserBtn',
         'adminDetailEventsCount', 'adminDetailAiCount', 'adminDetailCallsCount', 'adminDetailMinutesCount', 'adminDetailCorrectionsCount', 'adminDetailLoginsCount',
         'adminDetailActiveConv', 'adminDetailActiveConvContent',
+        'adminTimeframePills', 'adminActivityFallbackBanner',
         'adminTimelineFilters', 'tCountAll', 'tCountAi', 'tCountCalls', 'tCountAuth', 'tCountChat', 'adminDetailToggleAllPayloadsBtn', 'adminDetailTimeline'
       ].forEach(id => { els[id] = $(id); });
 
@@ -3817,6 +3883,54 @@
         });
       }
 
+      function openStudentDeleteModal() {
+        if (!els.studentDeleteModal) return;
+        const code = (state.authUser && state.authUser.userCode) || (els.friendUserId ? els.friendUserId.textContent : '----');
+        if (els.studentDeleteUserId) els.studentDeleteUserId.textContent = '#' + code;
+        els.studentDeleteModal.style.display = 'flex';
+      }
+
+      function closeStudentDeleteModal() {
+        if (els.studentDeleteModal) els.studentDeleteModal.style.display = 'none';
+      }
+
+      if (els.studentDeleteAccountBtn) {
+        els.studentDeleteAccountBtn.addEventListener('click', openStudentDeleteModal);
+      }
+      if (els.studentDeleteAccountTextBtn) {
+        els.studentDeleteAccountTextBtn.addEventListener('click', openStudentDeleteModal);
+      }
+      if (els.cancelStudentDeleteBtn) {
+        els.cancelStudentDeleteBtn.addEventListener('click', closeStudentDeleteModal);
+      }
+      if (els.studentDeleteModal) {
+        els.studentDeleteModal.addEventListener('click', (e) => {
+          if (e.target === els.studentDeleteModal) closeStudentDeleteModal();
+        });
+      }
+      if (els.confirmStudentDeleteBtn) {
+        els.confirmStudentDeleteBtn.addEventListener('click', async () => {
+          els.confirmStudentDeleteBtn.disabled = true;
+          els.confirmStudentDeleteBtn.textContent = '⏳ Deleting Account...';
+          try {
+            const res = await fetch('/api/auth/delete-account', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || 'Failed to delete account');
+            showToast('🗑️', 'Account Permanently Deleted', 'Your account and data have been removed.');
+            closeStudentDeleteModal();
+            setTimeout(() => { window.location.reload(); }, 1200);
+          } catch (err) {
+            showToast('❌', 'Deletion Failed', err.message);
+            els.confirmStudentDeleteBtn.disabled = false;
+            els.confirmStudentDeleteBtn.textContent = 'Yes, Delete My Account';
+          }
+        });
+      }
+
       if (els.changeIdBtn) {
         els.changeIdBtn.addEventListener('click', () => {
           if (!els.changeIdBox) return;
@@ -4513,34 +4627,7 @@
           e.stopPropagation();
           const userCode = deleteBtn.dataset.code;
           const userName = deleteBtn.dataset.name || 'User #' + userCode;
-          
-          if (!deleteBtn.dataset.confirming) {
-            deleteBtn.dataset.confirming = 'true';
-            deleteBtn.dataset.originalHtml = deleteBtn.innerHTML;
-            deleteBtn.innerHTML = '⚠️ Confirm?';
-            deleteBtn.style.background = '#dc2626';
-            deleteBtn.style.color = '#ffffff';
-            setTimeout(() => {
-              if (deleteBtn && deleteBtn.dataset.confirming) {
-                delete deleteBtn.dataset.confirming;
-                deleteBtn.innerHTML = deleteBtn.dataset.originalHtml || '🗑️';
-                deleteBtn.style.background = '';
-                deleteBtn.style.color = '';
-              }
-            }, 4000);
-            return;
-          }
-
-          delete deleteBtn.dataset.confirming;
-          deleteBtn.innerHTML = '⏳ Deleting...';
-          try {
-            await adminFetch(`/api/admin/users/${userCode}`, { method: 'DELETE' });
-            showToast('🗑️', 'Account Deleted', `Account #${userCode} has been removed`);
-            loadAdminUsers();
-          } catch (err) {
-            showToast('❌', 'Delete Failed', err.message);
-            if (deleteBtn.dataset.originalHtml) deleteBtn.innerHTML = deleteBtn.dataset.originalHtml;
-          }
+          openAdminDeleteModal(userCode, userName);
           return;
         }
 
@@ -4553,11 +4640,68 @@
       });
 
       // ==========================================================
-      // DETAILED 24-HOUR ACTIVITY HISTORY CONTROLLER
+      // ADMIN DELETE USER MODAL CONTROLLER
+      // ==========================================================
+      let pendingAdminDeleteCode = null;
+      let pendingAdminDeleteName = null;
+
+      function openAdminDeleteModal(userCode, userName) {
+        if (!els.adminConfirmDeleteModal) return;
+        pendingAdminDeleteCode = String(userCode);
+        pendingAdminDeleteName = userName || 'Student #' + userCode;
+        if (els.adminDeleteUserName) els.adminDeleteUserName.textContent = pendingAdminDeleteName;
+        if (els.adminDeleteUserCode) els.adminDeleteUserCode.textContent = '#' + pendingAdminDeleteCode;
+        els.adminConfirmDeleteModal.style.display = 'flex';
+      }
+
+      function closeAdminDeleteModal() {
+        if (els.adminConfirmDeleteModal) els.adminConfirmDeleteModal.style.display = 'none';
+        pendingAdminDeleteCode = null;
+        pendingAdminDeleteName = null;
+      }
+
+      if (els.cancelAdminDeleteBtn) {
+        els.cancelAdminDeleteBtn.addEventListener('click', closeAdminDeleteModal);
+      }
+      if (els.adminConfirmDeleteModal) {
+        els.adminConfirmDeleteModal.addEventListener('click', (e) => {
+          if (e.target === els.adminConfirmDeleteModal) closeAdminDeleteModal();
+        });
+      }
+      if (els.confirmAdminDeleteBtn) {
+        els.confirmAdminDeleteBtn.addEventListener('click', async () => {
+          if (!pendingAdminDeleteCode) return;
+          const targetCode = pendingAdminDeleteCode;
+          const targetName = pendingAdminDeleteName;
+          els.confirmAdminDeleteBtn.disabled = true;
+          els.confirmAdminDeleteBtn.textContent = '⏳ Deleting...';
+          try {
+            await adminFetch(`/api/admin/users/${targetCode}`, { method: 'DELETE' });
+            showToast('🗑️', 'Student Account Deleted', `Student #${targetCode} (${targetName}) was permanently removed.`);
+            closeAdminDeleteModal();
+            if (adminState.inspectingUserCode === targetCode) {
+              adminState.inspectingUserCode = null;
+              adminState.user24hData = null;
+              els.adminUserDetailView.style.display = 'none';
+              els.adminCardsContainer.style.display = 'grid';
+            }
+            loadAdminUsers();
+          } catch (err) {
+            showToast('❌', 'Delete Failed', err.message);
+          } finally {
+            els.confirmAdminDeleteBtn.disabled = false;
+            els.confirmAdminDeleteBtn.textContent = 'Yes, Delete Account';
+          }
+        });
+      }
+
+      // ==========================================================
+      // DETAILED 24-HOUR & HISTORICAL ACTIVITY HISTORY CONTROLLER
       // ==========================================================
       async function openUser24hActivity(userCode) {
         adminState.inspectingUserCode = userCode;
         adminState.timelineFilter = 'all';
+        adminState.user24hTimeframe = '24h';
         adminState.allPayloadsExpanded = false;
 
         els.adminCardsContainer.style.display = 'none';
@@ -4579,25 +4723,45 @@
           }
         }
 
-        els.adminDetailTimeline.innerHTML = '<div class="admin-empty-state"><div class="icon">⏳</div><h5>Loading 24-Hour Activity Logs...</h5></div>';
+        els.adminDetailTimeline.innerHTML = '<div class="admin-empty-state"><div class="icon">⏳</div><h5>Loading Activity Logs...</h5></div>';
 
-        await loadUser24hActivity(userCode);
+        await loadUser24hActivity(userCode, '24h');
       }
 
-      async function loadUser24hActivity(userCode, silent = false) {
+      async function loadUser24hActivity(userCode, timeframe = '24h', silent = false) {
         if (!silent) {
           els.adminDetailRefreshBtn.textContent = '🔄 Loading...';
           els.adminDetailRefreshBtn.disabled = true;
         }
 
+        adminState.user24hTimeframe = timeframe;
+
+        // Highlight active timeframe pill
+        if (els.adminTimeframePills) {
+          els.adminTimeframePills.querySelectorAll('.admin-time-pill').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.timeframe === timeframe);
+          });
+        }
+
         try {
-          const data = await adminFetch(`/api/admin/users/${userCode}/24h-activity`);
+          const data = await adminFetch(`/api/admin/users/${userCode}/24h-activity?timeframe=${encodeURIComponent(timeframe)}`);
           adminState.user24hData = data;
 
-          // Time window
+          // Time window label
           const fromFmt = formatFullDate(data.timeWindow.from);
           const toFmt = formatFullDate(data.timeWindow.to);
-          els.adminDetailTimeWindow.textContent = `24h Window: ${fromFmt} → ${toFmt}`;
+          const tfText = data.timeWindow.timeframe === 'all' ? 'All-Time' : (data.timeWindow.timeframe === '7d' ? 'Last 7 Days' : 'Last 24 Hours');
+          els.adminDetailTimeWindow.textContent = `${tfText} Window: ${fromFmt} → ${toFmt}`;
+
+          // Fallback notice banner
+          if (els.adminActivityFallbackBanner) {
+            if (data.isAllTimeFallback) {
+              els.adminActivityFallbackBanner.style.display = 'inline-flex';
+              els.adminActivityFallbackBanner.innerHTML = 'ℹ️ No activity in the last 24h. Displaying <strong>All-Time History</strong> (' + (data.allTimeCount || data.timeline.length) + ' total events)';
+            } else {
+              els.adminActivityFallbackBanner.style.display = 'none';
+            }
+          }
 
           // Stats chips
           const stats = data.stats || {};
@@ -4647,7 +4811,7 @@
           renderTimeline();
         } catch (err) {
           console.error('loadUser24hActivity error:', err);
-          els.adminDetailTimeline.innerHTML = `<div class="admin-empty-state"><div class="icon">⚠️</div><h5>Failed to Load 24h Activity</h5><p>${escapeHtml(err.message)}</p></div>`;
+          els.adminDetailTimeline.innerHTML = `<div class="admin-empty-state"><div class="icon">⚠️</div><h5>Failed to Load Activity</h5><p>${escapeHtml(err.message)}</p></div>`;
         } finally {
           if (!silent) {
             els.adminDetailRefreshBtn.textContent = '🔄 Refresh';
@@ -4656,8 +4820,20 @@
         }
       }
 
+      // Timeframe selector buttons
+      if (els.adminTimeframePills) {
+        els.adminTimeframePills.addEventListener('click', (e) => {
+          const pill = e.target.closest('.admin-time-pill');
+          if (!pill || !adminState.inspectingUserCode) return;
+          const tf = pill.dataset.timeframe || '24h';
+          loadUser24hActivity(adminState.inspectingUserCode, tf);
+        });
+      }
+
       els.adminDetailRefreshBtn.addEventListener('click', () => {
-        if (adminState.inspectingUserCode) loadUser24hActivity(adminState.inspectingUserCode);
+        if (adminState.inspectingUserCode) {
+          loadUser24hActivity(adminState.inspectingUserCode, adminState.user24hTimeframe || '24h');
+        }
       });
 
       els.adminDetailBackBtn.addEventListener('click', () => {
@@ -4671,44 +4847,17 @@
         if (!adminState.user24hData) return;
         const text = JSON.stringify(adminState.user24hData, null, 2);
         navigator.clipboard.writeText(text).then(() => {
-          showToast('📋', '24h Activity JSON Copied', `Complete 24-hour log for User #${adminState.inspectingUserCode} copied to clipboard`);
+          showToast('📋', '24h Activity JSON Copied', `Complete log for User #${adminState.inspectingUserCode} copied to clipboard`);
         });
       });
 
       // Delete student from inside detailed 24h view
       if (els.adminDetailDeleteUserBtn) {
-        els.adminDetailDeleteUserBtn.addEventListener('click', async () => {
+        els.adminDetailDeleteUserBtn.addEventListener('click', () => {
           const userCode = adminState.inspectingUserCode;
           if (!userCode) return;
           const userName = (els.adminDetailName ? els.adminDetailName.textContent : 'User #' + userCode).trim();
-          
-          if (!els.adminDetailDeleteUserBtn.dataset.confirming) {
-            els.adminDetailDeleteUserBtn.dataset.confirming = 'true';
-            els.adminDetailDeleteUserBtn.dataset.originalHtml = els.adminDetailDeleteUserBtn.innerHTML;
-            els.adminDetailDeleteUserBtn.innerHTML = '⚠️ Click Again to Confirm Delete';
-            setTimeout(() => {
-              if (els.adminDetailDeleteUserBtn && els.adminDetailDeleteUserBtn.dataset.confirming) {
-                delete els.adminDetailDeleteUserBtn.dataset.confirming;
-                els.adminDetailDeleteUserBtn.innerHTML = els.adminDetailDeleteUserBtn.dataset.originalHtml || '🗑️ Delete User';
-              }
-            }, 4000);
-            return;
-          }
-
-          delete els.adminDetailDeleteUserBtn.dataset.confirming;
-          els.adminDetailDeleteUserBtn.innerHTML = '⏳ Deleting...';
-          try {
-            await adminFetch(`/api/admin/users/${userCode}`, { method: 'DELETE' });
-            showToast('🗑️', 'Student Deleted', `Account #${userCode} (${userName}) permanently deleted`);
-            adminState.inspectingUserCode = null;
-            adminState.user24hData = null;
-            loadAdminUsers();
-          } catch (err) {
-            showToast('❌', 'Delete Failed', err.message);
-            if (els.adminDetailDeleteUserBtn.dataset.originalHtml) {
-              els.adminDetailDeleteUserBtn.innerHTML = els.adminDetailDeleteUserBtn.dataset.originalHtml;
-            }
-          }
+          openAdminDeleteModal(userCode, userName);
         });
       }
 
@@ -4872,13 +5021,32 @@
         });
 
         if (events.length === 0) {
+          const isFilterActive = f !== 'all';
+          const timeframe = adminState.user24hTimeframe || '24h';
+          const tfLabel = timeframe === 'all' ? 'All-Time' : (timeframe === '7d' ? 'Last 7 Days' : 'Last 24 Hours');
           els.adminDetailTimeline.innerHTML = `
             <div class="admin-empty-state">
               <div class="icon">📅</div>
-              <h5>No Activity in this Category</h5>
-              <p>No actions logged under "${escapeHtml(f)}" for this user during the past 24 hours.</p>
+              <h5>${isFilterActive ? 'No Events in this Category' : 'No Activity in ' + tfLabel}</h5>
+              <p>${isFilterActive 
+                ? 'No actions logged under "' + escapeHtml(f) + '" for this user in ' + tfLabel + '.' 
+                : 'No actions were logged for this student in the selected period.'}
+              </p>
+              ${timeframe !== 'all' ? `
+                <div style="margin-top:12px;">
+                  <button type="button" class="admin-btn primary" id="adminSwitchToAllTimeBtn">
+                    🌐 View All-Time History
+                  </button>
+                </div>
+              ` : ''}
             </div>
           `;
+          const switchBtn = document.getElementById('adminSwitchToAllTimeBtn');
+          if (switchBtn) {
+            switchBtn.addEventListener('click', () => {
+              if (adminState.inspectingUserCode) loadUser24hActivity(adminState.inspectingUserCode, 'all');
+            });
+          }
           return;
         }
 
@@ -5315,7 +5483,11 @@
                 <td>
                   <div style="display:flex; flex-direction:column; gap:3px;">
                     <div>${spamHealth}</div>
-                    <div style="font-size:11px; color:#94a3b8;">OTP: ${otpDisplay} ${log.error ? `<span style="color:#f87171;">(${escapeHtml(log.error.slice(0, 45))})</span>` : ''}</div>
+                    <div style="font-size:11px; color:#94a3b8; display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
+                      <span>OTP: ${otpDisplay}</span>
+                      ${otp ? `<button type="button" class="admin-btn icon-btn" style="padding:1px 6px; font-size:10.5px; border-radius:4px;" onclick="navigator.clipboard.writeText('${escapeHtml(otp)}').then(() => showToast('📋', 'OTP Copied', 'OTP code ${escapeHtml(otp)} copied'))" title="Copy OTP Code">📋 Copy</button>` : ''}
+                      ${log.error ? `<span style="color:#f87171;">(${escapeHtml(log.error.slice(0, 45))})</span>` : ''}
+                    </div>
                   </div>
                 </td>
               </tr>

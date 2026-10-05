@@ -14,7 +14,17 @@
 // ============================================================
 const fs = require('fs');
 const path = require('path');
+const dns = require('dns');
 const activity = require('./activity');
+
+// Ensure IPv4 first on Node.js to prevent 30-second IPv6 hangs on Render and Linux containers
+try {
+  if (dns && typeof dns.setDefaultResultOrder === 'function') {
+    dns.setDefaultResultOrder('ipv4first');
+  }
+} catch (e) {
+  // Ignore if unsupported
+}
 
 const CONFIG_FILE = path.join(__dirname, 'vocamate-email-config.json');
 let nodemailer = null;
@@ -55,21 +65,37 @@ function initTransporters() {
 
   if (gmailUser && cleanGmailPass) {
     smtpTransporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      family: 4, // CRITICAL FOR RENDER: forces IPv4 to avoid Render's 30s IPv6 hang
+      pool: true, // Keep connection pool warm for sub-second email dispatch
+      maxConnections: 3,
+      maxMessages: 100,
+      connectionTimeout: 5000,
+      greetingTimeout: 4000,
+      socketTimeout: 8000,
       auth: {
         user: gmailUser,
         pass: cleanGmailPass
       }
     });
-    console.log(`📧 Gmail SMTP Transporter initialized (${gmailUser}) ✅`);
+    console.log(`📧 Gmail SMTP Transporter initialized (${gmailUser}) with pooled IPv4 ✅`);
   } else if (smtpHost && smtpUser && smtpPass) {
     smtpTransporter = nodemailer.createTransport({
       host: smtpHost,
       port: smtpPort,
       secure: smtpSecure,
+      family: 4, // Force IPv4
+      pool: true,
+      maxConnections: 3,
+      maxMessages: 100,
+      connectionTimeout: 5000,
+      greetingTimeout: 4000,
+      socketTimeout: 8000,
       auth: { user: smtpUser, pass: smtpPass }
     });
-    console.log(`📧 SMTP Transporter initialized (${smtpHost}:${smtpPort} as ${smtpUser}) ✅`);
+    console.log(`📧 SMTP Transporter initialized (${smtpHost}:${smtpPort} as ${smtpUser}) with pooled IPv4 ✅`);
   } else {
     smtpTransporter = null;
   }
@@ -206,7 +232,7 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
   if (smtpTransporter) {
     try {
       const smtpFrom = getSenderAddress('smtp');
-      const info = await smtpTransporter.sendMail({
+      const sendPromise = smtpTransporter.sendMail({
         from: smtpFrom,
         to,
         subject,
@@ -215,6 +241,10 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
         replyTo,
         headers: antiSpamHeaders
       });
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('SMTP send timed out after 6s')), 6000)
+      );
+      const info = await Promise.race([sendPromise, timeoutPromise]);
       console.log(`✅ [SMTP EMAIL DELIVERED] to: ${to} | ID: ${info.messageId} | "${subject}"`);
       logEntry.status = 'sent';
       logEntry.provider = 'smtp';
@@ -234,7 +264,7 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
     try {
       const resendFrom = getSenderAddress('resend');
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -276,41 +306,37 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
         scheduleSave();
 
         // If Resend failed because of sandbox restrictions (recipient is not owner)
-        // Relay a notification copy to the Resend account owner so the OTP is never lost
+        // Relay a notification copy to the Resend account owner in the background
         const ownerEmail = 'chandrashekharbansal.2006@gmail.com';
         if (isSandboxRestriction && to.toLowerCase() !== ownerEmail.toLowerCase()) {
-          try {
-            console.log(`📨 [RESEND SANDBOX RELAY] Sending OTP notification copy to owner ${ownerEmail} for user ${to}...`);
-            await fetch('https://api.resend.com/emails', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${resendApiKey}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                from: 'VocaMate <onboarding@resend.dev>',
-                to: ownerEmail,
-                subject: `[VocaMate Relay] OTP for ${to}: ${metadata.otp || 'Action Required'}`,
-                html: `
-                  <div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; padding:24px; background:#f8fafc; color:#1e293b; border-radius:12px; border:1px solid #e2e8f0; max-width:520px; margin:0 auto;">
-                    <h3 style="color:#0284c7; margin-top:0;">VocaMate Email Gateway Relay</h3>
-                    <p style="font-size:14px; color:#475569;">A user initiated verification with email: <strong style="color:#0f172a;">${to}</strong></p>
-                    <div style="background:#fffbeb; border:1px solid #fde68a; padding:12px 16px; border-radius:8px; margin:16px 0;">
-                      <p style="margin:0 0 6px 0; color:#b45309; font-weight:700; font-size:13px;">Why this went to your inbox instead of ${to}:</p>
-                      <p style="margin:0; font-size:12.5px; color:#78350f; line-height:1.5;">Resend is currently in free sandbox mode and only sends to your registered email (${ownerEmail}).</p>
-                    </div>
-                    <div style="background:#f0f9ff; border:2px dashed #38bdf8; border-radius:10px; padding:16px; text-align:center; margin:18px 0;">
-                      <div style="font-size:11px; color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:1px;">6-Digit OTP for ${to}</div>
-                      <div style="font-size:32px; font-weight:900; color:#0284c7; letter-spacing:6px; font-family:monospace; margin-top:6px;">${metadata.otp || 'N/A'}</div>
-                    </div>
-                    <p style="font-size:12px; color:#64748b; line-height:1.5;">To send directly to ANY email without restrictions, configure free <strong>Gmail SMTP</strong> in VocaMate Admin &rarr; Email Gateway.</p>
+          console.log(`📨 [RESEND SANDBOX RELAY] Queuing OTP copy to owner ${ownerEmail} for user ${to}...`);
+          fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${resendApiKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              from: 'VocaMate <onboarding@resend.dev>',
+              to: ownerEmail,
+              subject: `[VocaMate Relay] OTP for ${to}: ${metadata.otp || 'Action Required'}`,
+              html: `
+                <div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; padding:24px; background:#f8fafc; color:#1e293b; border-radius:12px; border:1px solid #e2e8f0; max-width:520px; margin:0 auto;">
+                  <h3 style="color:#0284c7; margin-top:0;">VocaMate Email Gateway Relay</h3>
+                  <p style="font-size:14px; color:#475569;">A user initiated verification with email: <strong style="color:#0f172a;">${to}</strong></p>
+                  <div style="background:#fffbeb; border:1px solid #fde68a; padding:12px 16px; border-radius:8px; margin:16px 0;">
+                    <p style="margin:0 0 6px 0; color:#b45309; font-weight:700; font-size:13px;">Why this went to your inbox instead of ${to}:</p>
+                    <p style="margin:0; font-size:12.5px; color:#78350f; line-height:1.5;">Resend is currently in free sandbox mode and only sends to your registered email (${ownerEmail}).</p>
                   </div>
-                `
-              })
-            });
-          } catch (relayErr) {
-            console.warn('⚠️ [RESEND SANDBOX RELAY FAILED]:', relayErr.message);
-          }
+                  <div style="background:#f0f9ff; border:2px dashed #38bdf8; border-radius:10px; padding:16px; text-align:center; margin:18px 0;">
+                    <div style="font-size:11px; color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:1px;">6-Digit OTP for ${to}</div>
+                    <div style="font-size:32px; font-weight:900; color:#0284c7; letter-spacing:6px; font-family:monospace; margin-top:6px;">${metadata.otp || 'N/A'}</div>
+                  </div>
+                  <p style="font-size:12px; color:#64748b; line-height:1.5;">To send directly to ANY email without restrictions, configure free <strong>Gmail SMTP</strong> in VocaMate Admin &rarr; Email Gateway.</p>
+                </div>
+              `
+            })
+          }).catch(relayErr => console.warn('⚠️ [RESEND SANDBOX RELAY FAILED]:', relayErr.message));
         }
 
         return {

@@ -175,7 +175,12 @@ function getUser24hActivity(userCode, options = {}) {
     });
   }
 
-  const matched = events.filter(e => {
+  const allUserEvents = events.filter(e => {
+    return String(e.userCode) === targetCode || (e.details && (String(e.details.peerCode) === targetCode || String(e.details.toUser) === targetCode));
+  });
+  allUserEvents.sort((a, b) => b.timestampMs - a.timestampMs);
+
+  let matched = events.filter(e => {
     const isUser = String(e.userCode) === targetCode || (e.details && (String(e.details.peerCode) === targetCode || String(e.details.toUser) === targetCode));
     const inWindow = cutoff === 0 || e.timestampMs >= cutoff;
     return isUser && inWindow;
@@ -183,6 +188,13 @@ function getUser24hActivity(userCode, options = {}) {
 
   // Sort descending (most recent first)
   matched.sort((a, b) => b.timestampMs - a.timestampMs);
+
+  let isAllTimeFallback = false;
+  // If the requested 24h window has 0 events but user has history, fall back to all events gracefully
+  if (matched.length === 0 && allUserEvents.length > 0 && hours > 0) {
+    matched = allUserEvents;
+    isAllTimeFallback = true;
+  }
 
   // Calculate statistics
   let aiTextCount = 0;
@@ -210,12 +222,14 @@ function getUser24hActivity(userCode, options = {}) {
     }
   }
 
-  const fromDate = cutoff > 0 ? new Date(cutoff).toISOString() : (matched.length > 0 ? new Date(matched[matched.length - 1].timestampMs).toISOString() : new Date().toISOString());
+  const fromDate = (cutoff > 0 && !isAllTimeFallback) ? new Date(cutoff).toISOString() : (matched.length > 0 ? new Date(matched[matched.length - 1].timestampMs).toISOString() : new Date().toISOString());
 
   return {
     userCode: targetCode,
-    windowHours: hours,
-    timeframe: hours === 0 ? 'all' : (hours === 168 ? '7d' : '24h'),
+    windowHours: isAllTimeFallback ? 0 : hours,
+    timeframe: isAllTimeFallback ? 'all' : (hours === 0 ? 'all' : (hours === 168 ? '7d' : '24h')),
+    isAllTimeFallback,
+    allTimeCount: allUserEvents.length,
     from: fromDate,
     to: new Date().toISOString(),
     stats: {
