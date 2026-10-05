@@ -52,52 +52,57 @@ function initTransporters() {
   if (!nodemailer) return;
   const cfg = loadEmailConfig();
 
-  const smtpHost = (cfg.smtpHost || process.env.SMTP_HOST || process.env.EMAIL_HOST || '').trim();
-  const smtpUser = (cfg.smtpUser || process.env.SMTP_USER || process.env.EMAIL_USER || '').trim();
-  const smtpPass = (cfg.smtpPass || process.env.SMTP_PASS || process.env.EMAIL_PASS || '').trim();
-  const smtpPort = parseInt(cfg.smtpPort || process.env.SMTP_PORT || process.env.EMAIL_PORT || '587', 10);
-  const smtpSecure = cfg.smtpSecure === true || process.env.SMTP_SECURE === 'true' || smtpPort === 465;
-
-  const gmailUser = (cfg.gmailUser || process.env.GMAIL_USER || '').trim();
-  // Strip whitespace from Gmail App Passwords (e.g. "abcd efgh ijkl mnop" -> "abcdefghijklmnop")
-  const rawGmailPass = (cfg.gmailAppPassword || process.env.GMAIL_APP_PASSWORD || '').trim();
+  // Support both Environment Variables and config file (process.env priority for Render)
+  const gmailUser = (process.env.GMAIL_USER || cfg.gmailUser || '').trim();
+  const rawGmailPass = (process.env.GMAIL_APP_PASSWORD || cfg.gmailAppPassword || '').trim();
   const cleanGmailPass = rawGmailPass.replace(/\s+/g, '');
 
+  const smtpHost = (process.env.SMTP_HOST || cfg.smtpHost || process.env.EMAIL_HOST || (gmailUser ? 'smtp.gmail.com' : '')).trim();
+  const smtpUser = (process.env.SMTP_USER || cfg.smtpUser || process.env.EMAIL_USER || gmailUser).trim();
+  const smtpPass = (process.env.SMTP_PASS || cfg.smtpPass || process.env.EMAIL_PASS || cleanGmailPass).trim();
+  const smtpPort = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || cfg.smtpPort || '587', 10);
+  const smtpSecure = process.env.SMTP_SECURE === 'true' || cfg.smtpSecure === true || smtpPort === 465;
+
   if (gmailUser && cleanGmailPass) {
+    const port = smtpPort === 465 ? 465 : 587;
+    const isSecure = port === 465;
     smtpTransporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+      port: port,
+      secure: isSecure,
+      requireTLS: !isSecure,
       family: 4, // CRITICAL FOR RENDER: forces IPv4 to avoid Render's 30s IPv6 hang
       pool: true, // Keep connection pool warm for sub-second email dispatch
       maxConnections: 3,
       maxMessages: 100,
-      connectionTimeout: 5000,
-      greetingTimeout: 4000,
-      socketTimeout: 8000,
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 25000,
       auth: {
         user: gmailUser,
         pass: cleanGmailPass
       }
     });
-    console.log(`📧 Gmail SMTP Transporter initialized (${gmailUser}) with pooled IPv4 ✅`);
+    console.log(`📧 Gmail SMTP Transporter initialized (${gmailUser}, port ${port}, secure=${isSecure}) with pooled IPv4 ✅`);
   } else if (smtpHost && smtpUser && smtpPass) {
     smtpTransporter = nodemailer.createTransport({
       host: smtpHost,
       port: smtpPort,
       secure: smtpSecure,
+      requireTLS: !smtpSecure,
       family: 4, // Force IPv4
       pool: true,
       maxConnections: 3,
       maxMessages: 100,
-      connectionTimeout: 5000,
-      greetingTimeout: 4000,
-      socketTimeout: 8000,
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 25000,
       auth: { user: smtpUser, pass: smtpPass }
     });
     console.log(`📧 SMTP Transporter initialized (${smtpHost}:${smtpPort} as ${smtpUser}) with pooled IPv4 ✅`);
   } else {
     smtpTransporter = null;
+    console.warn('⚠️ No SMTP or Gmail credentials found. Outgoing emails will fail or fall back.');
   }
 }
 
@@ -147,8 +152,8 @@ loadLogs();
 
 function getSenderAddress(targetProvider) {
   const cfg = loadEmailConfig();
-  const gmailUser = (cfg.gmailUser || process.env.GMAIL_USER || '').trim();
-  const smtpUser = (cfg.smtpUser || process.env.SMTP_USER || '').trim();
+  const gmailUser = (process.env.GMAIL_USER || cfg.gmailUser || '').trim();
+  const smtpUser = (process.env.SMTP_USER || cfg.smtpUser || '').trim();
 
   // If using SMTP/Gmail, From MUST match the authenticated user to pass SPF/DKIM/DMARC
   if (targetProvider === 'smtp' || targetProvider === 'gmail' || (!targetProvider && smtpTransporter)) {
@@ -158,13 +163,16 @@ function getSenderAddress(targetProvider) {
     }
   }
 
-  // If custom verified domain is configured
-  if (cfg.fromEmail && cfg.fromEmail.trim() && !cfg.fromEmail.includes('resend.dev') && !cfg.fromEmail.includes('yourdomain.com')) {
-    return cfg.fromEmail.trim();
-  }
-  const envFrom = (process.env.EMAIL_FROM || '').trim();
-  if (envFrom && !envFrom.includes('resend.dev') && !envFrom.includes('yourdomain.com') && !envFrom.includes('example.com')) {
-    return envFrom;
+  // If using Resend, check for custom verified domain (NEVER use @gmail.com for Resend as it will fail 403)
+  if (targetProvider === 'resend') {
+    if (cfg.fromEmail && cfg.fromEmail.trim() && !cfg.fromEmail.includes('resend.dev') && !cfg.fromEmail.includes('yourdomain.com') && !cfg.fromEmail.includes('gmail.com')) {
+      return cfg.fromEmail.trim();
+    }
+    const envFrom = (process.env.EMAIL_FROM || '').trim();
+    if (envFrom && !envFrom.includes('resend.dev') && !envFrom.includes('yourdomain.com') && !envFrom.includes('example.com') && !envFrom.includes('gmail.com')) {
+      return envFrom;
+    }
+    return 'VocaMate <onboarding@resend.dev>';
   }
 
   if (gmailUser) return `VocaMate <${gmailUser}>`;
@@ -242,7 +250,7 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
         headers: antiSpamHeaders
       });
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('SMTP send timed out after 6s')), 6000)
+        setTimeout(() => reject(new Error('SMTP send timed out after 25s')), 25000)
       );
       const info = await Promise.race([sendPromise, timeoutPromise]);
       console.log(`✅ [SMTP EMAIL DELIVERED] to: ${to} | ID: ${info.messageId} | "${subject}"`);
@@ -250,11 +258,56 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
       logEntry.provider = 'smtp';
       logEntry.from = smtpFrom;
       logEntry.smtpId = info.messageId;
+      logEntry.error = null;
       scheduleSave();
       return { ok: true, delivered: true, id: emailId, provider: 'smtp', otp: metadata.otp };
     } catch (smtpErr) {
       console.warn(`⚠️ [SMTP SEND ERROR] to: ${to}:`, smtpErr.message);
       logEntry.error = 'SMTP: ' + smtpErr.message;
+
+      // If Gmail SMTP failed on primary port, attempt secondary port (465 if 587, or 587 if 465)
+      const cfg = loadEmailConfig();
+      const gmailUser = (process.env.GMAIL_USER || cfg.gmailUser || '').trim();
+      const rawGmailPass = (process.env.GMAIL_APP_PASSWORD || cfg.gmailAppPassword || '').trim();
+      const cleanGmailPass = rawGmailPass.replace(/\s+/g, '');
+      const primaryPort = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || cfg.smtpPort || '587', 10);
+      const altPort = primaryPort === 465 ? 587 : 465;
+
+      if (gmailUser && cleanGmailPass) {
+        try {
+          console.log(`🔄 Retrying Gmail SMTP on alternate port ${altPort} for ${to}...`);
+          const altTransporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: altPort,
+            secure: altPort === 465,
+            requireTLS: altPort !== 465,
+            family: 4,
+            connectionTimeout: 15000,
+            greetingTimeout: 15000,
+            socketTimeout: 20000,
+            auth: { user: gmailUser, pass: cleanGmailPass }
+          });
+          const altInfo = await altTransporter.sendMail({
+            from: getSenderAddress('smtp'),
+            to,
+            subject,
+            html,
+            text: text || undefined,
+            replyTo,
+            headers: antiSpamHeaders
+          });
+          console.log(`✅ [GMAIL SMTP RETRY SUCCESS] Delivered to: ${to} via port ${altPort} | ID: ${altInfo.messageId}`);
+          logEntry.status = 'sent';
+          logEntry.provider = 'smtp';
+          logEntry.smtpId = altInfo.messageId;
+          logEntry.error = null;
+          scheduleSave();
+          return { ok: true, delivered: true, id: emailId, provider: 'smtp', otp: metadata.otp };
+        } catch (altErr) {
+          console.warn(`⚠️ [GMAIL SMTP RETRY ON PORT ${altPort} FAILED]:`, altErr.message);
+          logEntry.error = `SMTP (primary & alt): ${smtpErr.message}; ${altErr.message}`;
+        }
+      }
       // Fall through to Resend if available
     }
   }

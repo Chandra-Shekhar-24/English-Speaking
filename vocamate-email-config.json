@@ -4,5 +4,5 @@
   "gmailUser": "chandrashekharbansal.2006@gmail.com",
   "gmailAppPassword": "jmjzcwqamzxklhxy",
   "smtpHost": "smtp.gmail.com",
-  "smtpPort": 465
+  "smtpPort": 587
 }

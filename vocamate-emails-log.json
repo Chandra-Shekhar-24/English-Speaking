@@ -1,22 +1,42 @@
 {
   "logs": [
     {
+      "id": "mail_1791201920203_295",
+      "timestamp": "2026-10-05T12:05:20.203Z",
+      "to": "chandrashekharbansal.2006@gmail.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your verification code is 852963",
+      "type": "email_verification",
+      "status": "pending",
+      "provider": "smtp",
+      "error": null,
+      "metadata": {
+        "userId": 999,
+        "userCode": "9999",
+        "displayName": "Test Student",
+        "otp": "852963",
+        "verifyUrl": "https://english-speaking-g7dn.onrender.com/verify-email.html?token=test_token_1234567890",
+        "tokenPrefix": "test_tok"
+      }
+    },
+    {
       "id": "mail_1791201149783_294",
       "timestamp": "2026-10-05T11:52:29.783Z",
       "to": "selfdel1791201145392@gmail.com",
       "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
       "subject": "VocaMate Security Alert: New sign-in detected for your account",
       "type": "login_alert",
-      "status": "pending",
+      "status": "sandbox_restricted",
       "provider": "smtp",
-      "error": null,
+      "error": "The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains",
       "metadata": {
         "userId": 14,
         "userCode": "9357",
         "displayName": "Self Deleter",
         "ip": "127.0.0.1",
         "userAgent": "node"
-      }
+      },
+      "sandboxRestricted": true
     },
     {
       "id": "mail_1791201145878_293",
@@ -5066,5 +5086,5 @@
       }
     }
   ],
-  "nextEmailId": 295
+  "nextEmailId": 296
 }
