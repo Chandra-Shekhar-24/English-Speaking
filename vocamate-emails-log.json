@@ -1,6 +1,82 @@
 {
   "logs": [
     {
+      "id": "mail_1791289252651_299",
+      "timestamp": "2026-10-06T12:20:52.651Z",
+      "to": "render_test_1791289252091@example.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your verification code is 849424",
+      "type": "email_verification",
+      "status": "pending",
+      "provider": "smtp",
+      "error": null,
+      "metadata": {
+        "userId": 15,
+        "userCode": "9468",
+        "displayName": "Render Production Tester",
+        "otp": "849424",
+        "verifyUrl": "https://english-speaking-g7dn.onrender.com/verify-email.html?token=5422d87738e888c9bf0bdf6a276b9e79aff4d2883f008de6388c9b0078e36cdb",
+        "tokenPrefix": "5422d877"
+      }
+    },
+    {
+      "id": "mail_1791289252546_298",
+      "timestamp": "2026-10-06T12:20:52.546Z",
+      "to": "render_test_1791289252091@example.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your verification code is 603793",
+      "type": "email_verification",
+      "status": "pending",
+      "provider": "smtp",
+      "error": null,
+      "metadata": {
+        "userId": 15,
+        "userCode": "9468",
+        "displayName": "Render Production Tester",
+        "otp": "603793",
+        "verifyUrl": "https://english-speaking-g7dn.onrender.com/verify-email.html?token=cf3ef43fa53fb44e5a4afa277c075775d2066775ceaf2a31acdba33ff7ad2fbd",
+        "tokenPrefix": "cf3ef43f"
+      }
+    },
+    {
+      "id": "mail_1791289096984_297",
+      "timestamp": "2026-10-06T12:18:16.984Z",
+      "to": "render_test_1791289096415@example.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your verification code is 535969",
+      "type": "email_verification",
+      "status": "pending",
+      "provider": "smtp",
+      "error": null,
+      "metadata": {
+        "userId": 15,
+        "userCode": "1381",
+        "displayName": "Render Production Tester",
+        "otp": "535969",
+        "verifyUrl": "https://english-speaking-g7dn.onrender.com/verify-email.html?token=b3c36ef091cec413050ca175e5dc47c7cbcb8b2e4382138f7810399843a3410b",
+        "tokenPrefix": "b3c36ef0"
+      }
+    },
+    {
+      "id": "mail_1791289096877_296",
+      "timestamp": "2026-10-06T12:18:16.877Z",
+      "to": "render_test_1791289096415@example.com",
+      "from": "VocaMate <chandrashekharbansal.2006@gmail.com>",
+      "subject": "VocaMate: Your verification code is 321531",
+      "type": "email_verification",
+      "status": "pending",
+      "provider": "smtp",
+      "error": null,
+      "metadata": {
+        "userId": 15,
+        "userCode": "1381",
+        "displayName": "Render Production Tester",
+        "otp": "321531",
+        "verifyUrl": "https://english-speaking-g7dn.onrender.com/verify-email.html?token=ab7c50a875cc92a57873ea40a4e6ac6e5e95bfdb8ae36b0eb581371f5e6bd59b",
+        "tokenPrefix": "ab7c50a8"
+      }
+    },
+    {
       "id": "mail_1791201920203_295",
       "timestamp": "2026-10-05T12:05:20.203Z",
       "to": "chandrashekharbansal.2006@gmail.com",
@@ -5086,5 +5162,5 @@
       }
     }
   ],
-  "nextEmailId": 296
+  "nextEmailId": 300
 }

@@ -9818,120 +9818,6 @@
       "userAgent": null
     },
     {
-      "id": "act_1790774226809_515",
-      "timestamp": "2026-09-30T13:17:06.809Z",
-      "timestampMs": 1790774226809,
-      "userCode": "9182",
-      "userId": 2,
-      "email": "market.test@example.com",
-      "displayName": "Market Tester",
-      "category": "auth",
-      "type": "email_password_reset",
-      "title": "Password Reset Email Sent",
-      "summary": "Sent password reset instructions to market.test@example.com",
-      "details": {
-        "email": "market.test@example.com",
-        "resetUrl": "http://localhost:3000/reset-password.html?token=3dfa057b7dfded6fa8a5a5c464ef0637b12ae7d5718144e26d35fd1b0253a972"
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790774227146_516",
-      "timestamp": "2026-09-30T13:17:07.146Z",
-      "timestampMs": 1790774227146,
-      "userCode": "9182",
-      "userId": 2,
-      "email": "market.test@example.com",
-      "displayName": "Market Tester",
-      "category": "auth",
-      "type": "email_password_reset",
-      "title": "Password Reset Email Sent",
-      "summary": "Sent password reset instructions to market.test@example.com",
-      "details": {
-        "email": "market.test@example.com",
-        "resetUrl": "http://localhost:3000/reset-password.html?token=f0903cf2420ea44dbebdf55ec214d9cfed0cee7e45fd093f2fc2e353e9a65240"
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790774227991_517",
-      "timestamp": "2026-09-30T13:17:07.991Z",
-      "timestampMs": 1790774227991,
-      "userCode": "9182",
-      "userId": 2,
-      "email": "market.test@example.com",
-      "displayName": "Market Tester",
-      "category": "auth",
-      "type": "email_login_alert",
-      "title": "Login Alert Email Dispatched",
-      "summary": "Sent sign-in security notification to market.test@example.com",
-      "details": {
-        "email": "market.test@example.com"
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790774266725_518",
-      "timestamp": "2026-09-30T13:17:46.725Z",
-      "timestampMs": 1790774266725,
-      "userCode": "9182",
-      "userId": 2,
-      "email": "market.test@example.com",
-      "displayName": "Market Tester",
-      "category": "auth",
-      "type": "email_password_reset",
-      "title": "Password Reset Email Sent",
-      "summary": "Sent password reset instructions to market.test@example.com",
-      "details": {
-        "email": "market.test@example.com",
-        "resetUrl": "http://localhost:3000/reset-password.html?token=3b92a3c1786a42c8335faf0a1814ced19af2008afe2c042fdc25f44da73c0683"
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790774267556_519",
-      "timestamp": "2026-09-30T13:17:47.556Z",
-      "timestampMs": 1790774267556,
-      "userCode": "9182",
-      "userId": 2,
-      "email": "market.test@example.com",
-      "displayName": "Market Tester",
-      "category": "auth",
-      "type": "login",
-      "title": "User Signed In",
-      "summary": "Logged in as #9182 (Market Tester)",
-      "details": {
-        "email": "market.test@example.com",
-        "userCode": "9182"
-      },
-      "ip": "127.0.0.1",
-      "userAgent": "node"
-    },
-    {
-      "id": "act_1790774267575_520",
-      "timestamp": "2026-09-30T13:17:47.575Z",
-      "timestampMs": 1790774267575,
-      "userCode": "9182",
-      "userId": 2,
-      "email": "market.test@example.com",
-      "displayName": "Market Tester",
-      "category": "auth",
-      "type": "email_login_alert",
-      "title": "Login Alert Email Dispatched",
-      "summary": "Sent sign-in security notification to market.test@example.com",
-      "details": {
-        "email": "market.test@example.com",
-        "ip": "127.0.0.1",
-        "userAgent": "node"
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
       "id": "act_1790774287180_521",
       "timestamp": "2026-09-30T13:18:07.180Z",
       "timestampMs": 1790774287180,
@@ -10033,138 +9919,6 @@
       "userAgent": null
     },
     {
-      "id": "act_1790946786386_528",
-      "timestamp": "2026-10-02T13:13:06.386Z",
-      "timestampMs": 1790946786386,
-      "userCode": "7573",
-      "userId": 7,
-      "email": "voca_user_1790946785654@example.com",
-      "displayName": "Aarav Sharma",
-      "category": "auth",
-      "type": "email_verification",
-      "title": "Verification Email Dispatched",
-      "summary": "Dispatched account activation link to voca_user_1790946785654@example.com",
-      "details": {
-        "email": "voca_user_1790946785654@example.com",
-        "userCode": "7573",
-        "verifyUrl": "http://localhost:3000/verify-email.html?token=af0305bd1e83cc25d552fcf4b9e5680a08ddf2e2cb24a14465c37657c4d284f1",
-        "delivered": false
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790946786387_529",
-      "timestamp": "2026-10-02T13:13:06.387Z",
-      "timestampMs": 1790946786387,
-      "userCode": "7573",
-      "userId": 7,
-      "email": "voca_user_1790946785654@example.com",
-      "displayName": "Aarav Sharma",
-      "category": "auth",
-      "type": "signup_pending_verification",
-      "title": "New User Registered (Pending OTP Verification)",
-      "summary": "Assigned ID #7573 to voca_user_1790946785654@example.com",
-      "details": {
-        "userCode": "7573",
-        "email": "voca_user_1790946785654@example.com",
-        "otp": "270496"
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790946786390_530",
-      "timestamp": "2026-10-02T13:13:06.390Z",
-      "timestampMs": 1790946786390,
-      "userCode": "7573",
-      "userId": 7,
-      "email": "voca_user_1790946785654@example.com",
-      "displayName": "Aarav Sharma",
-      "category": "auth",
-      "type": "email_verified_otp",
-      "title": "Account Activated via OTP",
-      "summary": "Account #7573 (voca_user_1790946785654@example.com) activated via OTP code 270496",
-      "details": {},
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790946786827_531",
-      "timestamp": "2026-10-02T13:13:06.827Z",
-      "timestampMs": 1790946786827,
-      "userCode": "7573",
-      "userId": 7,
-      "email": "voca_user_1790946785654@example.com",
-      "displayName": "Aarav Sharma",
-      "category": "auth",
-      "type": "email_login_alert",
-      "title": "Login Alert Email Dispatched",
-      "summary": "Sent sign-in security notification to voca_user_1790946785654@example.com",
-      "details": {
-        "email": "voca_user_1790946785654@example.com",
-        "ip": "127.0.0.1"
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790946787100_532",
-      "timestamp": "2026-10-02T13:13:07.100Z",
-      "timestampMs": 1790946787100,
-      "userCode": "7573",
-      "userId": 7,
-      "email": "voca_user_1790946785654@example.com",
-      "displayName": "Aarav Sharma",
-      "category": "auth",
-      "type": "email_password_reset",
-      "title": "Password Reset OTP Sent",
-      "summary": "Sent password reset OTP (667238) to voca_user_1790946785654@example.com",
-      "details": {
-        "email": "voca_user_1790946785654@example.com",
-        "otp": "667238",
-        "resetUrl": "http://localhost:3000/reset-password.html?token=e01b8cb1774597fdcf76a75e4c1e0a1f532eecfa9963d6b891f80d8c242cdfd6",
-        "delivered": false
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790946787512_533",
-      "timestamp": "2026-10-02T13:13:07.512Z",
-      "timestampMs": 1790946787512,
-      "userCode": "7573",
-      "userId": 7,
-      "email": "voca_user_1790946785654@example.com",
-      "displayName": "Aarav Sharma",
-      "category": "auth",
-      "type": "password_reset_success",
-      "title": "Password Successfully Reset",
-      "summary": "Password reset successfully for account #7573",
-      "details": {},
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790946787898_534",
-      "timestamp": "2026-10-02T13:13:07.898Z",
-      "timestampMs": 1790946787898,
-      "userCode": "7573",
-      "userId": 7,
-      "email": "voca_user_1790946785654@example.com",
-      "displayName": "Aarav Sharma",
-      "category": "auth",
-      "type": "email_login_alert",
-      "title": "Login Alert Email Dispatched",
-      "summary": "Sent sign-in security notification to voca_user_1790946785654@example.com",
-      "details": {
-        "email": "voca_user_1790946785654@example.com",
-        "ip": "127.0.0.1"
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
       "id": "act_1790947030358_535",
       "timestamp": "2026-10-02T13:17:10.358Z",
       "timestampMs": 1790947030358,
@@ -10228,117 +9982,6 @@
       "userAgent": null
     },
     {
-      "id": "act_1790947621299_542",
-      "timestamp": "2026-10-02T13:27:01.299Z",
-      "timestampMs": 1790947621299,
-      "userCode": "6318",
-      "userId": 10,
-      "email": "user_test_1790947620549@example.com",
-      "displayName": "Test Student",
-      "category": "auth",
-      "type": "email_verification",
-      "title": "Verification Email Dispatched",
-      "summary": "Dispatched account activation link to user_test_1790947620549@example.com",
-      "details": {
-        "email": "user_test_1790947620549@example.com",
-        "userCode": "6318",
-        "verifyUrl": "http://localhost:3000/verify-email.html?token=2025a0d5cc05290b56da680843e5272c8e9b4008cddb39bd8f75b76f2a7b0053",
-        "delivered": false
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790947621299_543",
-      "timestamp": "2026-10-02T13:27:01.299Z",
-      "timestampMs": 1790947621299,
-      "userCode": "6318",
-      "userId": 10,
-      "email": "user_test_1790947620549@example.com",
-      "displayName": "Test Student",
-      "category": "auth",
-      "type": "signup_pending_verification",
-      "title": "New User Registered (Pending OTP Verification)",
-      "summary": "Assigned ID #6318 to user_test_1790947620549@example.com",
-      "details": {
-        "userCode": "6318",
-        "email": "user_test_1790947620549@example.com"
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790947621301_544",
-      "timestamp": "2026-10-02T13:27:01.301Z",
-      "timestampMs": 1790947621301,
-      "userCode": "6318",
-      "userId": 10,
-      "email": "user_test_1790947620549@example.com",
-      "displayName": "Test Student",
-      "category": "auth",
-      "type": "email_verified_otp",
-      "title": "Account Activated via OTP",
-      "summary": "Account #6318 (user_test_1790947620549@example.com) activated via OTP code 707550",
-      "details": {},
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790947621600_545",
-      "timestamp": "2026-10-02T13:27:01.600Z",
-      "timestampMs": 1790947621600,
-      "userCode": "6318",
-      "userId": 10,
-      "email": "user_test_1790947620549@example.com",
-      "displayName": "Test Student",
-      "category": "auth",
-      "type": "email_password_reset",
-      "title": "Password Reset OTP Sent",
-      "summary": "Sent password reset OTP (412778) to user_test_1790947620549@example.com",
-      "details": {
-        "email": "user_test_1790947620549@example.com",
-        "otp": "412778",
-        "resetUrl": "http://localhost:3000/reset-password.html?token=49ce71d5d1313597f684e75a4228f419cdeb35ebcffe3978883d1d1e483d7428",
-        "delivered": false
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790947622031_546",
-      "timestamp": "2026-10-02T13:27:02.031Z",
-      "timestampMs": 1790947622031,
-      "userCode": "6318",
-      "userId": 10,
-      "email": "user_test_1790947620549@example.com",
-      "displayName": "Test Student",
-      "category": "auth",
-      "type": "password_reset_success",
-      "title": "Password Successfully Reset",
-      "summary": "Password reset successfully for account #6318",
-      "details": {},
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1790947622507_547",
-      "timestamp": "2026-10-02T13:27:02.507Z",
-      "timestampMs": 1790947622507,
-      "userCode": "6318",
-      "userId": 10,
-      "email": "user_test_1790947620549@example.com",
-      "displayName": "Test Student",
-      "category": "auth",
-      "type": "email_login_alert",
-      "title": "Login Alert Email Dispatched",
-      "summary": "Sent sign-in security notification to user_test_1790947620549@example.com",
-      "details": {
-        "email": "user_test_1790947620549@example.com"
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
       "id": "act_1791082438191_548",
       "timestamp": "2026-10-04T02:53:58.191Z",
       "timestampMs": 1791082438191,
@@ -10356,78 +9999,6 @@
         "verifyUrl": "http://localhost:3000/verify-email.html?token=test_token_abc_123",
         "delivered": false
       },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1791082463039_549",
-      "timestamp": "2026-10-04T02:54:23.039Z",
-      "timestampMs": 1791082463039,
-      "userCode": "1647",
-      "userId": 11,
-      "email": "student_test_1791082461923@gmail.com",
-      "displayName": "Student Learner",
-      "category": "auth",
-      "type": "email_verification",
-      "title": "Verification Email Dispatched",
-      "summary": "Dispatched account activation link to student_test_1791082461923@gmail.com",
-      "details": {
-        "email": "student_test_1791082461923@gmail.com",
-        "userCode": "1647",
-        "verifyUrl": "http://localhost:3000/verify-email.html?token=11e46967aef220002513fc779c9c5cab2f29d84bb2681a4c87a4af306b337422",
-        "delivered": false
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1791082463039_550",
-      "timestamp": "2026-10-04T02:54:23.039Z",
-      "timestampMs": 1791082463039,
-      "userCode": "1647",
-      "userId": 11,
-      "email": "student_test_1791082461923@gmail.com",
-      "displayName": "Student Learner",
-      "category": "auth",
-      "type": "signup_pending_verification",
-      "title": "New User Registered (Pending OTP Verification)",
-      "summary": "Assigned ID #1647 to student_test_1791082461923@gmail.com",
-      "details": {
-        "userCode": "1647",
-        "email": "student_test_1791082461923@gmail.com"
-      },
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1791082463101_551",
-      "timestamp": "2026-10-04T02:54:23.101Z",
-      "timestampMs": 1791082463101,
-      "userCode": "1647",
-      "userId": 11,
-      "email": "student_test_1791082461923@gmail.com",
-      "displayName": "Student Learner",
-      "category": "auth",
-      "type": "email_verified_otp",
-      "title": "Account Activated via OTP",
-      "summary": "Account #1647 (student_test_1791082461923@gmail.com) activated via OTP code 936888",
-      "details": {},
-      "ip": null,
-      "userAgent": null
-    },
-    {
-      "id": "act_1791083344016_552",
-      "timestamp": "2026-10-04T03:09:04.016Z",
-      "timestampMs": 1791083344016,
-      "userCode": "1647",
-      "userId": 11,
-      "email": "student_test_1791082461923@gmail.com",
-      "displayName": "Student Learner",
-      "category": "auth",
-      "type": "account_deleted",
-      "title": "User Account Permanently Deleted",
-      "summary": "Account #1647 (student_test_1791082461923@gmail.com) was deleted",
-      "details": {},
       "ip": null,
       "userAgent": null
     },
@@ -10464,21 +10035,40 @@
       "userAgent": null
     },
     {
-      "id": "act_1791084753916_564",
-      "timestamp": "2026-10-04T03:32:33.916Z",
-      "timestampMs": 1791084753916,
-      "userCode": "1647",
-      "userId": 11,
-      "email": "student_test_1791082461923@gmail.com",
-      "displayName": "Student Learner",
+      "id": "act_1791289252542_579",
+      "timestamp": "2026-10-06T12:20:52.542Z",
+      "timestampMs": 1791289252542,
+      "userCode": "9468",
+      "userId": 15,
+      "email": "render_test_1791289252091@example.com",
+      "displayName": "Render Production Tester",
       "category": "auth",
-      "type": "account_deleted",
-      "title": "User Account Permanently Deleted",
-      "summary": "Account #1647 (student_test_1791082461923@gmail.com) was deleted",
+      "type": "signup_pending_verification",
+      "title": "New User Registered (Pending OTP Verification)",
+      "summary": "Assigned ID #9468 to render_test_1791289252091@example.com",
+      "details": {
+        "userCode": "9468",
+        "email": "render_test_1791289252091@example.com"
+      },
+      "ip": null,
+      "userAgent": null
+    },
+    {
+      "id": "act_1791289252714_580",
+      "timestamp": "2026-10-06T12:20:52.714Z",
+      "timestampMs": 1791289252714,
+      "userCode": "9468",
+      "userId": 15,
+      "email": "render_test_1791289252091@example.com",
+      "displayName": "Render Production Tester",
+      "category": "auth",
+      "type": "email_verified_otp",
+      "title": "Account Activated via OTP",
+      "summary": "Account 9468 (render_test_1791289252091@example.com) activated via OTP code 849424",
       "details": {},
       "ip": null,
       "userAgent": null
     }
   ],
-  "nextEventId": 573
+  "nextEventId": 581
 }

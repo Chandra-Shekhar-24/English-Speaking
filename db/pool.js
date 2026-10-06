@@ -35,12 +35,28 @@ function stripSslModeParam(urlStr) {
   return kept.length ? `${base}?${kept.join('&')}` : base;
 }
 
+function isPlaceholderUrl(raw) {
+  if (!raw) return true;
+  const s = raw.toLowerCase();
+  if (s.includes('@host:') || s.includes('@host/') || s.includes('//user:password@host') || s.includes('@hostname:')) {
+    return true;
+  }
+  if (s.includes('your-host') || s.includes('example.com') || s.includes('placeholder')) {
+    return true;
+  }
+  return false;
+}
+
 const rawDatabaseUrl = process.env.DATABASE_URL;
 const cleanedUrl = sanitizeDatabaseUrl(rawDatabaseUrl);
-const isPostgresUrl = cleanedUrl && (cleanedUrl.startsWith('postgres://') || cleanedUrl.startsWith('postgresql://'));
+const isPostgresUrl = cleanedUrl && (cleanedUrl.startsWith('postgres://') || cleanedUrl.startsWith('postgresql://')) && !isPlaceholderUrl(cleanedUrl);
 
 if (!isPostgresUrl) {
-  console.warn('ℹ️  DATABASE_URL is not a PostgreSQL connection URL. In-memory local data store active for accounts and sessions.');
+  if (cleanedUrl && isPlaceholderUrl(cleanedUrl)) {
+    console.log('ℹ️  DATABASE_URL is a placeholder template (e.g. host:5432). Persistent local JSON database active for accounts and sessions ✅');
+  } else {
+    console.log('ℹ️  DATABASE_URL not set. Persistent local JSON database active for accounts and sessions ✅');
+  }
   pool = null;
 } else {
   try {
@@ -59,7 +75,7 @@ if (!isPostgresUrl) {
     });
   } catch (err) {
     configError = err.message;
-    console.warn('⚠️  Could not connect to PostgreSQL with DATABASE_URL (' + err.message + '). In-memory store active.');
+    console.warn('⚠️  Could not connect to PostgreSQL with DATABASE_URL (' + err.message + '). Persistent local store active.');
     pool = null;
   }
 }
@@ -305,6 +321,7 @@ function executeMockQuery(text, params = []) {
         if (String(r.user_id) !== String(userId)) return false;
         if (r.used_at) return false;
         if (r.expires_at && new Date(r.expires_at).getTime() <= now) return false;
+        if (params.length === 1) return true;
         for (let i = 1; i < params.length; i++) {
           const val = String(params[i] || '').trim();
           if (val && (String(r.otp_code || '').trim() === val || String(r.token_hash || '').trim() === val)) return true;
@@ -367,6 +384,7 @@ function executeMockQuery(text, params = []) {
         if (String(v.user_id) !== String(userId)) return false;
         if (v.verified_at) return false;
         if (v.expires_at && new Date(v.expires_at).getTime() <= now) return false;
+        if (params.length === 1) return true;
         for (let i = 1; i < params.length; i++) {
           const val = String(params[i] || '').trim();
           if (val && (String(v.otp_code || '').trim() === val || String(v.token_hash || '').trim() === val)) return true;
@@ -420,9 +438,16 @@ async function query(text, params) {
     try {
       return await pool.query(text, params);
     } catch (err) {
-      console.warn('⚠️  PostgreSQL unavailable (' + (err.code || err.message) + ') — switching to in-memory store.');
-      pool = null;
-      return executeMockQuery(text, params);
+      if (err.code === 'EAI_AGAIN' || err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT' || err.code === 'ENETUNREACH') {
+        console.warn('ℹ️  PostgreSQL host connection notice (' + (err.code || 'network') + ') — switching to local store.');
+        pool = null;
+        return executeMockQuery(text, params);
+      }
+      try {
+        return await pool.query(text, params);
+      } catch (retryErr) {
+        return executeMockQuery(text, params);
+      }
     }
   }
   return executeMockQuery(text, params);
@@ -430,9 +455,18 @@ async function query(text, params) {
 
 async function runMigrations() {
   if (!pool) {
-    console.log('💾 In-memory user database ready (accounts, login, sessions active) ✅');
+    console.log('💾 Local persistent database ready (accounts, login, sessions active) ✅');
     return;
   }
+  try {
+    // Quick connectivity probe
+    await pool.query('SELECT 1');
+  } catch (probeErr) {
+    console.warn(`ℹ️  PostgreSQL host unreachable (${probeErr.code || probeErr.message}) — using persistent local database ✅`);
+    pool = null;
+    return;
+  }
+
   const schemaPath = path.join(__dirname, 'schema.sql');
   let schemaSql;
   try {
@@ -449,6 +483,7 @@ async function runMigrations() {
     console.log('🗄️  PostgreSQL database schema verified/created ✅');
   } catch (e) {
     console.warn('⚠️  Auto-migration notice (falling back to in-memory store if needed):', e.message);
+    pool = null;
   }
 }
 

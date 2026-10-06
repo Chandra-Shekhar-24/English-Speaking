@@ -25,7 +25,7 @@ const crypto = require('crypto');
 
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SHEET_NAME = process.env.GOOGLE_SHEET_NAME || 'Users';
-const HEADER = ['User ID', 'Email', 'Name', 'Signed Up (UTC)', 'Last Updated (UTC)'];
+const HEADER = ['User ID', 'Email', 'Name', 'Status', 'Signed Up (UTC)', 'Last Updated (UTC)'];
 
 let sheetsClient = null;
 let enabled = false;
@@ -151,7 +151,7 @@ async function ensureHeader() {
 
     await sheetsClient.spreadsheets.values.update({
       spreadsheetId: SHEET_ID,
-      range: `${activeSheetName}!A1:E1`,
+      range: `${activeSheetName}!A1:F1`,
       valueInputOption: 'RAW',
       requestBody: { values: [HEADER] }
     });
@@ -194,24 +194,26 @@ async function upsertUser(user, previousUserCode) {
     const lookupId = previousUserCode || user.userCode;
     const rowNum = await findRowByUserId(lookupId);
     const nowIso = new Date().toISOString();
+    const status = user.isVerified ? 'Active/Verified' : 'Pending OTP';
     const values = [[
       user.userCode,
       user.email,
       user.displayName,
+      status,
       user.createdAt ? new Date(user.createdAt).toISOString() : nowIso,
       nowIso
     ]];
     if (rowNum) {
       await sheetsClient.spreadsheets.values.update({
         spreadsheetId: SHEET_ID,
-        range: `${activeSheetName}!A${rowNum}:E${rowNum}`,
+        range: `${activeSheetName}!A${rowNum}:F${rowNum}`,
         valueInputOption: 'RAW',
         requestBody: { values }
       });
     } else {
       await sheetsClient.spreadsheets.values.append({
         spreadsheetId: SHEET_ID,
-        range: `${activeSheetName}!A:E`,
+        range: `${activeSheetName}!A:F`,
         valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
         requestBody: { values }

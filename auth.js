@@ -262,6 +262,9 @@ async function verifyOtp({ email, otp }, meta = {}) {
   await query('UPDATE users SET is_verified = true, updated_at = now() WHERE id = $1', [user.id]);
   user.is_verified = true;
 
+  const pubUser = publicUser(user);
+  sheets.upsertUser(pubUser).catch(() => {});
+
   const token = await createSession(user.id, meta);
 
   activity.logEvent({
@@ -275,7 +278,7 @@ async function verifyOtp({ email, otp }, meta = {}) {
     summary: `Account ${user.user_code} (${user.email}) activated via OTP code ${cleanOtp}`
   });
 
-  return { user: publicUser(user), token };
+  return { user: pubUser, token };
 }
 
 async function verifyEmail(token) {
@@ -302,6 +305,10 @@ async function verifyEmail(token) {
   const userRes = await query('SELECT * FROM users WHERE id = $1', [record.user_id]);
   const user = userRes.rows && userRes.rows[0];
   if (!user) throw httpError(404, 'User account not found');
+  user.is_verified = true;
+
+  const pubUser = publicUser(user);
+  sheets.upsertUser(pubUser).catch(() => {});
 
   activity.logEvent({
     userCode: user.user_code,
@@ -314,7 +321,7 @@ async function verifyEmail(token) {
     summary: `Account ${user.user_code} (${user.email}) is now active`
   });
 
-  return publicUser(user);
+  return pubUser;
 }
 
 async function resendVerificationEmail(identifier, appUrl) {
@@ -385,15 +392,26 @@ async function createSession(userId, meta = {}) {
   return token;
 }
 
-async function login({ email, password }, meta = {}) {
-  const result = await query('SELECT * FROM users WHERE email = $1', [(email || '').toLowerCase()]);
-  const user = result.rows[0];
+async function login({ email, identifier, userCode, password }, meta = {}) {
+  const cleanId = (identifier || email || userCode || '').trim().toLowerCase();
+  if (!cleanId) throw httpError(400, 'Email address or User ID is required');
+
+  let user = null;
+  const strippedCode = cleanId.replace(/^#+/, '');
+  if (/^[0-9]{4,8}$/.test(strippedCode)) {
+    const resByCode = await query('SELECT * FROM users WHERE user_code = $1', [strippedCode]);
+    user = resByCode.rows && resByCode.rows[0];
+  }
+  if (!user) {
+    const resByEmail = await query('SELECT * FROM users WHERE email = $1', [cleanId]);
+    user = resByEmail.rows && resByEmail.rows[0];
+  }
   if (!user) throw httpError(401, 'Invalid email or password');
   const ok = await bcrypt.compare(password || '', user.password_hash);
   if (!ok) throw httpError(401, 'Invalid email or password');
 
   if (user.is_verified === false) {
-    const err = httpError(403, 'Your account is pending email verification. Please check your inbox and click the verification link to activate your account.');
+    const err = httpError(403, 'Your account is pending OTP verification. Please enter the 6-digit code sent to your email.');
     err.needsVerification = true;
     err.email = user.email;
     err.userCode = user.user_code;

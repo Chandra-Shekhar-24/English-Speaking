@@ -1540,6 +1540,11 @@ app.get("/api/admin/users", requireAdmin, async (req, res) => {
     );
     const allSessions = sessionsResult.rows || [];
 
+    const verifsResult = await query(
+      "SELECT user_id, otp_code, expires_at, created_at FROM email_verifications WHERE verified_at IS NULL ORDER BY id DESC"
+    ).catch(() => ({ rows: [] }));
+    const allVerifs = (verifsResult && verifsResult.rows) || [];
+
     const structuredUsers = [];
     const seenCodes = new Set();
 
@@ -1560,8 +1565,16 @@ app.get("/api/admin/users", requireAdmin, async (req, res) => {
 
       const isVerified = u.is_verified !== undefined ? Boolean(u.is_verified) : true;
       let status = "offline";
+      let pendingOtp = null;
+      let pendingOtpExpiresAt = null;
+
       if (!isVerified) {
         status = "pending_verification";
+        const pv = allVerifs.find(v => v.user_id === u.id);
+        if (pv) {
+          pendingOtp = pv.otp_code;
+          pendingOtpExpiresAt = pv.expires_at;
+        }
       } else if (isLive) {
         status = liveData.busy ? "in-call" : "online";
       }
@@ -1572,6 +1585,8 @@ app.get("/api/admin/users", requireAdmin, async (req, res) => {
         displayName: u.display_name,
         email: u.email,
         isVerified,
+        pendingOtp,
+        pendingOtpExpiresAt,
         status,
         accountStatus: status,
         isOnline: Boolean(isLive && liveData.connected),
@@ -1867,6 +1882,8 @@ app.post("/api/admin/users/:userCode/activate", requireAdmin, async (req, res) =
 
     await query("UPDATE users SET is_verified = true, updated_at = now() WHERE id = $1", [user.id]);
     await query("UPDATE email_verifications SET verified_at = now() WHERE user_id = $1", [user.id]).catch(() => {});
+    user.is_verified = true;
+    sheets.upsertUser(auth.publicUser(user)).catch(() => {});
 
     activity.logEvent({
       userCode,

@@ -586,6 +586,29 @@
                   <input type="number" id="gwSmtpPort" placeholder="587" style="width:100%; margin-top:2px;" />
                 </div>
               </div>
+              <button type="button" class="admin-btn" id="gwSaveOptionBBtn" style="margin-top:14px; width:100%; padding:10px; font-weight:700; font-size:12.5px;">💾 Save Custom SMTP / Resend</button>
+            </div>
+
+            <!-- Option C: Brevo (Sendinblue) HTTPS API (Port 443 — 100% Firewall-Safe on Render) -->
+            <div class="admin-gateway-card" style="margin-top:14px; border:1px solid rgba(56,189,248,0.25); background:rgba(56,189,248,0.03);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <h5 style="margin:0; color:#38bdf8; font-size:14px; font-weight:700;">
+                  🚀 Option C: Brevo (Sendinblue) HTTPS API (Recommended for Render)
+                </h5>
+                <span style="font-size:11px; padding:2px 8px; border-radius:12px; background:rgba(56,189,248,0.15); color:#38bdf8; font-weight:700;">Port 443 HTTPS</span>
+              </div>
+              <p style="font-size:12px; color:#94a3b8; margin-bottom:12px; line-height:1.4;">
+                If your cloud host (like Render Free tier) blocks outbound SMTP ports (587/465), Brevo sends emails directly over HTTPS (Port 443) which is <strong>never blocked</strong>. 300 free emails/day to ANY recipient worldwide.
+              </p>
+              
+              <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Brevo API Key (xkeysib-...)</label>
+              <div class="password-input-wrap" style="margin-top:4px; margin-bottom:10px;">
+                <input type="password" id="gwBrevoKey" placeholder="xkeysib-..." style="margin-bottom:0;" />
+                <button type="button" class="password-toggle-btn" data-target="gwBrevoKey" title="Show password" aria-label="Toggle password visibility">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
+              <button type="button" class="admin-btn primary" id="gwSaveOptionCBtn" style="margin-top:4px; width:100%; padding:10px; font-weight:700; font-size:12.5px; background:#0284c7;">💾 Save & Activate Brevo HTTPS (Port 443)</button>
             </div>
           </div>
 
@@ -1204,7 +1227,7 @@
         'adminConfirmDeleteModal', 'adminDeleteUserName', 'adminDeleteUserCode', 'cancelAdminDeleteBtn', 'confirmAdminDeleteBtn',
         'tabCountUsers', 'adminCardsContainer', 'adminRawJsonContainer', 'adminEmailGatewayContainer', 'adminEmailLogsContainer',
         'adminEmailLogsTableBody', 'adminRefreshLogsBtn', 'adminJsonSummaryLabel', 'adminCopyRawJsonBtn', 'adminRawJsonPre',
-        'gatewayStatusBadge', 'gatewaySandboxNotice', 'gwGmailUser', 'gwGmailPass', 'gwGmailPassStatus', 'gwClearPassBtn', 'gwSmtpHost', 'gwSmtpPort', 'gwFromEmail', 'gwResendKey', 'gwSaveBtn', 'gwVerifyBtn', 'gwVerifyResultBox', 'gwTestEmailInput', 'gwSendTestBtn', 'gwTestResultBox',
+        'gatewayStatusBadge', 'gatewaySandboxNotice', 'gwGmailUser', 'gwGmailPass', 'gwGmailPassStatus', 'gwClearPassBtn', 'gwSmtpHost', 'gwSmtpPort', 'gwFromEmail', 'gwResendKey', 'gwBrevoKey', 'gwSaveBtn', 'gwSaveOptionBBtn', 'gwSaveOptionCBtn', 'gwVerifyBtn', 'gwVerifyResultBox', 'gwTestEmailInput', 'gwSendTestBtn', 'gwTestResultBox',
         'adminUserDetailView', 'adminDetailAvatar', 'adminDetailName', 'adminDetailCode', 'adminDetailStatus', 'adminDetailEmail', 'adminDetailTimeWindow',
         'adminDetailBackBtn', 'adminDetailRefreshBtn', 'adminDetailCopyJsonBtn', 'adminDetailDeleteUserBtn',
         'adminDetailEventsCount', 'adminDetailAiCount', 'adminDetailCallsCount', 'adminDetailMinutesCount', 'adminDetailCorrectionsCount', 'adminDetailLoginsCount',
@@ -4425,7 +4448,7 @@
           const isInCall = u.status === 'in-call';
           const isPending = !u.isVerified || u.status === 'pending_verification';
           const statusClass = isInCall ? 'in-call' : (isOnline ? 'online' : (isPending ? 'pending' : 'offline'));
-          const statusLabel = isInCall ? '📞 In-Call' : (isOnline ? '🟢 Online' : (isPending ? '⏳ Pending OTP' : '⚪ Offline'));
+          const statusLabel = isInCall ? '📞 In-Call' : (isOnline ? '🟢 Online' : (isPending ? (u.pendingOtp ? `⏳ Pending (OTP: ${escapeHtml(u.pendingOtp)})` : '⏳ Pending OTP') : '⚪ Offline'));
 
           const prof = u.profile || {};
           const login = u.loginInfo || {};
@@ -4434,6 +4457,7 @@
           const userJsonStr = JSON.stringify(u, null, 2);
 
           const pendingButtons = isPending ? `
+            ${u.pendingOtp ? `<span style="display:inline-flex; align-items:center; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.35); color:#fbbf24; border-radius:6px; padding:4px 8px; font-size:12px; font-weight:700; font-family:monospace; letter-spacing:1px;" title="Active 6-digit OTP code">🔑 OTP: ${escapeHtml(u.pendingOtp)}</span>` : ''}
             <button class="admin-btn btn-activate-user" data-code="${escapeHtml(u.userCode)}" data-name="${escapeHtml(u.displayName)}">
               ⚡ Activate Account
             </button>
@@ -5213,8 +5237,18 @@
             els.gwResendKey.value = cfg.hasResend ? '••••••••' : '';
             els.gwResendKey.placeholder = 're_...';
           }
+          if (els.gwBrevoKey) {
+            els.gwBrevoKey.value = cfg.hasBrevoKey ? '••••••••' : '';
+            els.gwBrevoKey.placeholder = 'xkeysib-...';
+          }
 
-          if (cfg.activeProvider === 'gmail' || cfg.activeProvider === 'smtp') {
+          if (cfg.activeProvider === 'brevo') {
+            els.gatewayStatusBadge.textContent = '🟢 Brevo HTTPS Active (Port 443 — 100% Firewall-Safe on Render)';
+            els.gatewayStatusBadge.style.background = 'rgba(56,189,248,0.15)';
+            els.gatewayStatusBadge.style.color = '#38bdf8';
+            els.gatewayStatusBadge.style.borderColor = 'rgba(56,189,248,0.3)';
+            if (els.gatewaySandboxNotice) els.gatewaySandboxNotice.style.display = 'none';
+          } else if (cfg.activeProvider === 'gmail' || cfg.activeProvider === 'smtp') {
             els.gatewayStatusBadge.textContent = '🟢 Gmail SMTP Active (Delivers to ALL Primary Inboxes)';
             els.gatewayStatusBadge.style.background = 'rgba(16,185,129,0.15)';
             els.gatewayStatusBadge.style.color = '#34d399';
@@ -5319,56 +5353,71 @@
         });
       }
 
-      if (els.gwSaveBtn) {
-        els.gwSaveBtn.addEventListener('click', async () => {
-          const enteredPass = els.gwGmailPass ? els.gwGmailPass.value.trim() : '';
-          const enteredKey = els.gwResendKey ? els.gwResendKey.value.trim() : '';
+      async function handleSaveGatewaySettings(triggerBtn, defaultLabel) {
+        const enteredPass = els.gwGmailPass ? els.gwGmailPass.value.trim() : '';
+        const enteredKey = els.gwResendKey ? els.gwResendKey.value.trim() : '';
+        const enteredBrevo = els.gwBrevoKey ? els.gwBrevoKey.value.trim() : '';
 
-          const payload = {
-            gmailUser: (els.gwGmailUser ? els.gwGmailUser.value.trim() : ''),
-            smtpHost: (els.gwSmtpHost ? els.gwSmtpHost.value.trim() : ''),
-            smtpPort: parseInt((els.gwSmtpPort ? els.gwSmtpPort.value.trim() : '587') || '587', 10),
-            fromEmail: (els.gwFromEmail ? els.gwFromEmail.value.trim() : '')
-          };
+        const payload = {
+          gmailUser: (els.gwGmailUser ? els.gwGmailUser.value.trim() : ''),
+          smtpHost: (els.gwSmtpHost ? els.gwSmtpHost.value.trim() : ''),
+          smtpPort: parseInt((els.gwSmtpPort ? els.gwSmtpPort.value.trim() : '587') || '587', 10),
+          fromEmail: (els.gwFromEmail ? els.gwFromEmail.value.trim() : '')
+        };
 
-          const isMaskedOrEmpty = (val) => {
-            if (!val) return true;
-            return /^[\u2022\u25cf\*\s]+$/.test(val) || val.includes('••••') || val.includes('****');
-          };
+        const isMaskedOrEmpty = (val) => {
+          if (!val) return true;
+          return /^[\u2022\u25cf\*\s]+$/.test(val) || val.includes('••••') || val.includes('****');
+        };
 
-          // Only send password if non-empty and not masked dots
-          if (enteredPass && !isMaskedOrEmpty(enteredPass)) {
-            payload.gmailAppPassword = enteredPass.replace(/\s+/g, '');
-          }
-          if (enteredKey && !isMaskedOrEmpty(enteredKey)) {
-            payload.resendApiKey = enteredKey.trim();
-          }
+        if (enteredPass && !isMaskedOrEmpty(enteredPass)) {
+          payload.gmailAppPassword = enteredPass.replace(/\s+/g, '');
+        }
+        if (enteredKey && !isMaskedOrEmpty(enteredKey)) {
+          payload.resendApiKey = enteredKey.trim();
+        }
+        if (enteredBrevo && !isMaskedOrEmpty(enteredBrevo)) {
+          payload.brevoApiKey = enteredBrevo.trim();
+        }
 
-          els.gwSaveBtn.disabled = true;
-          els.gwSaveBtn.textContent = 'Saving & Verifying...';
-          try {
-            const res = await adminFetch('/api/admin/email-gateway', {
-              method: 'POST',
-              body: JSON.stringify(payload)
-            });
-            showToast('✅', 'Settings Saved', res.message || 'Email gateway settings saved successfully!');
-            await loadEmailGatewaySettings();
-            if (res.verification && res.verification.ok) {
-              if (els.gwVerifyResultBox) {
-                els.gwVerifyResultBox.style.display = 'block';
-                els.gwVerifyResultBox.style.background = 'rgba(16,185,129,0.12)';
-                els.gwVerifyResultBox.style.border = '1px solid rgba(16,185,129,0.3)';
-                els.gwVerifyResultBox.style.color = '#34d399';
-                els.gwVerifyResultBox.innerHTML = `✅ <strong>Verified!</strong> ${escapeHtml(res.verification.message || 'Connected to Gmail SMTP')}`;
-              }
+        if (triggerBtn) {
+          triggerBtn.disabled = true;
+          triggerBtn.textContent = 'Saving...';
+        }
+        try {
+          const res = await adminFetch('/api/admin/email-gateway', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          showToast('✅', 'Settings Saved', res.message || 'Email gateway settings saved successfully!');
+          await loadEmailGatewaySettings();
+          if (res.verification && res.verification.ok) {
+            if (els.gwVerifyResultBox) {
+              els.gwVerifyResultBox.style.display = 'block';
+              els.gwVerifyResultBox.style.background = 'rgba(16,185,129,0.12)';
+              els.gwVerifyResultBox.style.border = '1px solid rgba(16,185,129,0.3)';
+              els.gwVerifyResultBox.style.color = '#34d399';
+              els.gwVerifyResultBox.innerHTML = `✅ <strong>Verified!</strong> ${escapeHtml(res.verification.message || 'Connected to Email Gateway')}`;
             }
-          } catch (e) {
-            showToast('⚠️', 'Save Error', e.message);
-          } finally {
-            els.gwSaveBtn.disabled = false;
-            els.gwSaveBtn.textContent = '💾 Save Gmail SMTP';
           }
-        });
+        } catch (e) {
+          showToast('⚠️', 'Save Error', e.message);
+        } finally {
+          if (triggerBtn) {
+            triggerBtn.disabled = false;
+            triggerBtn.textContent = defaultLabel;
+          }
+        }
+      }
+
+      if (els.gwSaveBtn) {
+        els.gwSaveBtn.addEventListener('click', () => handleSaveGatewaySettings(els.gwSaveBtn, '💾 Save Gmail SMTP'));
+      }
+      if (els.gwSaveOptionBBtn) {
+        els.gwSaveOptionBBtn.addEventListener('click', () => handleSaveGatewaySettings(els.gwSaveOptionBBtn, '💾 Save Custom SMTP / Resend'));
+      }
+      if (els.gwSaveOptionCBtn) {
+        els.gwSaveOptionCBtn.addEventListener('click', () => handleSaveGatewaySettings(els.gwSaveOptionCBtn, '💾 Save & Activate Brevo HTTPS (Port 443)'));
       }
 
       if (els.gwSendTestBtn) {

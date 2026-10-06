@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "lint": "node -c server.js auth.js mailer.js db.js db/pool.js sheets.js media.js activity.js",
     "build": "echo 'Build complete'"
   },
   "engines": {

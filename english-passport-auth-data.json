@@ -1,17 +1,6 @@
 {
   "users": [
     {
-      "id": 2,
-      "user_code": "9182",
-      "email": "market.test@example.com",
-      "display_name": "Market Tester",
-      "password_hash": "$2a$12$jmBqvTXonkzfz3IdUaveZOUnrW2ZzAufD5sqlZL07ESk3ua6008uK",
-      "avatar_url": null,
-      "created_at": "2026-09-30T13:17:06.479Z",
-      "updated_at": "2026-09-30T13:17:47.154Z",
-      "is_verified": true
-    },
-    {
       "id": 3,
       "user_code": "6178",
       "email": "chandrashekharb.2405@gmail.com",
@@ -34,169 +23,29 @@
       "updated_at": "2026-10-01T13:09:07.604Z"
     },
     {
-      "id": 7,
-      "user_code": "7573",
-      "email": "voca_user_1790946785654@example.com",
-      "display_name": "Aarav Sharma",
-      "password_hash": "$2a$12$U6/Jat.J4WTcZLmj9T9KlOIcRyWujp1Fg9vTcaW88L9OG8zVZWqey",
+      "id": 15,
+      "user_code": "9468",
+      "email": "render_test_1791289252091@example.com",
+      "display_name": "Render Production Tester",
+      "password_hash": "$2a$12$tTQ7V0NpQ1hYnZQmsHnGeecwKgflrm2qgRS4lpLxAZzTsYy7vaZMO",
       "is_verified": true,
       "avatar_url": null,
-      "created_at": "2026-10-02T13:13:06.077Z",
-      "updated_at": "2026-10-02T13:13:07.511Z"
-    },
-    {
-      "id": 8,
-      "user_code": "2245",
-      "email": "testuser_1790947030644@gmail.com",
-      "display_name": "Test Student",
-      "password_hash": "$2a$12$UsUeQoIbvVrfPK3WDKktquAr2VZM4xucwBhZKD3SQDh.nF1IBYWZ2",
-      "is_verified": false,
-      "avatar_url": null,
-      "created_at": "2026-10-02T13:17:11.066Z",
-      "updated_at": "2026-10-02T13:17:11.066Z"
-    },
-    {
-      "id": 9,
-      "user_code": "5796",
-      "email": "chandras.bansal.24@gmail.com",
-      "display_name": "Chandra Shekhar Bansal",
-      "password_hash": "$2a$12$qHs/7RC2plNWf81lxlZeQOlcVO9sRi3Rc98dtt2BZkpNHWHUIxc.6",
-      "is_verified": false,
-      "avatar_url": null,
-      "created_at": "2026-10-02T13:26:42.314Z",
-      "updated_at": "2026-10-02T13:26:42.314Z"
-    },
-    {
-      "id": 10,
-      "user_code": "6318",
-      "email": "user_test_1790947620549@example.com",
-      "display_name": "Test Student",
-      "password_hash": "$2a$12$gFIioT/2VyMy5qxn1nsFEu.yE8.EaUxXF5OJQVEIlsVUQgNqUa8n6",
-      "is_verified": true,
-      "avatar_url": null,
-      "created_at": "2026-10-02T13:27:00.971Z",
-      "updated_at": "2026-10-02T13:27:02.030Z"
-    },
-    {
-      "id": 11,
-      "user_code": "1647",
-      "email": "student_test_1791082461923@gmail.com",
-      "display_name": "Student Learner",
-      "password_hash": "$2a$12$M4RCZvT3bLyswwvF5.Qm0evnZCTYORlQMqM0R8J/OUMNmtu1dK4kW",
-      "is_verified": true,
-      "avatar_url": null,
-      "created_at": "2026-10-04T02:54:22.422Z",
-      "updated_at": "2026-10-04T02:54:23.100Z"
+      "created_at": "2026-10-06T12:20:52.529Z",
+      "updated_at": "2026-10-06T12:20:52.704Z"
     }
   ],
   "sessions": [
     {
-      "id": "sess_1790774267154_fugl7l",
-      "user_id": 2,
-      "token_hash": "1df0e93ffd28e21e56c7e6367a6701c03f13064ba672400b9354b9f6c8ae3652",
-      "expires_at": "2026-10-30T13:17:47.154Z",
-      "user_agent": "node",
+      "id": "sess_1791289252713_dxc91w",
+      "user_id": 15,
+      "token_hash": "72ee4f27799dd6c7ee8c767685531e9a6253172f69f2175ef6ab637e0a4712d8",
+      "expires_at": "2026-11-05T12:20:52.704Z",
+      "user_agent": "test-runner",
       "ip_address": "127.0.0.1",
-      "created_at": "2026-09-30T13:17:47.155Z"
-    },
-    {
-      "id": "sess_1790774267555_4gn3js",
-      "user_id": 2,
-      "token_hash": "ffc621e45926a87d8339f8b49e44e163ff22276e3af1aa8715629b55266fa985",
-      "expires_at": "2026-10-30T13:17:47.555Z",
-      "user_agent": "node",
-      "ip_address": "127.0.0.1",
-      "created_at": "2026-09-30T13:17:47.555Z"
-    },
-    {
-      "id": "sess_1790946787512_mydjj2",
-      "user_id": 7,
-      "token_hash": "9ae70d605476ef441a95cb0bca0645a825ee4802aed121a5a4523ff3b51e4951",
-      "expires_at": "2026-11-01T13:13:07.512Z",
-      "user_agent": null,
-      "ip_address": "127.0.0.1",
-      "created_at": "2026-10-02T13:13:07.512Z"
-    },
-    {
-      "id": "sess_1790946787896_ixrt78",
-      "user_id": 7,
-      "token_hash": "615a652209c9d87b41fcb0a190c5c5b86a4a863ae05c5089b475734c117ea70d",
-      "expires_at": "2026-11-01T13:13:07.896Z",
-      "user_agent": null,
-      "ip_address": "127.0.0.1",
-      "created_at": "2026-10-02T13:13:07.896Z"
-    },
-    {
-      "id": "sess_1790947622031_z4zjnw",
-      "user_id": 10,
-      "token_hash": "e2f6d5a46f37233614874953f542547781970bc315f62723fdc1c1b437b2b76a",
-      "expires_at": "2026-11-01T13:27:02.031Z",
-      "user_agent": null,
-      "ip_address": null,
-      "created_at": "2026-10-02T13:27:02.031Z"
-    },
-    {
-      "id": "sess_1790947622483_ops3sv",
-      "user_id": 10,
-      "token_hash": "eedeb098ae3007d043e7747bc4855fef2136bd492b1b53ccd760b99b171e6354",
-      "expires_at": "2026-11-01T13:27:02.483Z",
-      "user_agent": null,
-      "ip_address": null,
-      "created_at": "2026-10-02T13:27:02.483Z"
+      "created_at": "2026-10-06T12:20:52.714Z"
     }
   ],
   "password_resets": [
-    {
-      "id": "reset_1790774226482_y2zeak",
-      "user_id": 2,
-      "token_hash": "87ae3216122ff70208438d625ef40c87077c079c3174d9d20d89907272ac2e39",
-      "expires_at": "2026-09-30T14:17:06.482Z",
-      "used_at": null,
-      "created_at": "2026-09-30T13:17:06.483Z"
-    },
-    {
-      "id": "reset_1790774226810_nv89wr",
-      "user_id": 2,
-      "token_hash": "97737a22e109a4dfd322ead5f48f58c1fdc0185793685e585d7f073a6a42a5ee",
-      "expires_at": "2026-09-30T14:17:06.810Z",
-      "used_at": "2026-09-30T13:17:07.546Z",
-      "created_at": "2026-09-30T13:17:06.810Z"
-    },
-    {
-      "id": "reset_1790774266424_rd2r53",
-      "user_id": 2,
-      "token_hash": "d92d9a586e0d374684e5b3922babe361c0a27f96c774b348b94e2ab20aeede5d",
-      "expires_at": "2026-09-30T14:17:46.423Z",
-      "used_at": "2026-09-30T13:17:47.154Z",
-      "created_at": "2026-09-30T13:17:46.424Z"
-    },
-    {
-      "id": "reset_1790946786803_1bty1f",
-      "user_id": 7,
-      "token_hash": "2a621116441ff014801a4839f2b8951c06930ef357dd2144002a2c857a478e51",
-      "otp_code": "667238",
-      "expires_at": "2026-10-02T14:13:06.802Z",
-      "used_at": "2026-10-02T13:13:07.511Z",
-      "created_at": "2026-10-02T13:13:06.803Z"
-    },
-    {
-      "id": "reset_1790946787896_zo8u6q",
-      "user_id": 7,
-      "token_hash": "3169697cc0bba297d8f3133df9cc63a42a0ffc9c6f8d5069be2d5e42e0c62c91",
-      "otp_code": "432478",
-      "expires_at": "2026-10-02T14:13:07.896Z",
-      "used_at": null,
-      "created_at": "2026-10-02T13:13:07.896Z"
-    },
-    {
-      "id": "reset_1790947031350_bc6ukt",
-      "user_id": 8,
-      "token_hash": "f6332eb83023a11c455ffa49dfe8fdd4a7f99d2d8980ae2b4bee1efffaf9e137",
-      "otp_code": "162299",
-      "expires_at": "2026-10-02T14:17:11.350Z",
-      "used_at": null,
-      "created_at": "2026-10-02T13:17:11.350Z"
-    },
     {
       "id": "reset_1790947081429_5gpy6o",
       "user_id": 3,
@@ -205,15 +54,6 @@
       "expires_at": "2026-10-02T14:18:01.429Z",
       "used_at": null,
       "created_at": "2026-10-02T13:18:01.429Z"
-    },
-    {
-      "id": "reset_1790947621301_qo5f4s",
-      "user_id": 10,
-      "token_hash": "5bf2525abbe85a3b7900d8c35a84a350db2ca64498d17bda1432e884aad454ba",
-      "otp_code": "412778",
-      "expires_at": "2026-10-02T14:27:01.301Z",
-      "used_at": "2026-10-02T13:27:02.030Z",
-      "created_at": "2026-10-02T13:27:01.301Z"
     }
   ],
   "email_verifications": [
@@ -243,50 +83,23 @@
       "created_at": "2026-10-02T13:04:30.253Z"
     },
     {
-      "id": "verify_1790946786078_2esnqs",
-      "user_id": 7,
-      "token_hash": "7e166ef59a2ecbe15f3de0adaba7f980ccf2ae8d24fbf1fd288f2ec80322e77a",
-      "otp_code": "270496",
-      "expires_at": "2026-10-03T13:13:06.077Z",
-      "verified_at": "2026-10-02T13:13:06.388Z",
-      "created_at": "2026-10-02T13:13:06.078Z"
+      "id": "verify_1791289252541_00d00h",
+      "user_id": 15,
+      "token_hash": "27978ba6b37a0795920f3eefb6b72eb45d1e86192b96cd826d0bcb909d2774d6",
+      "otp_code": "603793",
+      "expires_at": "2026-10-07T12:20:52.530Z",
+      "verified_at": "2026-10-06T12:20:52.599Z",
+      "created_at": "2026-10-06T12:20:52.541Z"
     },
     {
-      "id": "verify_1790947031067_9g6aci",
-      "user_id": 8,
-      "token_hash": "7ca0dfd5429830910fdc90a5a334f9b9ef75644756d5e6da860f82b295e98597",
-      "otp_code": "655526",
-      "expires_at": "2026-10-03T13:17:11.066Z",
-      "verified_at": null,
-      "created_at": "2026-10-02T13:17:11.067Z"
-    },
-    {
-      "id": "verify_1790947602315_6yx33g",
-      "user_id": 9,
-      "token_hash": "c51ca0514962ac2d5084b4e0fe5a95adc0d8ac404a269bf6a6cce2ca1a33d385",
-      "otp_code": "661303",
-      "expires_at": "2026-10-03T13:26:42.315Z",
-      "verified_at": null,
-      "created_at": "2026-10-02T13:26:42.315Z"
-    },
-    {
-      "id": "verify_1790947620972_a2rzan",
-      "user_id": 10,
-      "token_hash": "f4ee7e96868bd4910a696415346b6dc41fa2364449e27a94bb76c751a7700857",
-      "otp_code": "707550",
-      "expires_at": "2026-10-03T13:27:00.971Z",
-      "verified_at": "2026-10-02T13:27:01.300Z",
-      "created_at": "2026-10-02T13:27:00.972Z"
-    },
-    {
-      "id": "verify_1791082462422_cqsbcg",
-      "user_id": 11,
-      "token_hash": "247c05ee6515a0e941b18fc509438759fecad11f77589ce8396e622f0f255055",
-      "otp_code": "936888",
-      "expires_at": "2026-10-05T02:54:22.422Z",
-      "verified_at": "2026-10-04T02:54:23.100Z",
-      "created_at": "2026-10-04T02:54:22.422Z"
+      "id": "verify_1791289252650_po0tzp",
+      "user_id": 15,
+      "token_hash": "658b30f5cedab83adbd759de1c40cbe7a0905c07dd1abf6ede23dc031a29f2fb",
+      "otp_code": "849424",
+      "expires_at": "2026-10-07T12:20:52.629Z",
+      "verified_at": "2026-10-06T12:20:52.694Z",
+      "created_at": "2026-10-06T12:20:52.650Z"
     }
   ],
-  "nextUserId": 15
+  "nextUserId": 16
 }

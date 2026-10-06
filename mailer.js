@@ -53,13 +53,13 @@ function initTransporters() {
   const cfg = loadEmailConfig();
 
   // Support both Environment Variables and config file (process.env priority for Render)
-  const gmailUser = (process.env.GMAIL_USER || cfg.gmailUser || '').trim();
-  const rawGmailPass = (process.env.GMAIL_APP_PASSWORD || cfg.gmailAppPassword || '').trim();
+  const gmailUser = (process.env.GMAIL_USER || process.env.GMAIL_EMAIL || cfg.gmailUser || '').trim();
+  const rawGmailPass = (process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_PASSWORD || process.env.GMAIL_PASS || cfg.gmailAppPassword || '').trim();
   const cleanGmailPass = rawGmailPass.replace(/\s+/g, '');
 
   const smtpHost = (process.env.SMTP_HOST || cfg.smtpHost || process.env.EMAIL_HOST || (gmailUser ? 'smtp.gmail.com' : '')).trim();
   const smtpUser = (process.env.SMTP_USER || cfg.smtpUser || process.env.EMAIL_USER || gmailUser).trim();
-  const smtpPass = (process.env.SMTP_PASS || cfg.smtpPass || process.env.EMAIL_PASS || cleanGmailPass).trim();
+  const smtpPass = (process.env.SMTP_PASS || process.env.SMTP_PASSWORD || cfg.smtpPass || process.env.EMAIL_PASS || cleanGmailPass).trim();
   const smtpPort = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || cfg.smtpPort || '587', 10);
   const smtpSecure = process.env.SMTP_SECURE === 'true' || cfg.smtpSecure === true || smtpPort === 465;
 
@@ -193,7 +193,12 @@ function getReplyToAddress() {
 
 function getResendApiKey() {
   const cfg = loadEmailConfig();
-  return (cfg.resendApiKey || process.env.RESEND_API_KEY || '').trim();
+  return (process.env.RESEND_API_KEY || cfg.resendApiKey || '').trim();
+}
+
+function getBrevoApiKey() {
+  const cfg = loadEmailConfig();
+  return (process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY || cfg.brevoApiKey || '').trim();
 }
 
 /**
@@ -202,10 +207,11 @@ function getResendApiKey() {
 async function sendEmail({ to, subject, html, text, type = 'general', metadata = {} }) {
   const emailId = `mail_${Date.now()}_${nextEmailId++}`;
   const timestamp = new Date().toISOString();
+  const brevoApiKey = getBrevoApiKey();
   const resendApiKey = getResendApiKey();
   const replyTo = getReplyToAddress();
 
-  const activeProvider = smtpTransporter ? 'smtp' : (resendApiKey ? 'resend' : 'console_fallback');
+  const activeProvider = brevoApiKey ? 'brevo' : (smtpTransporter ? 'smtp' : (resendApiKey ? 'resend' : 'console_fallback'));
   const from = getSenderAddress(activeProvider);
 
   const logEntry = {
@@ -236,7 +242,55 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
     'Feedback-ID': `auth:${type}:vocamate`
   };
 
-  // 1) Try SMTP first if configured (delivers to ANY recipient address worldwide)
+  // 1) Try Brevo (Sendinblue) HTTPS API first if configured (Port 443 - NEVER BLOCKED BY RENDER OR CLOUD FIREWALLS)
+  if (brevoApiKey) {
+    try {
+      const cfg = loadEmailConfig();
+      const senderEmail = (process.env.GMAIL_USER || cfg.gmailUser || process.env.EMAIL_FROM || 'contact@vocamate.com').trim();
+      const senderName = 'VocaMate';
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'api-key': brevoApiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: { name: senderName, email: senderEmail },
+          to: [{ email: to }],
+          subject,
+          htmlContent: html,
+          textContent: text || undefined,
+          replyTo: { email: replyTo }
+        })
+      });
+      clearTimeout(timeoutId);
+      const resBody = await res.json().catch(() => ({}));
+      if (res.ok && (resBody.messageId || res.status === 201 || res.status === 200)) {
+        console.log(`✅ [BREVO HTTPS DELIVERED] to: ${to} | ID: ${resBody.messageId || 'ok'} | "${subject}"`);
+        logEntry.status = 'sent';
+        logEntry.provider = 'brevo';
+        logEntry.from = `${senderName} <${senderEmail}>`;
+        logEntry.smtpId = resBody.messageId || 'brevo_' + Date.now();
+        logEntry.error = null;
+        scheduleSave();
+        return { ok: true, delivered: true, id: emailId, provider: 'brevo', otp: metadata.otp };
+      } else {
+        const errMsg = resBody.message || resBody.code || ('Brevo HTTP ' + res.status);
+        console.warn(`⚠️ [BREVO API NOTICE] to: ${to}:`, errMsg);
+        logEntry.error = 'Brevo: ' + errMsg;
+      }
+    } catch (brevoErr) {
+      console.warn(`⚠️ [BREVO API EXCEPTION] to: ${to}:`, brevoErr.message);
+      logEntry.error = 'Brevo: ' + brevoErr.message;
+    }
+  }
+
+  // 2) Try SMTP (Gmail or custom) next if configured (delivers to ANY recipient address worldwide)
   if (smtpTransporter) {
     try {
       const smtpFrom = getSenderAddress('smtp');
@@ -305,14 +359,14 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
           return { ok: true, delivered: true, id: emailId, provider: 'smtp', otp: metadata.otp };
         } catch (altErr) {
           console.warn(`⚠️ [GMAIL SMTP RETRY ON PORT ${altPort} FAILED]:`, altErr.message);
-          logEntry.error = `SMTP (primary & alt): ${smtpErr.message}; ${altErr.message}`;
+          logEntry.error = `SMTP (primary port ${primaryPort} & alt port ${altPort}): ${smtpErr.message}; ${altErr.message}`;
         }
       }
       // Fall through to Resend if available
     }
   }
 
-  // 2) Try Resend API if configured
+  // 3) Try Resend API if configured
   if (resendApiKey) {
     try {
       const resendFrom = getSenderAddress('resend');
@@ -792,21 +846,24 @@ function getEmailLogs(limit = 100) {
 
 function getEmailGatewayConfig() {
   const cfg = loadEmailConfig();
+  const hasBrevo = Boolean(cfg.brevoApiKey || process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY);
   const hasResend = Boolean(cfg.resendApiKey || process.env.RESEND_API_KEY);
   const hasSmtp = Boolean(smtpTransporter);
   const rawSmtpUser = cfg.smtpUser || cfg.gmailUser || process.env.SMTP_USER || process.env.GMAIL_USER || '';
   const fromEmail = getSenderAddress();
   return {
+    hasBrevo,
     hasResend,
     hasSmtp,
-    activeProvider: hasSmtp ? (cfg.gmailUser ? 'gmail' : 'smtp') : (hasResend ? 'resend' : 'console'),
+    activeProvider: hasBrevo ? 'brevo' : (hasSmtp ? (cfg.gmailUser ? 'gmail' : 'smtp') : (hasResend ? 'resend' : 'console')),
     fromEmail,
     resendAccountOwner: 'chandrashekharbansal.2006@gmail.com',
     smtpUser: rawSmtpUser ? rawSmtpUser.replace(/(.{2})(.*)(@.*)/, '$1***$3') : '',
     rawSmtpUser: rawSmtpUser || '',
     gmailUser: cfg.gmailUser || process.env.GMAIL_USER || '',
-    hasGmailPass: Boolean(cfg.gmailAppPassword || process.env.GMAIL_APP_PASSWORD),
-    hasSmtpPass: Boolean(cfg.smtpPass || process.env.SMTP_PASS),
+    hasGmailPass: Boolean(cfg.gmailAppPassword || process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_PASSWORD || process.env.GMAIL_PASS),
+    hasBrevoKey: hasBrevo,
+    hasSmtpPass: Boolean(cfg.smtpPass || process.env.SMTP_PASS || process.env.EMAIL_PASS),
     smtpHost: cfg.smtpHost || process.env.SMTP_HOST || (cfg.gmailUser || process.env.GMAIL_USER ? 'smtp.gmail.com' : ''),
     smtpPort: cfg.smtpPort || process.env.SMTP_PORT || '587',
     customDomain: cfg.fromEmail && !cfg.fromEmail.includes('resend.dev') ? cfg.fromEmail : ''
@@ -827,6 +884,16 @@ function updateEmailGatewayConfig(newCfg = {}) {
   if (newCfg.fromEmail !== undefined && typeof newCfg.fromEmail === 'string') {
     const trimmed = newCfg.fromEmail.trim();
     if (trimmed) merged.fromEmail = trimmed;
+  }
+
+  // Brevo API Key: update if provided
+  if (newCfg.clearBrevoKey === true) {
+    merged.brevoApiKey = '';
+  } else if (newCfg.brevoApiKey !== undefined) {
+    const rawKey = String(newCfg.brevoApiKey || '').trim();
+    if (rawKey && !isMaskedValue(rawKey)) {
+      merged.brevoApiKey = rawKey;
+    }
   }
 
   // Resend API Key: only update if explicitly provided and not masked/empty
@@ -895,10 +962,38 @@ function updateEmailGatewayConfig(newCfg = {}) {
 
 async function verifyEmailGatewayConnection() {
   const cfg = loadEmailConfig();
-  const gmailUser = (cfg.gmailUser || process.env.GMAIL_USER || '').trim();
-  const rawGmailPass = (cfg.gmailAppPassword || process.env.GMAIL_APP_PASSWORD || '').trim();
+  const brevoApiKey = getBrevoApiKey();
+  const gmailUser = (cfg.gmailUser || process.env.GMAIL_USER || process.env.EMAIL_USER || '').trim();
+  const rawGmailPass = (cfg.gmailAppPassword || process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_PASSWORD || process.env.GMAIL_PASS || '').trim();
   const cleanGmailPass = rawGmailPass.replace(/\s+/g, '');
 
+  // 1. If Brevo HTTPS Key is configured, test connection via HTTPS
+  if (brevoApiKey) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch('https://api.brevo.com/v3/account', {
+        headers: { 'api-key': brevoApiKey },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const body = await res.json().catch(() => ({}));
+        return {
+          ok: true,
+          connected: true,
+          provider: 'brevo',
+          message: `Connected to Brevo HTTPS API (${body.email || 'Active'}) — 100% firewall-safe on Render (Port 443)`
+        };
+      } else {
+        return { ok: false, connected: false, provider: 'brevo', error: `Brevo API returned HTTP ${res.status}` };
+      }
+    } catch (e) {
+      return { ok: false, connected: false, provider: 'brevo', error: `Brevo API check failed: ${e.message}` };
+    }
+  }
+
+  // 2. If Gmail SMTP is configured, test SMTP connection
   if (gmailUser && cleanGmailPass) {
     if (!smtpTransporter) {
       initTransporters();
@@ -907,7 +1002,7 @@ async function verifyEmailGatewayConnection() {
       try {
         const verifyPromise = smtpTransporter.verify();
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Connection check timed out after 6s')), 6000)
+          setTimeout(() => reject(new Error('Connection check timed out after 10s. If deploying on Render Free Tier, note that Render blocks outbound SMTP ports 587/465. To bypass, configure BREVO_API_KEY in Render Environment Variables.')), 10000)
         );
         await Promise.race([verifyPromise, timeoutPromise]);
         return { ok: true, connected: true, provider: 'gmail', message: `Connected to Gmail SMTP as ${gmailUser}` };
@@ -919,7 +1014,7 @@ async function verifyEmailGatewayConnection() {
     try {
       const verifyPromise = smtpTransporter.verify();
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Connection check timed out after 6s')), 6000)
+        setTimeout(() => reject(new Error('SMTP connection check timed out')), 10000)
       );
       await Promise.race([verifyPromise, timeoutPromise]);
       return { ok: true, connected: true, provider: 'custom_smtp', message: 'Connected to custom SMTP server' };
@@ -927,7 +1022,7 @@ async function verifyEmailGatewayConnection() {
       return { ok: false, connected: false, provider: 'custom_smtp', error: err.message };
     }
   }
-  return { ok: false, connected: false, message: 'Gmail SMTP credentials not fully configured (needs email & 16-character App Password)' };
+  return { ok: false, connected: false, message: 'Email credentials not fully configured (needs Brevo API Key or Gmail email & 16-character App Password)' };
 }
 
 async function sendTestEmail(toEmail) {
