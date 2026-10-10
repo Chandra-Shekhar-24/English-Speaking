@@ -16,6 +16,11 @@ const auth = require("./auth");
 const activity = require("./activity");
 const sheets = require("./sheets");
 const mailer = require("./mailer");
+const friends = require("./friends");
+const interview = require("./interview");
+const interviewQuestions = require("./interview-questions");
+const gd = require("./gd");
+const words = require("./words");
 const { query, runMigrations } = require("./db/pool");
 
 // ============================================================
@@ -568,30 +573,38 @@ io.on("connection", (socket) => {
   socket.on("get-voices", (callback) => callback(VOICES));
 
   socket.on("find-user", async (targetUserId, callback) => {
-    const user = users.get(targetUserId);
-    if (user) {
-      if (!user.connected) { callback({ exists: true, online: false, message: "User is offline" }); return; }
-      if (user.busy) { callback({ exists: true, online: true, busy: true, message: "User is in a call" }); return; }
-      callback({
-        exists: true,
-        online: true,
-        busy: false,
-        peerId: user.peerId,
-        userId: targetUserId,
-        userName: user.userName || targetUserId
-      });
+    if (typeof callback !== 'function') return;
+    const targetCode = String(targetUserId || '').trim();
+    if (!targetCode) {
+      callback({ exists: false, message: "Enter a valid 4-digit User ID" });
       return;
     }
-    // Not currently connected — check whether the account exists at all
-    // (permanent IDs mean "not online right now" and "no such account"
-    // are different, meaningful answers).
+    const liveUser = users.get(targetCode);
+    let dbUser = null;
     try {
-      const result = await query("SELECT display_name FROM users WHERE user_code = $1", [targetUserId]);
-      if (result.rows.length) { callback({ exists: true, online: false, message: "User is offline" }); }
-      else { callback({ exists: false, message: "User not found" }); }
-    } catch (e) {
+      const result = await query("SELECT user_code, display_name FROM users WHERE user_code = $1", [targetCode]);
+      if (result && result.rows && result.rows.length) {
+        dbUser = result.rows[0];
+      }
+    } catch (e) {}
+
+    if (!liveUser && !dbUser) {
       callback({ exists: false, message: "User not found" });
+      return;
     }
+
+    const profile = friends.getProfile(userId, targetCode, liveUser, dbUser);
+    callback({
+      exists: true,
+      online: profile.online,
+      busy: profile.busy,
+      userId: targetCode,
+      userName: profile.displayName,
+      relationship: profile.relationship,
+      isFriend: profile.isFriend,
+      canCall: profile.canCall,
+      pendingRequestId: profile.pendingRequestId
+    });
   });
 
   socket.on("call-request", (data) => {
@@ -603,6 +616,19 @@ io.on("connection", (socket) => {
     if (!target.peerId) { socket.emit("call-error", "User is still connecting, try again in a moment"); return; }
     if (target.busy) { socket.emit("call-error", "User is in a call"); return; }
     if (caller.busy) { socket.emit("call-error", "You are already in a call"); return; }
+
+    // SECURITY ENFORCEMENT: Check block status
+    if (friends.isBlocked(userId, targetUserId)) {
+      socket.emit("call-error", "Cannot call this user");
+      return;
+    }
+
+    // SECURITY ENFORCEMENT: Calling Privacy is Friends Only!
+    if (!friends.areFriends(userId, targetUserId)) {
+      socket.emit("call-error", "Direct calling is restricted to Friends Only. Search their 4-digit ID and send a friend request first.");
+      return;
+    }
+
     caller.busy = true;
     const callId = `call_${Date.now()}_${userId}_${targetUserId}`;
     caller.currentCallId = callId;
@@ -622,6 +648,17 @@ io.on("connection", (socket) => {
             targetUser.busy = false; targetUser.currentCallId = null;
             if (targetUser.connected) { io.to(targetUser.socketId).emit("call-cancelled", { callId }); }
           }
+          // Log missed call in call logs
+          friends.logCallRecord({
+            callId,
+            caller: pending.caller,
+            target: pending.target,
+            callerName: (callerUser && callerUser.userName) || `User #${pending.caller}`,
+            targetName: (targetUser && targetUser.userName) || `User #${pending.target}`,
+            mediaType: pending.isVideo ? 'video' : 'voice',
+            status: 'missed',
+            durationSeconds: 0
+          });
           pendingCallRequests.delete(callId);
           broadcastOnlineUsers();
         }
@@ -630,12 +667,21 @@ io.on("connection", (socket) => {
     const callerName = caller.userName || `User ${userId}`;
     socket.emit("call-requested", { callId, isVideo });
     io.to(target.socketId).emit("incoming-call", {
-      callId, 
-      from: userId, 
-      fromPeerId: caller.peerId, 
+      callId,
+      from: userId,
+      fromPeerId: caller.peerId,
       fromName: callerName,
       isVideo
     });
+
+    // Send Web Push notification so phone/device rings even if tab is in background or closed
+    friends.sendCallPushNotification(targetUserId, {
+      callId,
+      fromUser: userId,
+      fromName: callerName,
+      isVideo
+    }).catch(err => console.warn('Push dispatch notice:', err.message));
+
     broadcastOnlineUsers();
   });
 
@@ -658,21 +704,29 @@ io.on("connection", (socket) => {
       if (responder) { responder.busy = true; responder.currentCallId = callId; }
       const callStartedAt = Date.now();
       const dbRecordId = db.startCallRecord('1:1', pendingCall.isVideo ? 'video' : 'voice', [pendingCall.caller, pendingCall.target]);
-      activeCalls.set(callId, { userA: pendingCall.caller, userB: pendingCall.target, status: 'connected', startedAt: callStartedAt, dbRecordId });
+      activeCalls.set(callId, {
+        userA: pendingCall.caller,
+        userB: pendingCall.target,
+        status: 'connected',
+        startedAt: callStartedAt,
+        dbRecordId,
+        isVideo: !!pendingCall.isVideo,
+        isRandom: !!pendingCall.isRandom
+      });
       pendingCallRequests.delete(callId);
       const responderName = responder.userName || `User ${pendingCall.target}`;
-      io.to(caller.socketId).emit("call-accepted", { 
-        callId, 
-        peerId: responder.peerId, 
+      io.to(caller.socketId).emit("call-accepted", {
+        callId,
+        peerId: responder.peerId,
         userId: pendingCall.target,
         userName: responderName,
         isVideo: !!pendingCall.isVideo,
         isRandom: !!pendingCall.isRandom
       });
       const callerName = caller.userName || `User ${pendingCall.caller}`;
-      io.to(responder.socketId).emit("call-connected", { 
-        callId, 
-        peerId: caller.peerId, 
+      io.to(responder.socketId).emit("call-connected", {
+        callId,
+        peerId: caller.peerId,
         userId: pendingCall.caller,
         userName: callerName,
         isVideo: !!pendingCall.isVideo,
@@ -702,6 +756,16 @@ io.on("connection", (socket) => {
     } else {
       if (caller) { caller.busy = false; caller.currentCallId = null; }
       if (responder) { responder.busy = false; responder.currentCallId = null; }
+      friends.logCallRecord({
+        callId,
+        caller: pendingCall.caller,
+        target: pendingCall.target,
+        callerName: (caller && caller.userName) || `User #${pendingCall.caller}`,
+        targetName: (responder && responder.userName) || `User #${pendingCall.target}`,
+        mediaType: pendingCall.isVideo ? 'video' : 'voice',
+        status: 'declined',
+        durationSeconds: 0
+      });
       pendingCallRequests.delete(callId);
       io.to(caller.socketId).emit("call-declined");
       broadcastOnlineUsers();
@@ -719,8 +783,176 @@ io.on("connection", (socket) => {
         target.busy = false; target.currentCallId = null;
         if (target.connected) { io.to(target.socketId).emit("call-cancelled", { callId }); }
       }
+      friends.logCallRecord({
+        callId,
+        caller: pendingCall.caller,
+        target: pendingCall.target,
+        callerName: (caller && caller.userName) || `User #${pendingCall.caller}`,
+        targetName: (target && target.userName) || `User #${pendingCall.target}`,
+        mediaType: pendingCall.isVideo ? 'video' : 'voice',
+        status: 'cancelled',
+        durationSeconds: 0
+      });
       pendingCallRequests.delete(callId);
       broadcastOnlineUsers();
+    }
+  });
+
+  // ============================================================
+  // REAL-TIME FRIEND SYSTEM (Requests, Friendships, Blocks, State)
+  // ============================================================
+  socket.on("get-friends-state", (callback) => {
+    if (typeof callback !== 'function') return;
+    try {
+      const friendsList = friends.getFriendsList(userId, users);
+      const requests = friends.getFriendRequests(userId);
+      const blocked = friends.getBlockedList(userId);
+      const missedCalls = friends.getMissedCallsCount(userId);
+      callback({
+        success: true,
+        friends: friendsList,
+        requests,
+        blocked,
+        missedCalls
+      });
+    } catch (e) {
+      callback({ success: false, error: e.message });
+    }
+  });
+
+  socket.on("send-friend-request", async (data, callback) => {
+    try {
+      const targetCode = String((data && data.targetUserId) || '').trim();
+      if (!targetCode) throw new Error("Enter a valid 4-digit User ID");
+      if (targetCode === userId) throw new Error("You cannot add yourself as a friend");
+
+      const targetUser = users.get(targetCode);
+      let targetName = targetUser ? targetUser.userName : null;
+      if (!targetName) {
+        const res = await query("SELECT display_name FROM users WHERE user_code = $1", [targetCode]);
+        targetName = res.rows[0] ? res.rows[0].display_name : `User #${targetCode}`;
+      }
+
+      const result = friends.sendFriendRequest(userId, targetCode, displayName, targetName);
+
+      // Notify target in real-time if connected
+      if (targetUser && targetUser.connected) {
+        io.to(targetUser.socketId).emit("friend-request-received", {
+          fromUser: userId,
+          fromName: displayName,
+          request: result.request
+        });
+        io.to(targetUser.socketId).emit("friends-updated");
+      }
+      socket.emit("friends-updated");
+      if (typeof callback === 'function') callback({ success: true, result });
+    } catch (err) {
+      if (typeof callback === 'function') callback({ success: false, error: err.message });
+    }
+  });
+
+  socket.on("accept-friend-request", (data, callback) => {
+    try {
+      const requestId = data && data.requestId;
+      const result = friends.acceptFriendRequest(requestId, userId);
+      const friendCode = result.friendCode;
+      const friendUser = users.get(friendCode);
+      if (friendUser && friendUser.connected) {
+        io.to(friendUser.socketId).emit("friend-request-accepted", {
+          byUser: userId,
+          byName: displayName
+        });
+        io.to(friendUser.socketId).emit("friends-updated");
+      }
+      socket.emit("friends-updated");
+      if (typeof callback === 'function') callback({ success: true, result });
+    } catch (err) {
+      if (typeof callback === 'function') callback({ success: false, error: err.message });
+    }
+  });
+
+  socket.on("decline-friend-request", (data, callback) => {
+    try {
+      const requestId = data && data.requestId;
+      const result = friends.declineFriendRequest(requestId, userId);
+      socket.emit("friends-updated");
+      if (typeof callback === 'function') callback({ success: true, result });
+    } catch (err) {
+      if (typeof callback === 'function') callback({ success: false, error: err.message });
+    }
+  });
+
+  socket.on("cancel-friend-request", (data, callback) => {
+    try {
+      const requestId = data && data.requestId;
+      const result = friends.cancelFriendRequest(requestId, userId);
+      socket.emit("friends-updated");
+      if (typeof callback === 'function') callback({ success: true, result });
+    } catch (err) {
+      if (typeof callback === 'function') callback({ success: false, error: err.message });
+    }
+  });
+
+  socket.on("remove-friend", (data, callback) => {
+    try {
+      const friendCode = String((data && data.friendUserCode) || '').trim();
+      const result = friends.removeFriend(userId, friendCode);
+      const friendUser = users.get(friendCode);
+      if (friendUser && friendUser.connected) {
+        io.to(friendUser.socketId).emit("friends-updated");
+      }
+      socket.emit("friends-updated");
+      if (typeof callback === 'function') callback({ success: true, result });
+    } catch (err) {
+      if (typeof callback === 'function') callback({ success: false, error: err.message });
+    }
+  });
+
+  socket.on("block-user", (data, callback) => {
+    try {
+      const targetCode = String((data && data.targetUserCode) || '').trim();
+      const result = friends.blockUser(userId, targetCode);
+      const targetUser = users.get(targetCode);
+      if (targetUser && targetUser.connected) {
+        io.to(targetUser.socketId).emit("friends-updated");
+      }
+      socket.emit("friends-updated");
+      if (typeof callback === 'function') callback({ success: true, result });
+    } catch (err) {
+      if (typeof callback === 'function') callback({ success: false, error: err.message });
+    }
+  });
+
+  socket.on("unblock-user", (data, callback) => {
+    try {
+      const targetCode = String((data && data.targetUserCode) || '').trim();
+      const result = friends.unblockUser(userId, targetCode);
+      socket.emit("friends-updated");
+      if (typeof callback === 'function') callback({ success: true, result });
+    } catch (err) {
+      if (typeof callback === 'function') callback({ success: false, error: err.message });
+    }
+  });
+
+  socket.on("report-user", (data, callback) => {
+    try {
+      const targetCode = String((data && data.targetUserCode) || '').trim();
+      const reason = data && data.reason;
+      const details = data && data.details;
+      const result = friends.reportUser(userId, targetCode, reason, details);
+      if (typeof callback === 'function') callback({ success: true, result });
+    } catch (err) {
+      if (typeof callback === 'function') callback({ success: false, error: err.message });
+    }
+  });
+
+  socket.on("get-call-history", (data, callback) => {
+    if (typeof callback !== 'function') return;
+    try {
+      const history = friends.getCallHistory(userId, 60);
+      callback({ success: true, history });
+    } catch (e) {
+      callback({ success: false, error: e.message });
     }
   });
 
@@ -897,11 +1129,11 @@ io.on("connection", (socket) => {
 
   socket.on("end-call", (callId) => {
     const user = users.get(userId);
-    if (user) { 
-      user.busy = false; 
-      user.currentCallId = null; 
+    if (user) {
+      user.busy = false;
+      user.currentCallId = null;
     }
-    
+
     if (callId && activeCalls.has(callId)) {
       const call = activeCalls.get(callId);
       db.endCallRecord(call.dbRecordId, call.startedAt);
@@ -913,6 +1145,19 @@ io.on("connection", (socket) => {
         io.to(otherUser.socketId).emit("call-ended");
       }
       const durationSeconds = Math.max(0, Math.round((Date.now() - call.startedAt) / 1000));
+      const userAObj = users.get(call.userA);
+      const userBObj = users.get(call.userB);
+      friends.logCallRecord({
+        callId,
+        caller: call.userA,
+        target: call.userB,
+        callerName: (userAObj && userAObj.userName) || `User #${call.userA}`,
+        targetName: (userBObj && userBObj.userName) || `User #${call.userB}`,
+        mediaType: call.isVideo ? 'video' : 'voice',
+        status: 'completed',
+        durationSeconds
+      });
+
       activity.logEvent({
         userCode: userId,
         category: 'call',
@@ -934,6 +1179,19 @@ io.on("connection", (socket) => {
             io.to(otherUser.socketId).emit("call-ended");
           }
           const durationSeconds = Math.max(0, Math.round((Date.now() - call.startedAt) / 1000));
+          const userAObj = users.get(call.userA);
+          const userBObj = users.get(call.userB);
+          friends.logCallRecord({
+            callId: id,
+            caller: call.userA,
+            target: call.userB,
+            callerName: (userAObj && userAObj.userName) || `User #${call.userA}`,
+            targetName: (userBObj && userBObj.userName) || `User #${call.userB}`,
+            mediaType: call.isVideo ? 'video' : 'voice',
+            status: 'completed',
+            durationSeconds
+          });
+
           activity.logEvent({
             userCode: userId,
             category: 'call',
@@ -956,9 +1214,9 @@ io.on("connection", (socket) => {
     const availableUsers = [];
     users.forEach((user, id) => {
       if (id !== userId && user.connected && !user.busy && user.peerId) {
-        availableUsers.push({ 
-          userId: id, 
-          peerId: user.peerId, 
+        availableUsers.push({
+          userId: id,
+          peerId: user.peerId,
           socketId: user.socketId,
           userName: user.userName || id
         });
@@ -1003,19 +1261,19 @@ io.on("connection", (socket) => {
     const callerName = caller.userName || `User ${userId}`;
     const targetName = target.userName || `User ${match.userId}`;
 
-    socket.emit("call-requested", { 
-      callId, 
-      isVideo, 
-      isRandom: true, 
-      targetUserId: match.userId, 
+    socket.emit("call-requested", {
+      callId,
+      isVideo,
+      isRandom: true,
+      targetUserId: match.userId,
       targetUserName: targetName,
       targetPeerId: match.peerId
     });
 
     io.to(target.socketId).emit("incoming-call", {
-      callId, 
-      from: userId, 
-      fromPeerId: caller.peerId, 
+      callId,
+      from: userId,
+      fromPeerId: caller.peerId,
       fromName: callerName,
       isVideo,
       isRandom: true
@@ -1024,8 +1282,98 @@ io.on("connection", (socket) => {
     broadcastOnlineUsers();
   });
 
+  // ============================================================
+  // GROUP DISCUSSION (GD) REAL-TIME SOCKET HANDLERS
+  // ============================================================
+  socket.on("gd:join-pool", ({ groupSize }, callback) => {
+    try {
+      const authUser = socket.authUser || {};
+      const res = gd.joinRandomWaitingPool({
+        userCode: socket.userId,
+        displayName: authUser.displayName || `User #${socket.userId}`,
+        avatarUrl: authUser.avatarUrl || null,
+        socketId: socket.id,
+        groupSize
+      });
+
+      if (res.status === 'matched' && res.room) {
+        const room = res.room;
+        // Join all participant sockets to the GD room channel
+        room.participants.forEach(p => {
+          const u = users.get(p.userCode);
+          if (u && u.socketId) {
+            const clientSocket = io.sockets.sockets.get(u.socketId);
+            if (clientSocket) clientSocket.join(`gd_${room.roomId}`);
+            io.to(u.socketId).emit("gd:matched", { room });
+          }
+        });
+      }
+
+      if (typeof callback === 'function') callback(res);
+    } catch (err) {
+      if (typeof callback === 'function') callback({ status: 'error', error: err.message });
+    }
+  });
+
+  socket.on("gd:leave-pool", (data, callback) => {
+    try {
+      const res = gd.leaveRandomWaitingPool(socket.userId);
+      if (typeof callback === 'function') callback(res);
+    } catch (err) {
+      if (typeof callback === 'function') callback({ error: err.message });
+    }
+  });
+
+  socket.on("gd:join-room", ({ roomId }, callback) => {
+    if (!roomId) return;
+    socket.join(`gd_${roomId}`);
+    const room = gd.getGdRoom(roomId);
+    if (typeof callback === 'function') callback({ ok: true, room });
+  });
+
+  socket.on("gd:message", async ({ roomId, text }, callback) => {
+    try {
+      const authUser = socket.authUser || {};
+      const result = await gd.postGdMessage({
+        roomId,
+        userCode: socket.userId,
+        displayName: authUser.displayName || `User #${socket.userId}`,
+        text
+      });
+
+      io.to(`gd_${roomId}`).emit("gd:new-message", { message: result.userMsg });
+      if (result.aiInterventionMsg) {
+        io.to(`gd_${roomId}`).emit("gd:new-message", { message: result.aiInterventionMsg });
+      }
+
+      if (typeof callback === 'function') callback({ ok: true });
+    } catch (err) {
+      if (typeof callback === 'function') callback({ ok: false, error: err.message });
+    }
+  });
+
+  socket.on("gd:speaking-state", ({ roomId, isSpeaking }) => {
+    if (!roomId) return;
+    socket.to(`gd_${roomId}`).emit("gd:speaker-changed", {
+      userCode: socket.userId,
+      isSpeaking: Boolean(isSpeaking)
+    });
+  });
+
+  socket.on("gd:end", async ({ roomId }, callback) => {
+    try {
+      io.to(`gd_${roomId}`).emit("gd:evaluating", { roomId });
+      const report = await gd.endGdSession(roomId);
+      io.to(`gd_${roomId}`).emit("gd:completed", { report });
+      if (typeof callback === 'function') callback({ ok: true, report });
+    } catch (err) {
+      if (typeof callback === 'function') callback({ ok: false, error: err.message });
+    }
+  });
+
   socket.on("disconnect", () => {
     if (socket.userId) {
+      gd.leaveRandomWaitingPool(socket.userId);
       const user = users.get(socket.userId);
       if (user) {
         db.endSession(user.sessionRecordId);
@@ -1081,8 +1429,8 @@ function broadcastOnlineUsers() {
   const onlineUsers = [];
   users.forEach((user, id) => {
     if (user.connected) {
-      onlineUsers.push({ 
-        userId: id, 
+      onlineUsers.push({
+        userId: id,
         busy: user.busy || false,
         userName: user.userName || id
       });
@@ -1442,6 +1790,808 @@ app.post("/api/friend-chat/upload", requireAuth, (req, res, next) => {
 });
 
 // ============================================================
+// FRIENDSHIP, SECURE CALLING & PUSH NOTIFICATION REST API
+// ============================================================
+app.get("/api/friends/vapid-public-key", (req, res) => {
+  res.json({ ok: true, publicKey: friends.getVapidPublicKey() });
+});
+
+app.post("/api/friends/push-subscription", requireAuth, (req, res) => {
+  try {
+    const { subscription } = req.body;
+    if (!subscription || !subscription.endpoint) {
+      return res.status(400).json({ error: "Invalid subscription" });
+    }
+    friends.savePushSubscription(req.user.userCode, subscription);
+    res.json({ ok: true, message: "Push notification subscription saved" });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post("/api/friends/push-unsubscribe", requireAuth, (req, res) => {
+  try {
+    const { endpoint } = req.body;
+    friends.removePushSubscription(endpoint);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post("/api/calls/decline-push", (req, res) => {
+  try {
+    const { callId } = req.body;
+    if (callId && pendingCallRequests.has(callId)) {
+      const pending = pendingCallRequests.get(callId);
+      if (pending.timeout) clearTimeout(pending.timeout);
+      const callerUser = users.get(pending.caller);
+      if (callerUser) {
+        callerUser.busy = false;
+        callerUser.currentCallId = null;
+        if (callerUser.connected) io.to(callerUser.socketId).emit("call-declined");
+      }
+      const targetUser = users.get(pending.target);
+      if (targetUser) {
+        targetUser.busy = false;
+        targetUser.currentCallId = null;
+      }
+      friends.logCallRecord({
+        callId,
+        caller: pending.caller,
+        target: pending.target,
+        callerName: (callerUser && callerUser.userName) || `User #${pending.caller}`,
+        targetName: (targetUser && targetUser.userName) || `User #${pending.target}`,
+        mediaType: pending.isVideo ? 'video' : 'voice',
+        status: 'declined',
+        durationSeconds: 0
+      });
+      pendingCallRequests.delete(callId);
+      broadcastOnlineUsers();
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/api/friends/state", requireAuth, (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const friendsList = friends.getFriendsList(myCode, users);
+    const requests = friends.getFriendRequests(myCode);
+    const blocked = friends.getBlockedList(myCode);
+    const missedCalls = friends.getMissedCallsCount(myCode);
+    res.json({ ok: true, friends: friendsList, requests, blocked, missedCalls });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/api/friends/list", requireAuth, (req, res) => {
+  try {
+    const friendsList = friends.getFriendsList(req.user.userCode, users);
+    res.json({ ok: true, friends: friendsList });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/api/friends/requests", requireAuth, (req, res) => {
+  try {
+    const reqs = friends.getFriendRequests(req.user.userCode);
+    res.json({ ok: true, ...reqs });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/api/friends/profile/:targetCode", requireAuth, async (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const targetCode = String(req.params.targetCode || '').trim();
+    if (!targetCode) return res.status(400).json({ error: "Missing 4-digit User ID" });
+
+    const liveUser = users.get(targetCode);
+    let dbUser = null;
+    const dbRes = await query("SELECT user_code, display_name FROM users WHERE user_code = $1", [targetCode]);
+    if (dbRes && dbRes.rows && dbRes.rows.length) {
+      dbUser = dbRes.rows[0];
+    }
+
+    if (!liveUser && !dbUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const profile = friends.getProfile(myCode, targetCode, liveUser, dbUser);
+    res.json({ ok: true, profile });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post("/api/friends/request", requireAuth, async (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const myName = req.user.displayName;
+    const targetCode = String(req.body.targetUserId || '').trim();
+    if (!targetCode) return res.status(400).json({ error: "Enter a valid 4-digit User ID" });
+    if (targetCode === myCode) return res.status(400).json({ error: "You cannot add yourself" });
+
+    const targetUser = users.get(targetCode);
+    let targetName = targetUser ? targetUser.userName : null;
+    if (!targetName) {
+      const dbRes = await query("SELECT display_name FROM users WHERE user_code = $1", [targetCode]);
+      targetName = dbRes.rows[0] ? dbRes.rows[0].display_name : `User #${targetCode}`;
+    }
+
+    const result = friends.sendFriendRequest(myCode, targetCode, myName, targetName);
+    if (targetUser && targetUser.connected) {
+      io.to(targetUser.socketId).emit("friend-request-received", {
+        fromUser: myCode,
+        fromName: myName,
+        request: result.request
+      });
+      io.to(targetUser.socketId).emit("friends-updated");
+    }
+    const myUser = users.get(myCode);
+    if (myUser && myUser.connected) {
+      io.to(myUser.socketId).emit("friends-updated");
+    }
+    res.json({ ok: true, result });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post("/api/friends/accept", requireAuth, (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const { requestId } = req.body;
+    const result = friends.acceptFriendRequest(requestId, myCode);
+    const friendCode = result.friendCode;
+    const friendUser = users.get(friendCode);
+    if (friendUser && friendUser.connected) {
+      io.to(friendUser.socketId).emit("friend-request-accepted", {
+        byUser: myCode,
+        byName: req.user.displayName
+      });
+      io.to(friendUser.socketId).emit("friends-updated");
+    }
+    const myUser = users.get(myCode);
+    if (myUser && myUser.connected) {
+      io.to(myUser.socketId).emit("friends-updated");
+    }
+    res.json({ ok: true, result });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post("/api/friends/decline", requireAuth, (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const { requestId } = req.body;
+    const result = friends.declineFriendRequest(requestId, myCode);
+    const myUser = users.get(myCode);
+    if (myUser && myUser.connected) {
+      io.to(myUser.socketId).emit("friends-updated");
+    }
+    res.json({ ok: true, result });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post("/api/friends/cancel", requireAuth, (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const { requestId } = req.body;
+    const result = friends.cancelFriendRequest(requestId, myCode);
+    const myUser = users.get(myCode);
+    if (myUser && myUser.connected) {
+      io.to(myUser.socketId).emit("friends-updated");
+    }
+    res.json({ ok: true, result });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post("/api/friends/remove", requireAuth, (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const friendCode = String(req.body.friendUserCode || '').trim();
+    const result = friends.removeFriend(myCode, friendCode);
+    const friendUser = users.get(friendCode);
+    if (friendUser && friendUser.connected) {
+      io.to(friendUser.socketId).emit("friends-updated");
+    }
+    const myUser = users.get(myCode);
+    if (myUser && myUser.connected) {
+      io.to(myUser.socketId).emit("friends-updated");
+    }
+    res.json({ ok: true, result });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post("/api/friends/block", requireAuth, (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const targetCode = String(req.body.targetUserCode || '').trim();
+    const result = friends.blockUser(myCode, targetCode);
+    const targetUser = users.get(targetCode);
+    if (targetUser && targetUser.connected) {
+      io.to(targetUser.socketId).emit("friends-updated");
+    }
+    const myUser = users.get(myCode);
+    if (myUser && myUser.connected) {
+      io.to(myUser.socketId).emit("friends-updated");
+    }
+    res.json({ ok: true, result });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post("/api/friends/unblock", requireAuth, (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const targetCode = String(req.body.targetUserCode || '').trim();
+    const result = friends.unblockUser(myCode, targetCode);
+    const myUser = users.get(myCode);
+    if (myUser && myUser.connected) {
+      io.to(myUser.socketId).emit("friends-updated");
+    }
+    res.json({ ok: true, result });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post("/api/friends/report", requireAuth, (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const targetCode = String(req.body.targetUserCode || '').trim();
+    const { reason, details } = req.body;
+    const result = friends.reportUser(myCode, targetCode, reason, details);
+    res.json({ ok: true, result });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.get("/api/friends/call-history", requireAuth, (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const limit = Number(req.query.limit) || 60;
+    const history = friends.getCallHistory(myCode, limit);
+    res.json({ ok: true, history });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/api/friends/missed-count", requireAuth, (req, res) => {
+  try {
+    const myCode = req.user.userCode;
+    const count = friends.getMissedCallsCount(myCode);
+    res.json({ ok: true, count });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================
+// AI INTERVIEW PRACTICE REST ENDPOINTS
+// ============================================================
+app.get("/api/interview/topics", (req, res) => {
+  res.json({ ok: true, topics: interview.TOPIC_CONFIG });
+});
+
+app.post("/api/interview/start", async (req, res) => {
+  try {
+    const { topicKey, customTopic, difficulty, totalQuestions, userCode: bodyCode } = req.body || {};
+    const userCode = req.user ? req.user.userCode : (bodyCode || `G${Math.floor(1000 + Math.random() * 9000)}`);
+    const userId = req.user ? req.user.id : null;
+    const sessionInfo = await interview.startInterviewSession({
+      userId,
+      userCode,
+      topicKey,
+      customTopic,
+      difficulty,
+      totalQuestions
+    });
+
+    if (req.user) {
+      activity.logEvent({
+        userCode: req.user.userCode,
+        userId: req.user.id,
+        displayName: req.user.displayName,
+        category: 'interview',
+        type: 'interview_started',
+        title: `Started Interview Practice: ${sessionInfo.topicTitle}`,
+        summary: `${sessionInfo.topicTitle} (${sessionInfo.difficulty}) - ${sessionInfo.totalQuestions} Questions`,
+        details: sessionInfo
+      });
+    }
+
+    res.json({ ok: true, ...sessionInfo });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/interview/answer", async (req, res) => {
+  try {
+    const { sessionId, answer, userCode: bodyCode } = req.body || {};
+    if (!sessionId) return res.status(400).json({ error: "sessionId is required" });
+    if (!answer || !answer.trim()) return res.status(400).json({ error: "answer is required" });
+
+    const userCode = req.user ? req.user.userCode : (bodyCode || 'Candidate');
+    const result = await interview.submitInterviewAnswer({
+      sessionId,
+      userCode,
+      answer
+    });
+
+    if (result.isCompleted && result.finalReport && req.user) {
+      activity.logEvent({
+        userCode: req.user.userCode,
+        userId: req.user.id,
+        displayName: req.user.displayName,
+        category: 'interview',
+        type: 'interview_completed',
+        title: `Completed Interview: ${result.finalReport.topicTitle}`,
+        summary: `Score: ${result.finalReport.overallScore}/100 (${result.finalReport.overallGrade})`,
+        details: {
+          sessionId,
+          score: result.finalReport.overallScore,
+          grade: result.finalReport.overallGrade,
+          topic: result.finalReport.topicTitle
+        }
+      });
+    }
+
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/interview/session/:sessionId", (req, res) => {
+  try {
+    const session = interview.getInterviewSession(req.params.sessionId);
+    if (!session) return res.status(404).json({ error: "Interview session not found" });
+    res.json({ ok: true, session });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/interview/history", (req, res) => {
+  try {
+    const code = req.user ? req.user.userCode : (req.query.userCode || '');
+    const history = interview.getUserInterviewHistory(code);
+    res.json({ ok: true, history });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/interview/email-report", async (req, res) => {
+  try {
+    const { sessionId, reportData, email: inputEmail } = req.body || {};
+    const session = sessionId ? interview.getInterviewSession(sessionId) : null;
+    const data = (session && session.finalReport) || reportData;
+    if (!data) return res.status(400).json({ error: "Interview evaluation report data is required" });
+
+    let targetEmail = (inputEmail || '').trim();
+    let displayName = data.displayName || 'Candidate';
+    let userCode = data.userCode || 'Learner';
+
+    if (req.user) {
+      const userRes = await query("SELECT id, user_code, email, display_name FROM users WHERE id = $1", [req.user.id]);
+      const userRow = (userRes && userRes.rows && userRes.rows[0]) ? userRes.rows[0] : req.user;
+      if (userRow && userRow.email) {
+        targetEmail = userRow.email;
+        displayName = userRow.display_name || displayName;
+        userCode = userRow.user_code || userCode;
+      }
+    }
+
+    if (!targetEmail) {
+      return res.status(400).json({ error: "No registered email address found. Please provide an email address." });
+    }
+
+    const mailRes = await mailer.sendInterviewReportEmail({
+      user: {
+        id: req.user ? req.user.id : null,
+        userCode,
+        email: targetEmail,
+        displayName
+      },
+      interviewData: data
+    });
+
+    res.json({
+      ok: true,
+      delivered: Boolean(mailRes && (mailRes.delivered || mailRes.ok)),
+      email: targetEmail,
+      message: `Interview evaluation report sent to ${targetEmail}`
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
+// SAVED WORDS & SPACED-REPETITION FLASHCARDS REST ENDPOINTS
+// ============================================================
+app.get("/api/words", (req, res) => {
+  try {
+    const userCode = req.user ? req.user.userCode : (req.query.userCode || 'default');
+    const filter = req.query.filter || 'all';
+    const result = words.getSavedWords(userCode, filter);
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/words/save", async (req, res) => {
+  try {
+    const { word, context, customDefinition } = req.body || {};
+    if (!word || !word.trim()) return res.status(400).json({ error: "Word is required" });
+    const userCode = req.user ? req.user.userCode : (req.body.userCode || 'default');
+    const result = await words.saveWord({
+      userCode,
+      word,
+      context,
+      customDefinition
+    });
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/words/review", (req, res) => {
+  try {
+    const { wordId, recalled } = req.body || {};
+    if (!wordId) return res.status(400).json({ error: "wordId is required" });
+    const userCode = req.user ? req.user.userCode : (req.body.userCode || 'default');
+    const updated = words.reviewWord(userCode, wordId, recalled !== false);
+    res.json({ ok: true, word: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/words/:id", (req, res) => {
+  try {
+    const userCode = req.user ? req.user.userCode : (req.query.userCode || 'default');
+    const deleted = words.deleteWord(userCode, req.params.id);
+    res.json({ ok: true, deleted });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/words/flashcards", (req, res) => {
+  try {
+    const userCode = req.user ? req.user.userCode : (req.query.userCode || 'default');
+    const limit = parseInt(req.query.limit || '15', 10);
+    const deck = words.getFlashcardDeck(userCode, limit);
+    res.json({ ok: true, deck });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
+// ADMIN INTERVIEW QUESTION BANK REST ENDPOINTS
+// ============================================================
+app.get("/api/admin/questions", requireAdmin, (req, res) => {
+  try {
+    const { topic, difficulty, search } = req.query;
+    const questions = interviewQuestions.getAllQuestions({ topic, difficulty, search });
+    const stats = interviewQuestions.getStats();
+    res.json({ ok: true, questions, stats });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/admin/questions", requireAdmin, (req, res) => {
+  try {
+    const { topic, difficulty, question, expectedAnswer, keyPoints } = req.body || {};
+    const created = interviewQuestions.addQuestion({ topic, difficulty, question, expectedAnswer, keyPoints });
+    res.json({ ok: true, question: created });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put("/api/admin/questions/:id", requireAdmin, (req, res) => {
+  try {
+    const updated = interviewQuestions.updateQuestion(req.params.id, req.body || {});
+    res.json({ ok: true, question: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/admin/questions/:id", requireAdmin, (req, res) => {
+  try {
+    const deleted = interviewQuestions.deleteQuestion(req.params.id);
+    res.json({ ok: true, deleted });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
+// GROUP DISCUSSION (GD) REST ENDPOINTS
+// ============================================================
+app.get("/api/gd/topics", (req, res) => {
+  res.json({ ok: true, topics: gd.GD_TOPICS });
+});
+
+app.post("/api/gd/pool/join", requireAuth, (req, res) => {
+  try {
+    const { groupSize } = req.body || {};
+    const liveUser = users.get(req.user.userCode);
+    const result = gd.joinRandomWaitingPool({
+      userCode: req.user.userCode,
+      displayName: req.user.displayName,
+      avatarUrl: req.user.avatarUrl,
+      socketId: liveUser ? liveUser.socketId : null,
+      groupSize
+    });
+
+    if (result.status === 'matched' && result.room) {
+      result.room.participants.forEach(p => {
+        const u = users.get(p.userCode);
+        if (u && u.socketId) {
+          const clientSocket = io.sockets.sockets.get(u.socketId);
+          if (clientSocket) clientSocket.join(`gd_${result.room.roomId}`);
+          io.to(u.socketId).emit("gd:matched", { room: result.room });
+        }
+      });
+    }
+
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/gd/pool/leave", requireAuth, (req, res) => {
+  try {
+    const result = gd.leaveRandomWaitingPool(req.user.userCode);
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/gd/private/create", requireAuth, async (req, res) => {
+  try {
+    const { groupSize, customTopic, invitedFriendCodes } = req.body || {};
+    const liveUser = users.get(req.user.userCode);
+
+    const room = gd.createPrivateGdRoom({
+      hostUser: {
+        userCode: req.user.userCode,
+        displayName: req.user.displayName,
+        avatarUrl: req.user.avatarUrl,
+        socketId: liveUser ? liveUser.socketId : null
+      },
+      groupSize,
+      customTopic,
+      invitedFriendCodes
+    });
+
+    if (liveUser && liveUser.socketId) {
+      const clientSocket = io.sockets.sockets.get(liveUser.socketId);
+      if (clientSocket) clientSocket.join(`gd_${room.roomId}`);
+    }
+
+    // Send invitations in real-time over Socket + Web Push + Email to friends
+    const hostOrigin = req.get('origin') || `${req.protocol}://${req.get('host')}`;
+    const invitedCodes = (invitedFriendCodes || []).map(c => String(c).trim()).filter(Boolean);
+
+    for (const friendCode of invitedCodes) {
+      const friendLive = users.get(friendCode);
+      if (friendLive && friendLive.socketId) {
+        io.to(friendLive.socketId).emit("gd:invite", {
+          roomId: room.roomId,
+          hostUser: { userCode: req.user.userCode, displayName: req.user.displayName },
+          topic: room.topic,
+          groupSize: room.groupSize
+        });
+      }
+
+      // Web Push notification to friend
+      friends.sendCallPushNotification(friendCode, {
+        type: 'gd_invite',
+        title: `GD Invite: ${req.user.displayName}`,
+        body: `Invited you to a ${room.groupSize}-person Group Discussion on "${room.topic.slice(0, 30)}..."`,
+        roomId: room.roomId,
+        hostUserCode: req.user.userCode,
+        hostName: req.user.displayName
+      }).catch(() => {});
+
+      // Email notification to friend's registered email
+      query("SELECT email, display_name, user_code FROM users WHERE user_code = $1", [friendCode])
+        .then(friendDbRes => {
+          if (friendDbRes && friendDbRes.rows && friendDbRes.rows[0]) {
+            const fRow = friendDbRes.rows[0];
+            if (fRow.email) {
+              mailer.sendGdInviteEmail({
+                inviter: { userCode: req.user.userCode, displayName: req.user.displayName },
+                recipient: { userCode: fRow.user_code, displayName: fRow.display_name, email: fRow.email },
+                gdRoomId: room.roomId,
+                topic: room.topic,
+                groupSize: room.groupSize,
+                appUrl: hostOrigin
+              }).catch(e => console.warn(`GD email invite error to ${fRow.email}:`, e.message));
+            }
+          }
+        }).catch(() => {});
+    }
+
+    res.json({ ok: true, room });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/gd/private/respond", requireAuth, (req, res) => {
+  try {
+    const { roomId, accept } = req.body || {};
+    const liveUser = users.get(req.user.userCode);
+    const result = gd.respondToPrivateInvite({
+      roomId,
+      user: {
+        userCode: req.user.userCode,
+        displayName: req.user.displayName,
+        avatarUrl: req.user.avatarUrl,
+        socketId: liveUser ? liveUser.socketId : null
+      },
+      accept
+    });
+
+    if (liveUser && liveUser.socketId && accept) {
+      const clientSocket = io.sockets.sockets.get(liveUser.socketId);
+      if (clientSocket) clientSocket.join(`gd_${roomId}`);
+    }
+
+    io.to(`gd_${roomId}`).emit("gd:participant-updated", {
+      userCode: req.user.userCode,
+      displayName: req.user.displayName,
+      accept: Boolean(accept),
+      room: result.room
+    });
+
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/gd/private/start", requireAuth, (req, res) => {
+  try {
+    const { roomId } = req.body || {};
+    const room = gd.startPrivateGd(roomId, req.user.userCode);
+    io.to(`gd_${roomId}`).emit("gd:started", { room });
+    res.json({ ok: true, room });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/gd/room/:roomId", requireAuth, (req, res) => {
+  try {
+    const room = gd.getGdRoom(req.params.roomId);
+    if (!room) return res.status(404).json({ error: "GD room not found" });
+    res.json({ ok: true, room });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/gd/room/:roomId/message", requireAuth, async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const { text } = req.body || {};
+    const result = await gd.postGdMessage({
+      roomId,
+      userCode: req.user.userCode,
+      displayName: req.user.displayName,
+      text
+    });
+
+    io.to(`gd_${roomId}`).emit("gd:new-message", { message: result.userMsg });
+    if (result.aiInterventionMsg) {
+      io.to(`gd_${roomId}`).emit("gd:new-message", { message: result.aiInterventionMsg });
+    }
+
+    res.json({ ok: true, message: result.userMsg });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/gd/room/:roomId/end", requireAuth, async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    io.to(`gd_${roomId}`).emit("gd:evaluating", { roomId });
+    const report = await gd.endGdSession(roomId);
+    io.to(`gd_${roomId}`).emit("gd:completed", { report });
+    res.json({ ok: true, report });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/gd/room/:roomId/email-report", requireAuth, async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const room = gd.getGdRoom(roomId);
+    const report = (room && room.evaluationReports) || null;
+    if (!report || !report.reportsByParticipant) {
+      return res.status(400).json({ error: "GD evaluation report is not ready" });
+    }
+
+    const myCode = req.user.userCode;
+    const participantReport = report.reportsByParticipant[myCode];
+    if (!participantReport) {
+      return res.status(404).json({ error: "No participant evaluation found for your User ID" });
+    }
+
+    const userRes = await query("SELECT id, user_code, email, display_name FROM users WHERE id = $1", [req.user.id]);
+    const userRow = (userRes && userRes.rows && userRes.rows[0]) ? userRes.rows[0] : req.user;
+    if (!userRow || !userRow.email) return res.status(400).json({ error: "No registered email address found for your account" });
+
+    const mailRes = await mailer.sendGdReportEmail({
+      user: {
+        id: userRow.id,
+        userCode: userRow.user_code || myCode,
+        email: userRow.email,
+        displayName: userRow.display_name || req.user.displayName
+      },
+      gdData: {
+        topic: report.topic,
+        groupSize: report.groupSize,
+        participantReport
+      }
+    });
+
+    res.json({
+      ok: true,
+      delivered: Boolean(mailRes && mailRes.delivered),
+      email: userRow.email,
+      message: `GD evaluation report dispatched to ${userRow.email}`
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/gd/history", requireAuth, (req, res) => {
+  try {
+    const history = gd.getUserGdHistory(req.user.userCode);
+    res.json({ ok: true, history });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
 // ADMIN SECURITY & USER ACTIVITY SYSTEM
 // ============================================================
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "Chandra@2006";
@@ -1623,47 +2773,7 @@ app.get("/api/admin/users", requireAdmin, async (req, res) => {
       structuredUsers.push(userObject);
     }
 
-    // Include any online socket users not yet in users table
-    for (const [code, liveData] of users.entries()) {
-      if (!seenCodes.has(String(code))) {
-        seenCodes.add(String(code));
-        const quickStats = activity.getUserQuickStats(code);
-        structuredUsers.push({
-          userCode: String(code),
-          userId: null,
-          displayName: liveData.userName || `User #${code}`,
-          email: "guest@vocamate.app",
-          status: liveData.busy ? "in-call" : "online",
-          isOnline: true,
-          isBusy: Boolean(liveData.busy),
-          registeredAt: new Date(liveData.joinedAt).toISOString(),
-          updatedAt: new Date(liveData.joinedAt).toISOString(),
-          avatarUrl: null,
-          loginInfo: {
-            lastLoginTime: new Date(liveData.joinedAt).toISOString(),
-            lastActiveTime: new Date().toISOString(),
-            ipAddress: "Live Socket",
-            userAgent: "Web Browser",
-            activeSessionCount: 1
-          },
-          profile: {
-            level: "intermediate",
-            profession: "Learner",
-            goal: "Daily practice",
-            preferredVoice: liveData.voicePreference || "en-IN-NeerjaNeural",
-            extractedFacts: {}
-          },
-          activitySummary24h: {
-            totalEvents: quickStats.events24h,
-            aiPractices: quickStats.aiPractices24h,
-            callsCount: quickStats.calls24h,
-            totalMinutesSpoken: quickStats.callMinutes24h
-          },
-          liveCall: liveData.busy ? { callId: liveData.currentCallId } : null
-        });
-      }
-    }
-
+    // Admin portal displays exclusively real registered accounts from users database
     structuredUsers.sort((a, b) => {
       if (a.isOnline !== b.isOnline) return a.isOnline ? -1 : 1;
       return new Date(b.loginInfo.lastActiveTime) - new Date(a.loginInfo.lastActiveTime);
@@ -2271,7 +3381,7 @@ function generateContextualFallback(message, conv, options = {}) {
     // Reflect key user words to maintain unbroken continuity
     const words = rawMsg.split(/\s+/).filter(w => w.length > 3 && !/^(this|that|with|have|from|about|what|when|where|they|them|your|will|just)$/i.test(w));
     const focusWord = words.length > 0 ? words[words.length - 1].replace(/[.,?!]/g, '') : 'that';
-    
+
     reply = `I really appreciate you sharing that about ${focusWord}! Expressing your thoughts naturally like this is the fastest way to build fluency. Tell me, how did that situation turn out for you?`;
     suggestions = ["It went really well in the end", "It was quite a learning experience", "What would you recommend in that case?"];
   }
@@ -2342,8 +3452,8 @@ async function generateAIResponse({ message, userLevel, userProfession, userGoal
         contents.push({ role: 'user', parts: [{ text: message }] });
       }
 
-      // Try best model first (gemini-3.8-flash for fluent human-like conversation)
-      const modelsToTry = ['gemini-3.8-flash', 'gemini-3.1-flash-lite'];
+      // Fast & resilient order: gemini-3.1-flash-lite (fastest, lowest load) then gemini-3.8-flash
+      const modelsToTry = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
       for (const model of modelsToTry) {
         try {
           const geminiRes = await gemini.models.generateContent({
@@ -2461,7 +3571,7 @@ async function generateAIResponse({ message, userLevel, userProfession, userGoal
 app.post("/api/text-chat", async (req, res) => {
   try {
     const { message, userLevel, userProfession, userGoal, conversationId, userName, topic, gender } = req.body || {};
-    
+
     if (!message) {
       return res.status(400).json({ error: "'message' is required." });
     }
@@ -2532,6 +3642,26 @@ app.post("/api/text-chat", async (req, res) => {
 // ============================================================
 // RESET TEXT CHAT CONVERSATION TOPIC
 // ============================================================
+const DIVERSE_CHAT_TOPICS = [
+  { topic: "Weekend Adventures & Relaxing", starter: "What is your ideal way to recharge on a weekend—exploring nature, catching a movie, or sleeping in?" },
+  { topic: "Favorite Foods & Comfort Dishes", starter: "What dish immediately brings back fond memories from your childhood, and can you cook it yourself?" },
+  { topic: "Dream Travel Destinations", starter: "If you had a free flight ticket to anywhere on Earth tomorrow, where would you land and what would you explore first?" },
+  { topic: "Tech, Gadgets & Modern Lifestyle", starter: "What is one piece of technology or mobile app that you genuinely cannot imagine living without anymore?" },
+  { topic: "Career Dreams & Ideal Workspaces", starter: "What would your dream job look like if salary and location were completely taken care of?" },
+  { topic: "Fitness, Habits & Morning Routines", starter: "How does your typical morning begin, and do you have any daily habit you are trying to build?" },
+  { topic: "Movies, Series & Storytelling", starter: "Have you watched any memorable movies or shows lately that completely kept you hooked till the end?" },
+  { topic: "Books, Learning & Hidden Talents", starter: "Is there a skill or hobby you have always secretly wanted to learn—like playing guitar, painting, or coding?" },
+  { topic: "City Life vs. Quiet Towns", starter: "Do you prefer the buzzing energy of a big city, or the calm pace of a peaceful town or countryside?" },
+  { topic: "Public Speaking & Overcoming Hesitation", starter: "Have you ever had to give a speech or presentation that gave you butterflies in your stomach? How did it go?" },
+  { topic: "Music Playlists & Concerts", starter: "What music do you listen to when you need to focus, work out, or unwind after a demanding day?" },
+  { topic: "Friendship & Meaningful Connections", starter: "What qualities do you cherish most in your closest friends—loyalty, humor, or deep conversations?" },
+  { topic: "Memorable Festivities & Celebrations", starter: "What is your favorite festival or family celebration of the entire year, and what makes it special to you?" },
+  { topic: "Future Innovations & Science", starter: "Do you think flying cars or humanoid robot helpers will be part of everyday homes in the next twenty years?" },
+  { topic: "Handling Daily Stress & Staying Calm", starter: "When things get overwhelming or hectic during your day, what helps you step back and breathe easy?" }
+];
+
+const recentUserTopicsMap = new Map();
+
 app.post("/api/text-chat/reset", (req, res) => {
   const { conversationId, gender } = req.body || {};
   const convId = conversationId || 'guest_user';
@@ -2546,15 +3676,34 @@ app.post("/api/text-chat/reset", (req, res) => {
       facts: existing.facts
     });
   }
+
+  // Pick genuinely new topic avoiding recent repeats
+  const recentList = recentUserTopicsMap.get(convId) || [];
+  const candidateTopics = DIVERSE_CHAT_TOPICS.filter(t => !recentList.includes(t.topic));
+  const pool = candidateTopics.length > 0 ? candidateTopics : DIVERSE_CHAT_TOPICS;
+  const chosen = pool[Math.floor(Math.random() * pool.length)];
+
+  recentList.push(chosen.topic);
+  if (recentList.length > 8) recentList.shift();
+  recentUserTopicsMap.set(convId, recentList);
+
+  const conv = getTextConversation(convId);
+  conv.currentTopic = chosen.topic;
+
   const isMale = String(gender).toLowerCase() === 'male';
   activity.logEvent({
     userCode: convId,
     category: 'ai_chat',
     type: 'topic_reset',
     title: 'Reset AI Conversation Topic',
-    summary: `Started fresh conversation with ${isMale ? 'Rohan' : 'Madhu'}`
+    summary: `Started new topic "${chosen.topic}" with ${isMale ? 'Rohan' : 'Madhu'}`
   });
-  res.json({ ok: true, message: "Chat topic reset. Ready for a new conversation!" });
+  res.json({
+    ok: true,
+    topic: chosen.topic,
+    starter: chosen.starter,
+    message: `New topic: ${chosen.topic}`
+  });
 });
 
 // ============================================================
@@ -2563,7 +3712,7 @@ app.post("/api/text-chat/reset", (req, res) => {
 app.post("/api/voice-chat", async (req, res) => {
   try {
     const { message, userLevel, userProfession, userGoal, conversationId, userName, topic, gender } = req.body || {};
-    
+
     if (!message) {
       return res.status(400).json({ error: "'message' is required." });
     }
@@ -2632,7 +3781,7 @@ app.post("/api/voice-chat", async (req, res) => {
 // ============================================================
 app.post("/api/get-correction", (req, res) => {
   const { conversationId, messageIndex, type = 'text' } = req.body;
-  
+
   if (!conversationId || messageIndex === undefined) {
     return res.status(400).json({ error: "conversationId and messageIndex required" });
   }

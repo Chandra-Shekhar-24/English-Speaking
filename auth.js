@@ -130,25 +130,27 @@ async function signup({ email, password, displayName }, appUrl) {
     console.log(`🔐 [6-DIGIT OTP CODE]: >>> ${verifyOtp} <<<`);
     console.log(`======================================================\n`);
 
-    setImmediate(() => {
+    const sendPromise = dispatchEmailQuick(() =>
       mailer.sendVerificationEmail({
         user: { id: existing.id, email: email.toLowerCase(), userCode: existing.user_code, displayName: existing.display_name },
         token: verifyToken,
         otp: verifyOtp,
         appUrl
-      }).catch(err => {
-        console.error(`⚠️ Verification email dispatch error for ${existing.email}:`, err.message);
-      });
-    });
+      })
+    );
+    const emailResult = await sendPromise;
 
     return {
       user: publicUser(existing),
       needsVerification: true,
       userCode: existing.user_code,
       email: email.toLowerCase(),
-      delivered: true,
-      sandboxRestricted: false,
-      message: `Verification code sent to ${email}. Please enter the 6-digit OTP code to activate your account.`
+      delivered: Boolean(emailResult && emailResult.delivered),
+      sandboxRestricted: Boolean(emailResult && emailResult.sandboxRestricted),
+      error: (emailResult && emailResult.error) || null,
+      message: emailResult && emailResult.delivered
+        ? `Verification code delivered to ${email}. Please enter the 6-digit OTP code to activate your account.`
+        : `Verification code generated for ${email}. Please check your inbox or view details in the notification banner.`
     };
   }
 
@@ -178,7 +180,7 @@ async function signup({ email, password, displayName }, appUrl) {
   console.log(`🔐 [6-DIGIT OTP CODE]: >>> ${verifyOtp} <<<`);
   console.log(`======================================================\n`);
 
-  setImmediate(() => {
+  const sendPromise = dispatchEmailQuick(() =>
     mailer.sendVerificationEmail({
       user: {
         id: user.id,
@@ -189,10 +191,9 @@ async function signup({ email, password, displayName }, appUrl) {
       token: verifyToken,
       otp: verifyOtp,
       appUrl
-    }).catch(err => {
-      console.error(`⚠️ Verification email dispatch error for ${user.email}:`, err.message);
-    });
-  });
+    })
+  );
+  const emailResult = await sendPromise;
 
   const pubUser = publicUser(user);
   sheets.upsertUser(pubUser).catch(() => {});
@@ -206,7 +207,7 @@ async function signup({ email, password, displayName }, appUrl) {
     type: 'signup_pending_verification',
     title: 'New User Registered (Pending OTP Verification)',
     summary: `Assigned ID #${user.user_code} to ${user.email}`,
-    details: { userCode: user.user_code, email: user.email }
+    details: { userCode: user.user_code, email: user.email, delivered: emailResult && emailResult.delivered }
   });
 
   return {
@@ -214,9 +215,12 @@ async function signup({ email, password, displayName }, appUrl) {
     needsVerification: true,
     userCode: user.user_code,
     email: user.email,
-    delivered: true,
-    sandboxRestricted: false,
-    message: `Account created! We've sent a 6-digit verification code to ${user.email}. Please check your email inbox and enter the code below to activate your account.`
+    delivered: Boolean(emailResult && emailResult.delivered),
+    sandboxRestricted: Boolean(emailResult && emailResult.sandboxRestricted),
+    error: (emailResult && emailResult.error) || null,
+    message: emailResult && emailResult.delivered
+      ? `Account created! We've sent a 6-digit verification code to ${user.email}. Please check your email inbox and enter the code below to activate your account.`
+      : `Account created for ${user.email}. Verification OTP generated. Please enter the 6-digit code below to activate your account.`
   };
 }
 
@@ -358,16 +362,15 @@ async function resendVerificationEmail(identifier, appUrl) {
   console.log(`🔐 [6-DIGIT OTP CODE]: >>> ${verifyOtp} <<<`);
   console.log(`======================================================\n`);
 
-  setImmediate(() => {
+  const sendPromise = dispatchEmailQuick(() =>
     mailer.sendVerificationEmail({
       user: { id: user.id, email: user.email, userCode: user.user_code, displayName: user.display_name },
       token: verifyToken,
       otp: verifyOtp,
       appUrl
-    }).catch(err => {
-      console.error(`⚠️ Resend verification email dispatch error for ${user.email}:`, err.message);
-    });
-  });
+    })
+  );
+  const emailResult = await sendPromise;
 
   const emailMasked = user.email.slice(0, 2) + '***@' + (user.email.split('@')[1] || '');
 
@@ -375,9 +378,13 @@ async function resendVerificationEmail(identifier, appUrl) {
     ok: true,
     userCode: user.user_code,
     emailMasked,
-    delivered: true,
-    sandboxRestricted: false,
-    message: `A fresh 6-digit verification code has been dispatched to ${emailMasked}. Please check your inbox and enter the code below.`
+    email: user.email,
+    delivered: Boolean(emailResult && emailResult.delivered),
+    sandboxRestricted: Boolean(emailResult && emailResult.sandboxRestricted),
+    error: (emailResult && emailResult.error) || null,
+    message: emailResult && emailResult.delivered
+      ? `A fresh 6-digit verification code has been dispatched to ${emailMasked}. Please check your inbox and enter the code below.`
+      : `A fresh 6-digit verification code was generated for ${emailMasked}. Please check your inbox.`
   };
 }
 
@@ -479,7 +486,7 @@ async function requestPasswordReset(identifier, appUrl) {
   console.log(`🔐 [6-DIGIT OTP CODE]: >>> ${resetOtp} <<<`);
   console.log(`======================================================\n`);
 
-  setImmediate(() => {
+  const sendPromise = dispatchEmailQuick(() =>
     mailer.sendPasswordResetEmail({
       user: {
         id: user.id,
@@ -490,10 +497,9 @@ async function requestPasswordReset(identifier, appUrl) {
       token,
       otp: resetOtp,
       appUrl
-    }).catch(err => {
-      console.error(`⚠️ Password reset email dispatch error for ${user.email}:`, err.message);
-    });
-  });
+    })
+  );
+  const emailResult = await sendPromise;
 
   let emailMasked = user.email || '';
   if (emailMasked.includes('@')) {
@@ -511,9 +517,12 @@ async function requestPasswordReset(identifier, appUrl) {
     email: user.email,
     userCode: user.user_code,
     displayName: user.display_name,
-    delivered: true,
-    sandboxRestricted: false,
-    message: `A 6-digit password reset code has been sent to your registered email (${emailMasked}). Please check your inbox and enter the code below.`
+    delivered: Boolean(emailResult && emailResult.delivered),
+    sandboxRestricted: Boolean(emailResult && emailResult.sandboxRestricted),
+    error: (emailResult && emailResult.error) || null,
+    message: emailResult && emailResult.delivered
+      ? `A 6-digit password reset code has been sent to your registered email (${emailMasked}). Please check your inbox and enter the code below.`
+      : `A 6-digit password reset code was generated for your registered email (${emailMasked}). Please check your inbox.`
   };
 }
 

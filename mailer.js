@@ -188,7 +188,8 @@ function getReplyToAddress() {
   if (gmailUser) return gmailUser;
   const smtpUser = (cfg.smtpUser || process.env.SMTP_USER || '').trim();
   if (smtpUser && smtpUser.includes('@')) return smtpUser;
-  return 'chandrashekharbansal.2006@gmail.com';
+  if (cfg.fromEmail && cfg.fromEmail.includes('@') && !cfg.fromEmail.includes('resend.dev')) return cfg.fromEmail.trim();
+  return 'support@vocamate.com';
 }
 
 function getResendApiKey() {
@@ -412,45 +413,11 @@ async function sendEmail({ to, subject, html, text, type = 'general', metadata =
         logEntry.sandboxRestricted = isSandboxRestriction;
         scheduleSave();
 
-        // If Resend failed because of sandbox restrictions (recipient is not owner)
-        // Relay a notification copy to the Resend account owner in the background
-        const ownerEmail = 'chandrashekharbansal.2006@gmail.com';
-        if (isSandboxRestriction && to.toLowerCase() !== ownerEmail.toLowerCase()) {
-          console.log(`📨 [RESEND SANDBOX RELAY] Queuing OTP copy to owner ${ownerEmail} for user ${to}...`);
-          fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${resendApiKey}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              from: 'VocaMate <onboarding@resend.dev>',
-              to: ownerEmail,
-              subject: `[VocaMate Relay] OTP for ${to}: ${metadata.otp || 'Action Required'}`,
-              html: `
-                <div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; padding:24px; background:#f8fafc; color:#1e293b; border-radius:12px; border:1px solid #e2e8f0; max-width:520px; margin:0 auto;">
-                  <h3 style="color:#0284c7; margin-top:0;">VocaMate Email Gateway Relay</h3>
-                  <p style="font-size:14px; color:#475569;">A user initiated verification with email: <strong style="color:#0f172a;">${to}</strong></p>
-                  <div style="background:#fffbeb; border:1px solid #fde68a; padding:12px 16px; border-radius:8px; margin:16px 0;">
-                    <p style="margin:0 0 6px 0; color:#b45309; font-weight:700; font-size:13px;">Why this went to your inbox instead of ${to}:</p>
-                    <p style="margin:0; font-size:12.5px; color:#78350f; line-height:1.5;">Resend is currently in free sandbox mode and only sends to your registered email (${ownerEmail}).</p>
-                  </div>
-                  <div style="background:#f0f9ff; border:2px dashed #38bdf8; border-radius:10px; padding:16px; text-align:center; margin:18px 0;">
-                    <div style="font-size:11px; color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:1px;">6-Digit OTP for ${to}</div>
-                    <div style="font-size:32px; font-weight:900; color:#0284c7; letter-spacing:6px; font-family:monospace; margin-top:6px;">${metadata.otp || 'N/A'}</div>
-                  </div>
-                  <p style="font-size:12px; color:#64748b; line-height:1.5;">To send directly to ANY email without restrictions, configure free <strong>Gmail SMTP</strong> in VocaMate Admin &rarr; Email Gateway.</p>
-                </div>
-              `
-            })
-          }).catch(relayErr => console.warn('⚠️ [RESEND SANDBOX RELAY FAILED]:', relayErr.message));
-        }
-
         return {
           ok: false,
           delivered: false,
           sandboxRestricted: isSandboxRestriction,
-          error: errMsg,
+          error: isSandboxRestriction ? 'Resend sandbox mode can only deliver to verified domain. Configure Brevo HTTPS API Key or Gmail SMTP in Admin Email Gateway.' : errMsg,
           id: emailId,
           otp: metadata.otp
         };
@@ -857,7 +824,7 @@ function getEmailGatewayConfig() {
     hasSmtp,
     activeProvider: hasBrevo ? 'brevo' : (hasSmtp ? (cfg.gmailUser ? 'gmail' : 'smtp') : (hasResend ? 'resend' : 'console')),
     fromEmail,
-    resendAccountOwner: 'chandrashekharbansal.2006@gmail.com',
+    resendAccountOwner: (cfg.fromEmail || process.env.EMAIL_FROM || '').trim(),
     smtpUser: rawSmtpUser ? rawSmtpUser.replace(/(.{2})(.*)(@.*)/, '$1***$3') : '',
     rawSmtpUser: rawSmtpUser || '',
     gmailUser: cfg.gmailUser || process.env.GMAIL_USER || '',
@@ -1076,11 +1043,398 @@ async function sendTestEmail(toEmail) {
   return res;
 }
 
+/**
+ * 4. AI Interview Performance Report Email
+ * Sent directly to user's registered email when an interview is completed
+ */
+async function sendInterviewReportEmail({ user, interviewData }) {
+  if (!user || !user.email) throw new Error('Valid user with registered email is required');
+
+  const {
+    topicTitle = 'Technical Interview',
+    difficulty = 'Intermediate',
+    overallScore = 80,
+    overallGrade = 'Good',
+    strengths = [],
+    weaknesses = [],
+    areasToImprove = [],
+    summary = '',
+    questionEvaluations = []
+  } = interviewData || {};
+
+  const subject = `VocaMate Interview Report: ${topicTitle} (${overallScore}/100 - ${overallGrade})`;
+
+  const strengthsHtml = strengths.map(s => `<li style="margin-bottom:6px; color:#166534;">${escapeHtml(s)}</li>`).join('') || '<li>Demonstrated good foundational knowledge</li>';
+  const weaknessesHtml = weaknesses.map(w => `<li style="margin-bottom:6px; color:#991b1b;">${escapeHtml(w)}</li>`).join('') || '<li>Keep working on structured explanations</li>';
+  const improvementsHtml = areasToImprove.map(a => `<li style="margin-bottom:6px; color:#1e40af;">${escapeHtml(a)}</li>`).join('') || '<li>Practice answering with concrete examples</li>';
+
+  let questionsBreakdownHtml = '';
+  if (Array.isArray(questionEvaluations) && questionEvaluations.length > 0) {
+    questionsBreakdownHtml = questionEvaluations.map((q, idx) => `
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <strong style="color:#0f172a; font-size:13.5px;">Q${idx + 1}: ${escapeHtml(q.question || '')}</strong>
+          <span style="background:#0284c7; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px;">${q.score !== undefined ? q.score + '/10' : ''}</span>
+        </div>
+        <p style="margin:4px 0 8px 0; font-size:13px; color:#334155;"><strong>Your Answer:</strong> <em>"${escapeHtml(q.answer || '(No answer recorded)')}"</em></p>
+        ${q.whatWasCorrect ? `<div style="font-size:12.5px; color:#15803d; margin-bottom:4px;"><strong>✓ Correct:</strong> ${escapeHtml(q.whatWasCorrect)}</div>` : ''}
+        ${q.whatWasMissing ? `<div style="font-size:12.5px; color:#b45309; margin-bottom:4px;"><strong>⚠ Missing:</strong> ${escapeHtml(q.whatWasMissing)}</div>` : ''}
+        ${q.mistakes ? `<div style="font-size:12.5px; color:#dc2626; margin-bottom:4px;"><strong>✗ Inaccuracies:</strong> ${escapeHtml(q.mistakes)}</div>` : ''}
+        ${q.betterAnswer ? `<div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:8px 10px; font-size:12px; color:#166534; margin-top:6px;"><strong>💡 Model Professional Answer:</strong> ${escapeHtml(q.betterAnswer)}</div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Interview Report</title>
+</head>
+<body style="margin:0; padding:24px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background-color:#f1f5f9; color:#0f172a;">
+  <div style="max-width:620px; margin:0 auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:32px 28px; box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+    <div style="border-bottom:1px solid #e2e8f0; padding-bottom:18px; margin-bottom:20px;">
+      <h2 style="margin:0; font-size:22px; font-weight:800; color:#0284c7;">VocaMate AI Interview Practice</h2>
+      <p style="margin:4px 0 0 0; font-size:12px; color:#64748b; text-transform:uppercase; font-weight:700;">Performance Evaluation Report</p>
+    </div>
+
+    <p style="font-size:15px; font-weight:600; color:#0f172a; margin:0 0 8px 0;">Hello ${escapeHtml(user.displayName || 'Candidate')},</p>
+    <p style="font-size:14px; line-height:1.6; color:#475569; margin:0 0 20px 0;">
+      Here is your detailed AI interview evaluation for <strong>${escapeHtml(topicTitle)}</strong> (${escapeHtml(difficulty)} level).
+    </p>
+
+    <!-- Score Card -->
+    <div style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-radius:12px; padding:22px; text-align:center; color:#ffffff; margin-bottom:24px;">
+      <div style="font-size:12px; text-transform:uppercase; letter-spacing:1px; opacity:0.9;">Overall Performance Score</div>
+      <div style="font-size:46px; font-weight:900; letter-spacing:-1px; margin:8px 0;">${overallScore}<span style="font-size:20px; font-weight:600; opacity:0.85;">/100</span></div>
+      <div style="display:inline-block; background:rgba(255,255,255,0.2); padding:4px 14px; border-radius:999px; font-size:13px; font-weight:700;">${escapeHtml(overallGrade)}</div>
+    </div>
+
+    ${summary ? `
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:20px;">
+      <h4 style="margin:0 0 8px 0; font-size:14px; color:#0f172a;">Evaluator Verdict</h4>
+      <p style="margin:0; font-size:13.5px; line-height:1.6; color:#334155;">${escapeHtml(summary)}</p>
+    </div>
+    ` : ''}
+
+    <div style="display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:24px;">
+      <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:16px;">
+        <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#166534;">🌟 Key Strengths</h4>
+        <ul style="margin:0; padding-left:20px; font-size:13px;">${strengthsHtml}</ul>
+      </div>
+      <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:16px;">
+        <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#991b1b;">⚠️ Weaknesses & Gaps</h4>
+        <ul style="margin:0; padding-left:20px; font-size:13px;">${weaknessesHtml}</ul>
+      </div>
+      <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:16px;">
+        <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#1e40af;">🚀 Actionable Recommendations</h4>
+        <ul style="margin:0; padding-left:20px; font-size:13px;">${improvementsHtml}</ul>
+      </div>
+    </div>
+
+    ${questionsBreakdownHtml ? `
+    <div style="margin-top:24px;">
+      <h3 style="font-size:16px; color:#0f172a; margin:0 0 14px 0;">Question-by-Question Analysis</h3>
+      ${questionsBreakdownHtml}
+    </div>
+    ` : ''}
+
+    <div style="border-top:1px solid #e2e8f0; padding-top:16px; margin-top:28px; font-size:11.5px; color:#94a3b8; text-align:center; line-height:1.5;">
+      VocaMate Learning Platform • AI Spoken English & Technical Interview Practice<br>
+      This report was generated specifically for ${escapeHtml(user.email)}.
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  const text = `
+VocaMate Interview Performance Report
+Candidate: ${user.displayName || 'Candidate'} (#${user.userCode})
+Topic: ${topicTitle} (${difficulty})
+Overall Score: ${overallScore}/100 (${overallGrade})
+
+Summary:
+${summary}
+
+Strengths:
+${strengths.map(s => '- ' + s).join('\n')}
+
+Weaknesses:
+${weaknesses.map(w => '- ' + w).join('\n')}
+
+Areas to Improve:
+${areasToImprove.map(a => '- ' + a).join('\n')}
+
+VocaMate Learning Platform
+  `.trim();
+
+  const sendRes = await sendEmail({
+    to: user.email,
+    subject,
+    html,
+    text,
+    type: 'interview_report',
+    metadata: {
+      userId: user.id,
+      userCode: user.userCode,
+      topic: topicTitle,
+      overallScore
+    }
+  });
+
+  activity.logEvent({
+    userCode: user.userCode,
+    userId: user.id,
+    email: user.email,
+    displayName: user.displayName,
+    category: 'interview',
+    type: 'email_interview_report',
+    title: `Interview Report Emailed: ${topicTitle}`,
+    summary: `Sent performance report (${overallScore}/100) to ${user.email}`,
+    details: { topic: topicTitle, score: overallScore, delivered: sendRes && sendRes.delivered }
+  });
+
+  return sendRes;
+}
+
+/**
+ * 5. Group Discussion (GD) Invitation Email
+ * Sent when a friend invites user to a private GD
+ */
+async function sendGdInviteEmail({ inviter, recipient, gdRoomId, topic, groupSize, appUrl }) {
+  if (!recipient || !recipient.email) throw new Error('Recipient must have a valid registered email');
+
+  const resolvedAppUrl = (appUrl || process.env.APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+  const joinUrl = `${resolvedAppUrl}/#gd?room=${encodeURIComponent(gdRoomId)}`;
+  const subject = `VocaMate GD Invitation: ${inviter.displayName || 'A friend'} invited you to a Group Discussion`;
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Group Discussion Invitation</title>
+</head>
+<body style="margin:0; padding:24px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background-color:#f1f5f9; color:#0f172a;">
+  <div style="max-width:540px; margin:0 auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:32px 28px; box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+    <div style="border-bottom:1px solid #e2e8f0; padding-bottom:18px; margin-bottom:20px;">
+      <h2 style="margin:0; font-size:22px; font-weight:800; color:#0284c7;">VocaMate Group Discussion</h2>
+      <p style="margin:4px 0 0 0; font-size:12px; color:#64748b; text-transform:uppercase; font-weight:700;">Live GD Session Invitation</p>
+    </div>
+
+    <p style="font-size:15px; font-weight:600; color:#0f172a; margin:0 0 12px 0;">Hello ${escapeHtml(recipient.displayName || 'Learner')},</p>
+    <p style="font-size:14px; line-height:1.6; color:#475569; margin:0 0 18px 0;">
+      <strong>${escapeHtml(inviter.displayName || 'A friend')}</strong> (User ID: #${inviter.userCode}) has invited you to join a <strong>${groupSize}-participant Group Discussion</strong> on VocaMate!
+    </p>
+
+    <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:18px; margin-bottom:22px;">
+      <div style="font-size:11.5px; font-weight:700; color:#0369a1; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">GD Topic</div>
+      <div style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.4;">${escapeHtml(topic || 'Trending Current Affairs & Technology')}</div>
+      <div style="margin-top:10px; font-size:12.5px; color:#475569;">
+        👥 Group Size: <strong>${groupSize} People</strong> • 🤖 AI Moderator: <strong>Live Moderation & Feedback</strong>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin:24px 0;">
+      <a href="${joinUrl}" style="display:inline-block; background:#0284c7; color:#ffffff; font-size:14px; font-weight:700; text-decoration:none; padding:12px 30px; border-radius:8px;">Join Group Discussion</a>
+    </div>
+
+    <p style="font-size:12.5px; color:#64748b; text-align:center;">You can also open VocaMate and accept the invitation banner directly on your dashboard.</p>
+
+    <div style="border-top:1px solid #e2e8f0; padding-top:16px; margin-top:24px; font-size:11.5px; color:#94a3b8; text-align:center; line-height:1.5;">
+      VocaMate Learning Platform • AI Spoken English & Peer Practice<br>
+      Automated invitation sent to ${escapeHtml(recipient.email)}.
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  const text = `
+Hello ${recipient.displayName || 'Learner'},
+
+${inviter.displayName} (#${inviter.userCode}) invited you to a ${groupSize}-person Group Discussion on VocaMate!
+
+Topic: ${topic}
+Join Link: ${joinUrl}
+
+VocaMate Learning Platform
+  `.trim();
+
+  return sendEmail({
+    to: recipient.email,
+    subject,
+    html,
+    text,
+    type: 'gd_invite',
+    metadata: {
+      inviterCode: inviter.userCode,
+      recipientCode: recipient.userCode,
+      gdRoomId,
+      groupSize
+    }
+  });
+}
+
+/**
+ * 6. Group Discussion (GD) Final Evaluation Report Email
+ * Sent to each participant after the GD ends
+ */
+async function sendGdReportEmail({ user, gdData }) {
+  if (!user || !user.email) throw new Error('User with registered email is required');
+
+  const {
+    topic = 'Group Discussion',
+    groupSize = 4,
+    participantReport = {}
+  } = gdData || {};
+
+  const {
+    overallScore = 75,
+    participation = 8,
+    communication = 7,
+    relevance = 8,
+    confidence = 7,
+    clarity = 8,
+    leadership = 6,
+    teamwork = 8,
+    pointsMade = [],
+    mistakes = [],
+    suggestions = [],
+    overallFeedback = ''
+  } = participantReport;
+
+  const subject = `VocaMate GD Report: "${topic.slice(0, 40)}" (Score: ${overallScore}/100)`;
+
+  const pointsHtml = (pointsMade || []).map(p => `<li style="margin-bottom:6px; color:#0f172a;">${escapeHtml(p)}</li>`).join('') || '<li>Contributed substantive arguments</li>';
+  const mistakesHtml = (mistakes || []).map(m => `<li style="margin-bottom:6px; color:#991b1b;">${escapeHtml(m)}</li>`).join('') || '<li>Keep working on structured transitions</li>';
+  const suggestionsHtml = (suggestions || []).map(s => `<li style="margin-bottom:6px; color:#1e40af;">${escapeHtml(s)}</li>`).join('') || '<li>Take more initiative in summarizing key consensus points</li>';
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>GD Evaluation Report</title>
+</head>
+<body style="margin:0; padding:24px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background-color:#f1f5f9; color:#0f172a;">
+  <div style="max-width:600px; margin:0 auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:32px 28px; box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+    <div style="border-bottom:1px solid #e2e8f0; padding-bottom:18px; margin-bottom:20px;">
+      <h2 style="margin:0; font-size:22px; font-weight:800; color:#0284c7;">VocaMate Group Discussion Report</h2>
+      <p style="margin:4px 0 0 0; font-size:12px; color:#64748b; text-transform:uppercase; font-weight:700;">Individual AI Moderation & Performance Analysis</p>
+    </div>
+
+    <p style="font-size:15px; font-weight:600; color:#0f172a; margin:0 0 8px 0;">Hello ${escapeHtml(user.displayName || 'Participant')},</p>
+    <p style="font-size:14px; line-height:1.6; color:#475569; margin:0 0 18px 0;">
+      Here is your individual performance breakdown for the <strong>${groupSize}-person Group Discussion</strong> on:
+      <br><strong style="color:#0f172a;">"${escapeHtml(topic)}"</strong>
+    </p>
+
+    <!-- Score Card -->
+    <div style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-radius:12px; padding:20px; text-align:center; color:#ffffff; margin-bottom:22px;">
+      <div style="font-size:12px; text-transform:uppercase; letter-spacing:1px; opacity:0.9;">Overall GD Performance Score</div>
+      <div style="font-size:44px; font-weight:900; letter-spacing:-1px; margin:6px 0;">${overallScore}<span style="font-size:18px; font-weight:600; opacity:0.85;">/100</span></div>
+    </div>
+
+    <!-- Parameter Matrix -->
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:20px;">
+      <h4 style="margin:0 0 12px 0; font-size:13.5px; color:#0f172a;">7-Metric Evaluation Matrix</h4>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:12.5px;">
+        <div style="padding:6px 10px; background:#fff; border-radius:6px; border:1px solid #e2e8f0;">📢 Participation: <strong>${participation}/10</strong></div>
+        <div style="padding:6px 10px; background:#fff; border-radius:6px; border:1px solid #e2e8f0;">💬 Communication: <strong>${communication}/10</strong></div>
+        <div style="padding:6px 10px; background:#fff; border-radius:6px; border:1px solid #e2e8f0;">🎯 Relevance: <strong>${relevance}/10</strong></div>
+        <div style="padding:6px 10px; background:#fff; border-radius:6px; border:1px solid #e2e8f0;">🦁 Confidence: <strong>${confidence}/10</strong></div>
+        <div style="padding:6px 10px; background:#fff; border-radius:6px; border:1px solid #e2e8f0;">💎 Clarity: <strong>${clarity}/10</strong></div>
+        <div style="padding:6px 10px; background:#fff; border-radius:6px; border:1px solid #e2e8f0;">👑 Leadership: <strong>${leadership}/10</strong></div>
+        <div style="padding:6px 10px; background:#fff; border-radius:6px; border:1px solid #e2e8f0; grid-column:span 2;">🤝 Listening & Teamwork: <strong>${teamwork}/10</strong></div>
+      </div>
+    </div>
+
+    ${overallFeedback ? `
+    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:14px; margin-bottom:20px; font-size:13px; color:#166534; line-height:1.6;">
+      <strong>Moderator Summary:</strong> ${escapeHtml(overallFeedback)}
+    </div>
+    ` : ''}
+
+    <div style="margin-bottom:20px;">
+      <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#0f172a;">📌 Notable Points Made by You</h4>
+      <ul style="margin:0; padding-left:20px; font-size:13px;">${pointsHtml}</ul>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#991b1b;">⚠️ Areas of Improvement & Mistakes</h4>
+      <ul style="margin:0; padding-left:20px; font-size:13px;">${mistakesHtml}</ul>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#1e40af;">🚀 Targeted Recommendations</h4>
+      <ul style="margin:0; padding-left:20px; font-size:13px;">${suggestionsHtml}</ul>
+    </div>
+
+    <div style="border-top:1px solid #e2e8f0; padding-top:16px; margin-top:24px; font-size:11.5px; color:#94a3b8; text-align:center; line-height:1.5;">
+      VocaMate Learning Platform • AI Group Discussion Practice<br>
+      Report dispatched to registered address ${escapeHtml(user.email)}.
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  const text = `
+VocaMate GD Report
+Topic: ${topic} (${groupSize} participants)
+Overall Score: ${overallScore}/100
+
+Participation: ${participation}/10 | Communication: ${communication}/10 | Relevance: ${relevance}/10
+Confidence: ${confidence}/10 | Clarity: ${clarity}/10 | Leadership: ${leadership}/10 | Teamwork: ${teamwork}/10
+
+Moderator Feedback:
+${overallFeedback}
+
+Points Made:
+${(pointsMade || []).map(p => '- ' + p).join('\n')}
+
+Suggestions:
+${(suggestions || []).map(s => '- ' + s).join('\n')}
+
+VocaMate Learning Platform
+  `.trim();
+
+  return sendEmail({
+    to: user.email,
+    subject,
+    html,
+    text,
+    type: 'gd_report',
+    metadata: {
+      userId: user.id,
+      userCode: user.userCode,
+      topic,
+      overallScore
+    }
+  });
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 module.exports = {
   sendEmail,
   sendLoginAlertEmail,
   sendPasswordResetEmail,
   sendVerificationEmail,
+  sendInterviewReportEmail,
+  sendGdInviteEmail,
+  sendGdReportEmail,
   getEmailLogs,
   getEmailGatewayConfig,
   updateEmailGatewayConfig,

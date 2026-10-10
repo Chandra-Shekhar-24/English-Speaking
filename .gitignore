@@ -2,9 +2,20 @@
 node_modules/
 package-lock.json
 .DS_Store
+*.tmp
 
 # ============================================
-# DATABASE (local JSON data file)
+# DATABASE & RUNTIME LOGS (local only)
 # ============================================
 english-passport-data.json
 english-passport-data.json.tmp
+english-passport-auth-data.json
+english-passport-auth-data.json.tmp
+vocamate-activity-events.json
+vocamate-activity-events.json.tmp
+vocamate-emails-log.json
+vocamate-emails-log.json.tmp
+vocamate-email-config.json
+vocamate-auth-data.json
+vocamate-friends.json
+vocamate-interviews.json

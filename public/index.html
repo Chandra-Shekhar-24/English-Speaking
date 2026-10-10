@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>VocaMate — AI English Speaking & Real-Time Practice</title>
-  <meta name="description" content="AI English conversation practice with text chat, 20 voices, and real-time audio and video calls with friends." />
-  <meta property="og:title" content="VocaMate — AI English Speaking & Real-Time Practice" />
-  <meta property="og:description" content="AI English conversation practice with text chat, 20 voices, and real-time audio and video calls with friends." />
+  <title>VocaMate — AI English Speaking, Mock Interviews & Group Discussions</title>
+  <meta name="description" content="AI English conversation practice with natural chat, 20 voices, AI Mock Interviews, Group Discussions (GD), and real-time audio and video calls with friends." />
+  <meta property="og:title" content="VocaMate — AI English Speaking, Mock Interviews & Group Discussions" />
+  <meta property="og:description" content="AI English conversation practice with natural chat, 20 voices, AI Mock Interviews, Group Discussions (GD), and real-time audio and video calls with friends." />
   <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script>
@@ -256,6 +256,37 @@
           <button class="accept-call-btn" id="acceptCallBtn">📞</button>
           <span class="btn-label">Accept</span>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report User Modal -->
+  <div class="modal-overlay" id="reportUserModal" style="display:none;">
+    <div class="modal-dialog">
+      <div class="modal-title">🚩 Report User</div>
+      <div class="modal-sub">Help keep VocaMate safe. Reports are reviewed by moderators.</div>
+      <input type="hidden" id="reportTargetUserCode" />
+      <div class="modal-field">
+        <label class="modal-label">User</label>
+        <div id="reportTargetDisplayName" style="font-size:13px; font-weight:700; color:#38bdf8;">--</div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="reportReasonSelect">Reason</label>
+        <select id="reportReasonSelect" class="modal-select">
+          <option value="harassment">Harassment or Abuse</option>
+          <option value="inappropriate_content">Inappropriate Language / Behavior</option>
+          <option value="spam">Spam or Unwanted Promotion</option>
+          <option value="impersonation">Impersonation / Fake ID</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="reportDetailsInput">Details (optional)</label>
+        <textarea id="reportDetailsInput" class="modal-textarea" placeholder="Explain what happened..."></textarea>
+      </div>
+      <div class="modal-btn-row">
+        <button type="button" class="btn-secondary-action" id="cancelReportBtn">Cancel</button>
+        <button type="button" class="btn-danger-action" id="submitReportBtn">Submit Report</button>
       </div>
     </div>
   </div>
@@ -525,10 +556,10 @@
               <p style="font-size:12px; color:#94a3b8; margin-bottom:14px; line-height:1.4;">
                 Send OTPs from your own Gmail address directly to any user's email. Verified to bypass spam filters and land in the Primary Inbox.
               </p>
-              
+
               <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Your Gmail Address</label>
               <input type="email" id="gwGmailUser" placeholder="e.g. yourname@gmail.com" style="width:100%; margin-top:4px; margin-bottom:12px;" />
-              
+
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Google 16-Character App Password</label>
                 <div style="display:flex; align-items:center; gap:6px;">
@@ -564,7 +595,7 @@
               <p style="font-size:12px; color:#94a3b8; margin-bottom:12px; line-height:1.4;">
                 If you have a corporate SMTP server or a verified custom domain at <a href="https://resend.com/domains" target="_blank" style="color:#38bdf8;">resend.com/domains</a>:
               </p>
-              
+
               <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Custom Sender Email (`from` address)</label>
               <input type="text" id="gwFromEmail" placeholder="VocaMate &lt;noreply@yourdomain.com&gt;" style="width:100%; margin-top:4px; margin-bottom:10px;" />
 
@@ -600,7 +631,7 @@
               <p style="font-size:12px; color:#94a3b8; margin-bottom:12px; line-height:1.4;">
                 If your cloud host (like Render Free tier) blocks outbound SMTP ports (587/465), Brevo sends emails directly over HTTPS (Port 443) which is <strong>never blocked</strong>. 300 free emails/day to ANY recipient worldwide.
               </p>
-              
+
               <label style="font-size:11.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Brevo API Key (xkeysib-...)</label>
               <div class="password-input-wrap" style="margin-top:4px; margin-bottom:10px;">
                 <input type="password" id="gwBrevoKey" placeholder="xkeysib-..." style="margin-bottom:0;" />
@@ -670,10 +701,10 @@
         </div>
         <button type="button" class="clean-close-btn" id="closeCleanStudentsModalBtn" title="Close">✕</button>
       </div>
-      
+
       <div class="admin-clean-body">
         <p class="clean-desc">Choose a cleanup option below. Administrator accounts and settings are always kept completely safe.</p>
-        
+
         <div class="clean-options-grid">
           <div class="clean-opt-card" id="cleanOptUnverified">
             <div class="clean-opt-header">
@@ -917,9 +948,11 @@
     </div>
 
     <div class="tabs">
-      <button class="tab-btn active" data-tab="text">💬 AI Chat</button>
+      <button class="tab-btn active" data-tab="text">💬 AI Natural Talk</button>
+      <button class="tab-btn" data-tab="interview">🎯 AI Interview Practice</button>
+      <button class="tab-btn" data-tab="gd">🗣️ Group Discussion (GD)</button>
       <button class="tab-btn voice-tab" data-tab="voice">🎤 AI Voice</button>
-      <button class="tab-btn" data-tab="friend">👥 Practice Calls</button>
+      <button class="tab-btn" data-tab="friend">📞 Practice Calls</button>
     </div>
 
     <div id="tab-text" class="panel active">
@@ -1024,6 +1057,508 @@
       </div>
     </div>
 
+    <!-- ======================================================== -->
+    <!-- TAB: AI INTERVIEW PRACTICE                               -->
+    <!-- ======================================================== -->
+    <div id="tab-interview" class="panel">
+      <!-- Section 1: Setup / Topic Selection -->
+      <div id="interviewSetupView" class="interview-setup-container">
+        <div class="interview-hero-banner">
+          <div class="interview-hero-text">
+            <h2>🎯 AI Interview Practice & Evaluation</h2>
+            <p>Practice realistic Technical, HR, and Personal mock interviews. Receive instant question-by-question critiques and a complete performance report emailed directly to your registered address.</p>
+          </div>
+          <div class="interview-hero-actions">
+            <button type="button" class="admin-btn icon-btn" id="btnInterviewPastReports" title="View past completed interview reports">📜 Past Reports</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+          <label style="font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Select Interview Topic</label>
+          <span style="font-size:12px; color:var(--text-muted);">9 Specialized Practice Tracks</span>
+        </div>
+
+        <div class="interview-topic-grid" id="interviewTopicGrid">
+          <div class="interview-topic-card active" data-topic="java">
+            <div class="topic-card-header">
+              <span class="topic-card-icon">☕</span>
+              <span class="topic-card-badge tech">Tech</span>
+            </div>
+            <div class="topic-card-title">Java Interview</div>
+            <p class="topic-card-desc">Core Java, OOPs, Collections, Multithreading, JVM, Memory Management, Spring Boot</p>
+          </div>
+
+          <div class="interview-topic-card" data-topic="dsa">
+            <div class="topic-card-header">
+              <span class="topic-card-icon">🌳</span>
+              <span class="topic-card-badge tech">Coding</span>
+            </div>
+            <div class="topic-card-title">DSA Interview</div>
+            <p class="topic-card-desc">Arrays, Strings, Linked Lists, Trees, Graphs, Big-O Complexity, Dynamic Programming</p>
+          </div>
+
+          <div class="interview-topic-card" data-topic="webdev">
+            <div class="topic-card-header">
+              <span class="topic-card-icon">🌐</span>
+              <span class="topic-card-badge tech">Web</span>
+            </div>
+            <div class="topic-card-title">Web Development</div>
+            <p class="topic-card-desc">HTTP/HTTPS, Browsers, REST APIs, Web Security, Performance, Client vs Server</p>
+          </div>
+
+          <div class="interview-topic-card" data-topic="htmlcssjs">
+            <div class="topic-card-header">
+              <span class="topic-card-icon">⚡</span>
+              <span class="topic-card-badge tech">Frontend</span>
+            </div>
+            <div class="topic-card-title">HTML/CSS/JavaScript</div>
+            <p class="topic-card-desc">Closures, Event Loop, Promises, DOM Manipulation, CSS Flexbox & Grid, ES6+</p>
+          </div>
+
+          <div class="interview-topic-card" data-topic="fullstack">
+            <div class="topic-card-header">
+              <span class="topic-card-icon">🛠️</span>
+              <span class="topic-card-badge tech">Full Stack</span>
+            </div>
+            <div class="topic-card-title">Backend / Full Stack</div>
+            <p class="topic-card-desc">Node.js, Express, Databases (SQL/NoSQL), Authentication, Architecture, System Design</p>
+          </div>
+
+          <div class="interview-topic-card" data-topic="technical">
+            <div class="topic-card-header">
+              <span class="topic-card-icon">💻</span>
+              <span class="topic-card-badge tech">General</span>
+            </div>
+            <div class="topic-card-title">Technical Interview</div>
+            <p class="topic-card-desc">Software Engineering, SOLID Principles, Design Patterns, Debugging, Clean Code</p>
+          </div>
+
+          <div class="interview-topic-card" data-topic="hr">
+            <div class="topic-card-header">
+              <span class="topic-card-icon">🤝</span>
+              <span class="topic-card-badge hr">Behavioral</span>
+            </div>
+            <div class="topic-card-title">HR Interview</div>
+            <p class="topic-card-desc">Workplace culture, Behavioral scenarios, Conflict resolution, Salary & expectations</p>
+          </div>
+
+          <div class="interview-topic-card" data-topic="personal">
+            <div class="topic-card-header">
+              <span class="topic-card-icon">👤</span>
+              <span class="topic-card-badge personal">Personal</span>
+            </div>
+            <div class="topic-card-title">Personal Interview</div>
+            <p class="topic-card-desc">Introduction, Strengths & Weaknesses, Projects, Education, Professional STAR framing</p>
+          </div>
+
+          <div class="interview-topic-card" data-topic="custom">
+            <div class="topic-card-header">
+              <span class="topic-card-icon">✨</span>
+              <span class="topic-card-badge">Custom</span>
+            </div>
+            <div class="topic-card-title">Custom Interview</div>
+            <p class="topic-card-desc">Define any specific role, job description, or company-targeted interview topic</p>
+          </div>
+        </div>
+
+        <div id="customTopicInputWrap" class="custom-topic-input-box" style="display:none;">
+          <label style="font-size:12px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:6px;">Custom Interview Role / Topic</label>
+          <input type="text" id="customTopicInput" placeholder="e.g. Python Django Developer, Data Analyst, Cloud DevOps Engineer" style="width:100%; padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;" />
+        </div>
+
+        <div class="interview-config-row">
+          <div class="config-group">
+            <div class="config-label">Difficulty Level</div>
+            <div class="pills-group" id="interviewDiffPills">
+              <button type="button" class="choice-pill" data-diff="beginner">Beginner</button>
+              <button type="button" class="choice-pill active" data-diff="intermediate">Intermediate</button>
+              <button type="button" class="choice-pill" data-diff="advanced">Advanced</button>
+            </div>
+          </div>
+
+          <div class="config-group">
+            <div class="config-label">Session Length</div>
+            <div class="pills-group" id="interviewCountPills">
+              <button type="button" class="choice-pill" data-count="3">3 Questions</button>
+              <button type="button" class="choice-pill active" data-count="5">5 Questions</button>
+              <button type="button" class="choice-pill" data-count="10">10 Questions</button>
+            </div>
+          </div>
+
+          <button type="button" class="admin-btn primary" id="btnStartInterview" style="padding:12px 28px; font-weight:800; font-size:14px; height:46px;">
+            🚀 Start Mock Interview
+          </button>
+        </div>
+      </div>
+
+      <!-- Section 2: Active Interview Screen -->
+      <div id="interviewActiveView" class="interview-active-container" style="display:none;">
+        <div class="interview-progress-bar-wrap">
+          <div class="interview-progress-fill" id="interviewProgressFill" style="width:20%;"></div>
+        </div>
+
+        <div class="interview-active-header">
+          <div class="interview-active-meta">
+            <span class="badge topic-badge" id="interviewActiveTopicBadge">Java Interview</span>
+            <span class="badge diff-badge" id="interviewActiveDiffBadge">Intermediate</span>
+            <span style="font-size:13px; font-weight:700; color:var(--text-secondary);" id="interviewProgressCounter">Question 1 of 5</span>
+          </div>
+          <button type="button" class="admin-btn danger-soft" id="btnCancelInterview" style="font-size:12px; padding:6px 14px;">End Interview</button>
+        </div>
+
+        <!-- Question Card -->
+        <div class="interview-question-box">
+          <div class="question-header">
+            <span class="question-number-badge" id="interviewQuestionNumberLabel">Question 1</span>
+            <button type="button" class="btn-listen-question" id="btnListenQuestion" title="Listen to question audio">
+              🔊 Listen Question
+            </button>
+          </div>
+          <p class="interview-question-text" id="interviewQuestionText">Loading question...</p>
+        </div>
+
+        <!-- Answer Submission Card -->
+        <div class="interview-answer-box" id="interviewAnswerBox">
+          <label style="font-size:12px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:8px;">Your Response (Type or Speak)</label>
+          <textarea id="interviewAnswerText" class="interview-answer-textarea" placeholder="Type your answer clearly, or click the mic button below to speak your response..."></textarea>
+          <div class="interview-answer-actions">
+            <button type="button" class="mic-toggle-btn" id="btnInterviewMic">
+              <span id="interviewMicIcon">🎙️</span>
+              <span id="interviewMicText">Speak Answer (Mic)</span>
+            </button>
+            <button type="button" class="admin-btn primary" id="btnSubmitAnswer" style="padding:10px 24px; font-weight:800;">
+              Submit Answer & Evaluate
+            </button>
+          </div>
+        </div>
+
+        <!-- Evaluation Card (Displayed after submission) -->
+        <div class="interview-eval-card" id="interviewEvalCard" style="display:none;">
+          <div class="eval-card-header">
+            <div>
+              <span style="font-size:12px; font-weight:800; text-transform:uppercase; color:#0284c7; letter-spacing:0.5px;">AI Examiner Evaluation</span>
+              <h3 style="margin:2px 0 0 0; font-size:16px; color:var(--text-primary);">Response Assessment</h3>
+            </div>
+            <div class="eval-score-badge" id="evalScoreBadge">8.5 / 10</div>
+          </div>
+
+          <div class="eval-sections-grid">
+            <div class="eval-item correct" id="evalCorrectBox">
+              <strong>✓ What Was Correct & Strong:</strong>
+              <span id="evalCorrectText"></span>
+            </div>
+            <div class="eval-item missing" id="evalMissingBox">
+              <strong>⚠️ What Was Missing / Needed More Depth:</strong>
+              <span id="evalMissingText"></span>
+            </div>
+            <div class="eval-item mistakes" id="evalMistakesBox">
+              <strong>✗ Inaccuracies & Conceptual Mistakes:</strong>
+              <span id="evalMistakesText"></span>
+            </div>
+            <div class="eval-item model-answer" id="evalModelAnswerBox">
+              <strong>💡 Model Professional Answer:</strong>
+              <span id="evalModelAnswerText"></span>
+            </div>
+            <div class="eval-item suggestions" id="evalSuggestionsBox">
+              <strong>🚀 Improvement Suggestions:</strong>
+              <span id="evalSuggestionsText"></span>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:16px;">
+            <button type="button" class="admin-btn primary" id="btnNextQuestion" style="padding:10px 28px; font-weight:800;">
+              Next Question →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Final Comprehensive Report View -->
+      <div id="interviewReportView" class="interview-report-container" style="display:none;">
+        <div class="report-score-hero">
+          <div style="font-size:13px; text-transform:uppercase; letter-spacing:1px; opacity:0.9;">Interview Practice Complete</div>
+          <div class="big-number" id="reportOverallScoreNum">82<span style="font-size:24px; font-weight:600; opacity:0.85;">/100</span></div>
+          <div class="report-grade-badge" id="reportGradeBadge">Strong / Recommended</div>
+          <div style="margin-top:10px; font-size:13px; opacity:0.9;" id="reportMetaSubtitle">Java Interview • Intermediate Level • 5 Questions</div>
+        </div>
+
+        <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:18px 22px; margin-bottom:20px;">
+          <h4 style="margin:0 0 8px 0; font-size:14px; color:var(--text-primary);">Evaluator Overall Verdict</h4>
+          <p id="reportSummaryText" style="margin:0; font-size:13.5px; line-height:1.6; color:var(--text-secondary);"></p>
+        </div>
+
+        <div class="report-details-grid">
+          <div class="report-card" style="border-left:4px solid #22c55e;">
+            <h4 style="color:#22c55e;">🌟 Demonstrated Strengths</h4>
+            <ul id="reportStrengthsList"></ul>
+          </div>
+          <div class="report-card" style="border-left:4px solid #ef4444;">
+            <h4 style="color:#ef4444;">⚠️ Weaknesses & Knowledge Gaps</h4>
+            <ul id="reportWeaknessesList"></ul>
+          </div>
+          <div class="report-card" style="border-left:4px solid #38bdf8;">
+            <h4 style="color:#38bdf8;">🚀 Concrete Areas to Improve</h4>
+            <ul id="reportImprovementsList"></ul>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:20px; margin-bottom:24px;">
+          <h3 style="font-size:15px; margin:0 0 14px 0; color:var(--text-primary);">Question-by-Question Detailed Breakdown</h3>
+          <div id="reportQuestionsBreakdown"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding:16px 0; border-top:1px solid var(--border-color);">
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="admin-btn primary" id="btnEmailInterviewReport">
+              📧 Email Report to My Registered Email
+            </button>
+            <span id="emailReportStatus" style="font-size:12.5px; color:#22c55e; align-self:center; font-weight:700;"></span>
+          </div>
+          <button type="button" class="admin-btn" id="btnRestartInterview">🔄 Practice Another Interview</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB: GROUP DISCUSSION (GD)                               -->
+    <!-- ======================================================== -->
+    <div id="tab-gd" class="panel">
+      <div class="gd-nav-bar">
+        <button type="button" class="gd-nav-btn active" id="gdNavRandomBtn" data-view="random">🎲 Random GD</button>
+        <button type="button" class="gd-nav-btn" id="gdNavPrivateBtn" data-view="private">🔒 Private GD with Friends</button>
+        <button type="button" class="gd-nav-btn" id="gdNavHistoryBtn" data-view="history">📜 GD History & Reports</button>
+      </div>
+
+      <!-- View 1: Random GD Matching Pool Setup -->
+      <div id="gdRandomSetupView" class="gd-view-section">
+        <div class="interview-hero-banner">
+          <div class="interview-hero-text">
+            <h2>🎲 Random Multi-User Group Discussion</h2>
+            <p>Join an automated peer waiting pool with your real account. When enough participants join (4, 6 or 8), VocaMate launches the live discussion with our AI Moderator tracking turns, relevance, and team collaboration.</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <label style="font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Select Group Size</label>
+        </div>
+
+        <div class="gd-size-selector-wrap" id="gdRandomSizeSelector">
+          <div class="gd-size-btn active" data-size="4">
+            <div class="gd-size-number">4</div>
+            <div class="gd-size-label">4 People (Fast Match)</div>
+          </div>
+          <div class="gd-size-btn" data-size="6">
+            <div class="gd-size-number">6</div>
+            <div class="gd-size-label">6 People (Standard GD)</div>
+          </div>
+          <div class="gd-size-btn" data-size="8">
+            <div class="gd-size-number">8</div>
+            <div class="gd-size-label">8 People (Panel GD)</div>
+          </div>
+        </div>
+
+        <div id="gdRandomInitialState" style="text-align:center; padding:18px 0;">
+          <button type="button" class="admin-btn primary" id="btnJoinRandomGdPool" style="padding:14px 38px; font-size:15px; font-weight:800;">
+            🎲 Join Random GD Waiting Pool
+          </button>
+        </div>
+
+        <!-- Waiting Room Card (Hidden until joined) -->
+        <div id="gdWaitingPoolCard" class="waiting-pool-box" style="display:none;">
+          <div class="waiting-pulse-ring">⏳</div>
+          <h3 style="margin:0 0 8px 0; color:var(--text-primary);">Waiting for GD Peers...</h3>
+          <p style="margin:0 0 16px 0; font-size:14px; color:var(--text-secondary);">
+            Matching with interested participants. The discussion starts automatically as soon as <span id="gdWaitingTargetCount">4</span> participants are assembled.
+          </p>
+          <div style="display:inline-block; background:rgba(2,132,199,0.15); border:1px solid #0284c7; padding:8px 20px; border-radius:var(--radius-full); font-weight:800; font-size:15px; color:#38bdf8; margin-bottom:20px;" id="gdWaitingCounterBadge">
+            Joined: 1 / 4
+          </div>
+          <div>
+            <button type="button" class="admin-btn danger-soft" id="btnLeaveRandomGdPool">Cancel & Leave Pool</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- View 2: Private GD Setup -->
+      <div id="gdPrivateSetupView" class="gd-view-section" style="display:none;">
+        <div class="interview-hero-banner">
+          <div class="interview-hero-text">
+            <h2>🔒 Private GD With Friends</h2>
+            <p>Create a dedicated private Group Discussion with 4, 6, or 8 accepted friends using their 4-digit User IDs. Real-time invites and emails are dispatched immediately.</p>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:24px; margin-bottom:20px;">
+          <div style="margin-bottom:18px;">
+            <label style="font-size:12px; font-weight:800; text-transform:uppercase; color:var(--text-secondary); display:block; margin-bottom:8px;">Group Size</label>
+            <div class="pills-group" id="gdPrivateSizePills">
+              <button type="button" class="choice-pill active" data-size="4">4 Participants (3 Friends)</button>
+              <button type="button" class="choice-pill" data-size="6">6 Participants (5 Friends)</button>
+              <button type="button" class="choice-pill" data-size="8">8 Participants (7 Friends)</button>
+            </div>
+          </div>
+
+          <div style="margin-bottom:18px;">
+            <label style="font-size:12px; font-weight:800; text-transform:uppercase; color:var(--text-secondary); display:block; margin-bottom:8px;">Discussion Topic</label>
+            <input type="text" id="gdPrivateTopicInput" placeholder="Leave empty for auto-selected topic or enter custom topic..." style="width:100%; padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:13.5px;" />
+          </div>
+
+          <div style="margin-bottom:22px;">
+            <label style="font-size:12px; font-weight:800; text-transform:uppercase; color:var(--text-secondary); display:block; margin-bottom:8px;">Invite Friends by 4-digit User ID</label>
+            <p style="font-size:12px; color:var(--text-muted); margin:0 0 10px 0;">Select from your accepted friends list below or enter their 4-digit IDs separated by commas.</p>
+            <div id="gdFriendsPickerList" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
+            <input type="text" id="gdFriendIdsInput" placeholder="e.g. 1024, 2048, 5120" style="width:100%; padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:13.5px;" />
+          </div>
+
+          <button type="button" class="admin-btn primary" id="btnCreatePrivateGd" style="padding:12px 28px; font-weight:800; font-size:14px;">
+            🚀 Create GD & Send Invites
+          </button>
+        </div>
+
+        <!-- Private Waiting Room Card -->
+        <div id="gdPrivateWaitingRoom" class="waiting-pool-box" style="display:none;">
+          <h3 style="margin:0 0 6px 0; color:var(--text-primary);">Private GD Waiting Room</h3>
+          <p id="gdPrivateRoomTopicLabel" style="font-size:14px; font-weight:700; color:#38bdf8; margin:0 0 16px 0;"></p>
+          <div id="gdPrivateParticipantsRoster" style="display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;"></div>
+          <div style="display:flex; justify-content:center; gap:12px;">
+            <button type="button" class="admin-btn primary" id="btnStartPrivateGdNow" style="padding:10px 24px; font-weight:800;">
+              Start Discussion
+            </button>
+            <button type="button" class="admin-btn danger-soft" id="btnCancelPrivateGd">Cancel Room</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- View 3: Live Active GD Room -->
+      <div id="gdActiveRoomView" class="gd-view-section" style="display:none;">
+        <div class="gd-room-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+            <div>
+              <span class="gd-topic-category-badge" id="gdActiveCategoryBadge">Group Discussion</span>
+              <h3 class="gd-topic-title" id="gdActiveTopicTitle">Topic</h3>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="background:rgba(2,132,199,0.15); border:1px solid #0284c7; color:#38bdf8; font-weight:800; font-size:14px; padding:6px 14px; border-radius:var(--radius-full);" id="gdActiveTimer">
+                ⏱️ 06:00
+              </div>
+              <button type="button" class="admin-btn danger-soft" id="btnEndGdSession" style="font-size:12px; padding:6px 14px;">
+                End GD & Evaluate
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Participants Avatar Strip -->
+        <div class="gd-participants-strip" id="gdParticipantsStrip"></div>
+
+        <!-- Discussion Feed -->
+        <div class="gd-discussion-feed" id="gdDiscussionFeed"></div>
+
+        <!-- Input Bar -->
+        <div class="gd-input-bar">
+          <button type="button" class="mic-toggle-btn" id="btnGdMicToggle" title="Toggle speaking mode" style="padding:11px 14px;">
+            🎙️ <span id="gdMicLabel" style="display:none;">Speaking</span>
+          </button>
+          <input type="text" id="gdMessageInput" class="gd-input-field" placeholder="Type your contribution to the group discussion..." autocomplete="off" />
+          <button type="button" class="admin-btn primary" id="btnSendGdMessage" style="padding:11px 22px; font-weight:800;">
+            Send
+          </button>
+        </div>
+      </div>
+
+      <!-- View 4: Completed GD Comprehensive Evaluation Report -->
+      <div id="gdReportView" class="gd-view-section" style="display:none;">
+        <div class="report-score-hero">
+          <div style="font-size:13px; text-transform:uppercase; letter-spacing:1px; opacity:0.9;">Group Discussion Performance Analysis</div>
+          <div class="big-number" id="gdReportScoreNum">82<span style="font-size:22px; font-weight:600; opacity:0.85;">/100</span></div>
+          <div class="report-grade-badge" id="gdReportCandidateName">Participant Evaluation</div>
+          <div style="margin-top:10px; font-size:13px; opacity:0.9;" id="gdReportTopicSubtitle"></div>
+        </div>
+
+        <div class="gd-metrics-grid">
+          <div class="gd-metric-box">
+            <span class="gd-metric-label">📢 Participation</span>
+            <span class="gd-metric-score" id="gdMetricParticipation">8/10</span>
+          </div>
+          <div class="gd-metric-box">
+            <span class="gd-metric-label">💬 Communication</span>
+            <span class="gd-metric-score" id="gdMetricCommunication">8/10</span>
+          </div>
+          <div class="gd-metric-box">
+            <span class="gd-metric-label">🎯 Relevance</span>
+            <span class="gd-metric-score" id="gdMetricRelevance">8/10</span>
+          </div>
+          <div class="gd-metric-box">
+            <span class="gd-metric-label">🦁 Confidence</span>
+            <span class="gd-metric-score" id="gdMetricConfidence">7/10</span>
+          </div>
+          <div class="gd-metric-box">
+            <span class="gd-metric-label">💎 Clarity</span>
+            <span class="gd-metric-score" id="gdMetricClarity">8/10</span>
+          </div>
+          <div class="gd-metric-box">
+            <span class="gd-metric-label">👑 Leadership</span>
+            <span class="gd-metric-score" id="gdMetricLeadership">7/10</span>
+          </div>
+          <div class="gd-metric-box" style="grid-column:1 / -1;">
+            <span class="gd-metric-label">🤝 Listening & Teamwork</span>
+            <span class="gd-metric-score" id="gdMetricTeamwork">8/10</span>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:18px 22px; margin-bottom:20px;">
+          <h4 style="margin:0 0 8px 0; font-size:14px; color:var(--text-primary);">AI Moderator Verdict</h4>
+          <p id="gdReportFeedbackText" style="margin:0; font-size:13.5px; line-height:1.6; color:var(--text-secondary);"></p>
+        </div>
+
+        <div class="report-details-grid">
+          <div class="report-card" style="border-left:4px solid #0284c7;">
+            <h4 style="color:#0284c7;">📌 Notable Points Made by You</h4>
+            <ul id="gdReportPointsList"></ul>
+          </div>
+          <div class="report-card" style="border-left:4px solid #ef4444;">
+            <h4 style="color:#ef4444;">⚠️ Mistakes & Discussion Gaps</h4>
+            <ul id="gdReportMistakesList"></ul>
+          </div>
+          <div class="report-card" style="border-left:4px solid #22c55e;">
+            <h4 style="color:#22c55e;">🚀 Targeted Recommendations</h4>
+            <ul id="gdReportSuggestionsList"></ul>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding:16px 0; border-top:1px solid var(--border-color);">
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="admin-btn primary" id="btnEmailGdReport">
+              📧 Email My Report to Registered Email
+            </button>
+            <span id="emailGdReportStatus" style="font-size:12.5px; color:#22c55e; align-self:center; font-weight:700;"></span>
+          </div>
+          <button type="button" class="admin-btn" id="btnRestartGd">🎲 Start Another GD</button>
+        </div>
+      </div>
+
+      <!-- View 5: GD History List View -->
+      <div id="gdHistoryView" class="gd-view-section" style="display:none;">
+        <h3 style="margin:0 0 14px 0; color:var(--text-primary);">Your Completed Group Discussion Reports</h3>
+        <div id="gdHistoryListContainer"></div>
+      </div>
+    </div>
+
+    <!-- Incoming GD Invite Modal / Notification Banner -->
+    <div id="gdInviteOverlay" class="admin-modal-overlay" style="display:none;">
+      <div class="admin-auth-card" style="max-width:440px; text-align:center;">
+        <div style="font-size:36px; margin-bottom:10px;">🗣️</div>
+        <h3 style="margin:0 0 8px 0; color:var(--text-primary);">Group Discussion Invitation</h3>
+        <p id="gdInviteModalText" style="font-size:13.5px; color:var(--text-secondary); line-height:1.5; margin:0 0 18px 0;">
+          A friend has invited you to join a Group Discussion.
+        </p>
+        <div style="display:flex; justify-content:center; gap:12px;">
+          <button type="button" class="admin-btn danger-soft" id="btnDeclineGdInvite">Decline</button>
+          <button type="button" class="admin-btn primary" id="btnAcceptGdInvite" style="padding:10px 24px; font-weight:800;">Accept & Join</button>
+        </div>
+      </div>
+    </div>
+
     <div id="tab-friend" class="panel">
       <div class="friend-area">
         <div class="friend-dashboard-grid">
@@ -1076,19 +1611,92 @@
               <video id="localVideo" autoplay playsinline muted></video>
             </div>
 
+            <!-- Hidden legacy elements for compatibility -->
+            <div style="display:none;">
+              <div id="callTypeRow"><button id="voiceTypeBtn"></button><button id="videoTypeBtn"></button></div>
+              <input id="friendIdInput" />
+              <button id="connectBtn"></button>
+              <button id="chatBtn"></button>
+              <button id="groupCallBtn"></button>
+            </div>
+
+            <!-- Secure Friends & Calling Hub -->
             <div class="direct-call-box">
-              <div class="friend-section-title">📞 Direct 1-on-1 Practice</div>
-              <div class="call-type-row" id="callTypeRow">
-                <button type="button" class="call-type-btn active" id="voiceTypeBtn"><span class="call-type-icon">📞</span>Voice Call</button>
-                <button type="button" class="call-type-btn" id="videoTypeBtn"><span class="call-type-icon">🎥</span>Video Call</button>
+              <div class="calling-privacy-notice">
+                <span class="calling-privacy-tag">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  Privacy: Friends Only
+                </span>
+                <button type="button" class="push-notif-toggle-btn" id="pushNotifToggleBtn" title="Receive incoming calls even when tab is in background or closed">
+                  <span>🔔</span> <span id="pushNotifLabel">Enable Ringing</span>
+                </button>
               </div>
-              <div class="friend-row">
-                <input id="friendIdInput" placeholder="Enter User ID (e.g. 67208)" maxlength="10" inputmode="numeric" />
-                <button class="connect-btn" id="connectBtn">Connect</button>
+
+              <!-- Friend Navigation Tabs -->
+              <div class="friend-tabs-bar" role="tablist">
+                <button type="button" class="friend-tab-btn active" id="tabBtnFriends" data-tab="friends">
+                  <span>🤝 Friends</span>
+                  <span class="friend-tab-badge green" id="friendsCountBadge" style="display:none;">0</span>
+                </button>
+                <button type="button" class="friend-tab-btn" id="tabBtnSearch" data-tab="search">
+                  <span>🔍 Search ID</span>
+                </button>
+                <button type="button" class="friend-tab-btn" id="tabBtnRequests" data-tab="requests">
+                  <span>📩 Requests</span>
+                  <span class="friend-tab-badge" id="requestsCountBadge" style="display:none;">0</span>
+                </button>
+                <button type="button" class="friend-tab-btn" id="tabBtnHistory" data-tab="history">
+                  <span>📜 History</span>
+                  <span class="friend-tab-badge" id="missedCallsBadge" style="display:none;">0</span>
+                </button>
               </div>
-              <div class="friend-actions-grid" id="chatEntryRow">
-                <button class="chat-entry-btn" id="chatBtn">💬 Chat</button>
-                <button class="chat-entry-btn" id="groupCallBtn">👥 Group Call</button>
+
+              <!-- Tab 1: Friends List -->
+              <div class="friend-tab-panel active" id="panelFriends">
+                <div class="friends-list-container" id="myFriendsList">
+                  <div class="empty" style="padding:20px; text-align:center; color:var(--text-muted); font-size:12px;">
+                    Loading friends...
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 2: Search ID & View Profile -->
+              <div class="friend-tab-panel" id="panelSearch">
+                <div class="search-id-box">
+                  <div style="font-size:11.5px; color:var(--text-muted);">
+                    Enter a 4-digit User ID to view their profile and send a friend request. Unknown users cannot be called directly.
+                  </div>
+                  <div class="search-input-row">
+                    <input id="searchFriendIdInput" class="search-id-input" placeholder="e.g. 4291" maxlength="6" inputmode="numeric" />
+                    <button type="button" class="search-id-btn" id="searchUserBtn">🔍 Search</button>
+                  </div>
+                  <div id="searchProfileCard" class="search-profile-card" style="display:none;">
+                    <!-- Filled dynamically -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 3: Friend Requests -->
+              <div class="friend-tab-panel" id="panelRequests">
+                <div class="requests-section-title">Incoming Requests (<span id="incomingReqCount">0</span>)</div>
+                <div class="requests-list" id="incomingRequestsList">
+                  <div class="empty" style="font-size:12px; color:var(--text-muted); padding:10px 0;">No incoming friend requests</div>
+                </div>
+                <div class="requests-section-title" style="margin-top:14px;">Sent Requests (<span id="outgoingReqCount">0</span>)</div>
+                <div class="requests-list" id="outgoingRequestsList">
+                  <div class="empty" style="font-size:12px; color:var(--text-muted); padding:10px 0;">No outgoing requests</div>
+                </div>
+              </div>
+
+              <!-- Tab 4: Call History & Missed Calls -->
+              <div class="friend-tab-panel" id="panelHistory">
+                <div class="history-filter-row">
+                  <button type="button" class="history-filter-pill active" id="filterAllCalls">All Calls</button>
+                  <button type="button" class="history-filter-pill" id="filterMissedCalls">📵 Missed (<span id="missedFilterCount">0</span>)</button>
+                </div>
+                <div class="call-history-list" id="callHistoryList">
+                  <div class="empty" style="font-size:12px; color:var(--text-muted); padding:16px 0; text-align:center;">No call history yet</div>
+                </div>
               </div>
             </div>
 
@@ -1171,7 +1779,16 @@
         groupIsMuted: false, groupIsCameraOff: false, groupCallStartTime: null, groupCallTimerInterval: null,
         waCallActive: false, waCallMode: 'off', isSpeakerOn: false,
         // Store corrections by message ID
-        correctionCache: {}
+        correctionCache: {},
+        // Secure Calling & Friends System
+        friends: [],
+        friendRequests: { incoming: [], outgoing: [] },
+        blockedUsers: [],
+        callHistory: [],
+        missedCallsCount: 0,
+        currentHistoryFilter: 'all',
+        searchedProfile: null,
+        isPushSubscribed: false
       };
 
       const $ = id => document.getElementById(id);
@@ -1180,6 +1797,15 @@
         'callStatus', 'statusLabel', 'statusDot', 'aiName', 'userIdDisplay',
         'onlineCount', 'onlineUsersList', 'friendCallStatus', 'friendUserId',
         'friendIdInput', 'connectBtn', 'randomMatchBtn', 'friendStatus',
+        'tabBtnFriends', 'tabBtnSearch', 'tabBtnRequests', 'tabBtnHistory',
+        'friendsCountBadge', 'requestsCountBadge', 'missedCallsBadge',
+        'panelFriends', 'myFriendsList', 'panelSearch', 'searchFriendIdInput',
+        'searchUserBtn', 'searchProfileCard', 'panelRequests', 'incomingReqCount',
+        'incomingRequestsList', 'outgoingReqCount', 'outgoingRequestsList',
+        'panelHistory', 'filterAllCalls', 'filterMissedCalls', 'missedFilterCount',
+        'callHistoryList', 'pushNotifToggleBtn', 'pushNotifLabel',
+        'reportUserModal', 'reportTargetUserCode', 'reportTargetDisplayName',
+        'reportReasonSelect', 'reportDetailsInput', 'cancelReportBtn', 'submitReportBtn',
         'textChatBox', 'textInput', 'textSend', 'resetTopicBtn', 'textSuggestionChips', 'voiceSelectCompact',
         'levelSelect', 'professionSelect', 'goalSelect', 'startBtn',
         'onboarding', 'mainApp', 'endFriendCallBtn', 'nameInput', 'callTimerDisplay',
@@ -1248,7 +1874,7 @@
           document.documentElement.classList.remove('light-theme');
         }
         try { localStorage.setItem('vocamate_theme', isLight ? 'light' : 'dark'); } catch(e) {}
-        
+
         if (els.themeToggleBtn) {
           const icon = els.themeToggleBtn.querySelector('.theme-toggle-icon');
           const label = els.themeToggleBtn.querySelector('.theme-toggle-label');
@@ -1292,21 +1918,19 @@
       // ONBOARDING
       // ==========================================================
       els.startBtn.addEventListener('click', () => {
-        const userName = els.nameInput.value.trim() || 'Friend';
-        state.userProfile.level = els.levelSelect.value;
-        state.userProfile.profession = els.professionSelect.value;
-        state.userProfile.goal = els.goalSelect.value;
-        state.userName = userName;
-        els.onboarding.style.display = 'none';
-        els.mainApp.style.display = 'flex';
-        initApp();
-        setTimeout(() => { if (state.socket && state.socket.connected) state.socket.emit('set-user-name', userName); }, 500);
-        const badge = document.querySelector('.user-id-badge');
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'name-display';
-        nameSpan.textContent = '👤 ' + userName;
-        badge.appendChild(nameSpan);
-        setTimeout(() => startTextChatGreeting(), 1000);
+        const userName = els.nameInput.value.trim() || (state.authUser ? state.authUser.displayName : 'Friend');
+        const profile = {
+          name: userName,
+          level: els.levelSelect.value,
+          profession: els.professionSelect.value,
+          goal: els.goalSelect.value
+        };
+        if (state.authUser && state.authUser.userCode) {
+          try {
+            localStorage.setItem('vocamate_user_profile_' + state.authUser.userCode, JSON.stringify(profile));
+          } catch (e) {}
+        }
+        enterApplication(state.authUser || { displayName: userName, userCode: '----' }, profile);
       });
 
       async function startTextChatGreeting() {
@@ -1440,15 +2064,49 @@
       // ==========================================================
       // INITIALIZATION
       // ==========================================================
+      let appInitialized = false;
       function initApp() {
+        if (appInitialized) return;
+        appInitialized = true;
         connectSocket();
         setupTabs();
         setupTextChat();
         setupVoiceUI();
         setupFriendCall();
         setupGroupCall();
+        setupInterviewSystem();
+        setupGdSystem();
         loadVoices();
         populateVoiceSelect();
+
+        // Check if opened from incoming call push notification
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const autoAnswerCallId = urlParams.get('answerCall');
+          if (autoAnswerCallId) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setTimeout(() => {
+              if (state.socket) {
+                state.socket.emit('call-response', { callId: autoAnswerCallId, accepted: true });
+                state.isFriendCall = true;
+                state.currentCallId = autoAnswerCallId;
+              }
+            }, 1200);
+          }
+        } catch (e) {}
+
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'ANSWER_INCOMING_CALL') {
+              const callId = event.data.callId;
+              if (callId && state.socket) {
+                state.socket.emit('call-response', { callId, accepted: true });
+                state.isFriendCall = true;
+                state.currentCallId = callId;
+              }
+            }
+          });
+        }
       }
 
       // ==========================================================
@@ -1481,7 +2139,30 @@
           if (els.userIdDisplay) els.userIdDisplay.textContent = 'ID: #' + id;
           if (els.friendUserId) els.friendUserId.textContent = id;
           initPeer();
+          if (window.loadFriendsState) window.loadFriendsState();
+          if (window.loadCallHistory) window.loadCallHistory();
+          if (window.initPushNotifications) window.initPushNotifications();
         });
+
+        state.socket.on('friends-updated', () => {
+          if (window.loadFriendsState) window.loadFriendsState();
+          if (window.loadCallHistory) window.loadCallHistory();
+          if (state.searchedProfile && window.searchUserByCode) {
+            window.searchUserByCode(state.searchedProfile.userCode);
+          }
+        });
+
+        state.socket.on('friend-request-received', (data) => {
+          playNotificationChime();
+          showToast('📩', 'Friend Request', (data.fromName || ('User #' + data.fromUser)) + ' sent you a friend request!');
+          if (window.loadFriendsState) window.loadFriendsState();
+        });
+
+        state.socket.on('friend-request-accepted', (data) => {
+          showToast('🎉', 'Friend Connected', (data.byName || ('User #' + data.byUser)) + ' accepted your friend request! You can now call each other.');
+          if (window.loadFriendsState) window.loadFriendsState();
+        });
+
         state.socket.on('online-users', (users) => { renderOnlineUsers(users); const online = users.filter(u => !u.busy).length; els.onlineCount.textContent = online; });
 
         state.socket.on('incoming-call', (data) => {
@@ -2219,16 +2900,35 @@
       // ==========================================================
       // TABS
       // ==========================================================
+      function switchMainTab(tabName) {
+        const tabs = document.querySelectorAll('.tab-btn');
+        const panels = {
+          text: document.getElementById('tab-text'),
+          interview: document.getElementById('tab-interview'),
+          gd: document.getElementById('tab-gd'),
+          voice: document.getElementById('tab-voice'),
+          friend: document.getElementById('tab-friend')
+        };
+        tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+        state.activeTab = tabName;
+        Object.keys(panels).forEach(k => {
+          if (panels[k]) panels[k].classList.toggle('active', k === tabName);
+        });
+        if (tabName === 'voice' && !state.isConversationStarted) {
+          state.isConversationStarted = true;
+          resetFluencyStats();
+          setTimeout(() => startVoiceChatGreeting(), 500);
+        }
+        if (tabName === 'gd') {
+          loadGdFriendsList();
+        }
+      }
+
       function setupTabs() {
         const tabs = document.querySelectorAll('.tab-btn');
-        const panels = { text: document.getElementById('tab-text'), voice: document.getElementById('tab-voice'), friend: document.getElementById('tab-friend') };
         tabs.forEach(btn => {
           btn.addEventListener('click', () => {
-            tabs.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            state.activeTab = btn.dataset.tab;
-            Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === btn.dataset.tab));
-            if (btn.dataset.tab === 'voice' && !state.isConversationStarted) { state.isConversationStarted = true; resetFluencyStats(); setTimeout(() => startVoiceChatGreeting(), 500); }
+            switchMainTab(btn.dataset.tab);
           });
         });
       }
@@ -2307,19 +3007,23 @@
             els.resetTopicBtn.disabled = true;
             els.resetTopicBtn.textContent = '🔄 Starting fresh...';
             try {
-              await fetch('/api/text-chat/reset', {
+              const res = await fetch('/api/text-chat/reset', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ conversationId: state.userId })
               });
+              const data = await res.json();
+              const topicName = (data && data.topic) || 'Fresh Topic';
+              const starterMsg = (data && data.starter) || 'What would you like to explore today?';
+              state.currentTopic = topicName;
               els.textChatBox.innerHTML = '';
-              addTextChatMessage('🌱 Fresh conversation started! What shall we talk about?', 'system');
+              addTextChatMessage(`🌱 New Topic: ${topicName}`, 'system');
               showTypingIndicator();
               setTimeout(() => {
                 hideTypingIndicator();
                 const userName = state.userName || 'friend';
-                addTextChatMessage(`Hey ${userName}! We've got a fresh topic. What's on your mind today — how work/college went, weekend plans, or an interview you're prepping for?`, 'ai');
-                renderSuggestionChips(["I'd like to practice an interview", "Let's talk about weekend plans", "Tell me an interesting story!"]);
+                addTextChatMessage(`Hey ${userName}! Let's talk about "${topicName}". ${starterMsg}`, 'ai');
+                renderSuggestionChips(["I agree with that!", "Tell me more about it", "Here is my perspective..."]);
               }, 700);
             } catch (err) {
               console.error('Reset topic error:', err);
@@ -2456,7 +3160,7 @@
       function showCorrectionBox(star, data) {
         if (!data || !data.original) return;
 
-        const parentMsg = star.closest('.conv-msg.ai');
+        const parentMsg = star.closest('.conv-msg');
         if (!parentMsg) return;
 
         const box = document.createElement('div');
@@ -2761,7 +3465,20 @@
             div.appendChild(star);
           }
         } else if (type === 'user') {
-          div.textContent = 'You: ' + content;
+          const contentSpan = document.createElement('span');
+          contentSpan.className = 'user-content';
+          contentSpan.textContent = 'You: ' + content;
+          div.appendChild(contentSpan);
+          if (correctionIndex !== undefined && correctionIndex !== null) {
+            const star = document.createElement('span');
+            star.className = 'correction-star';
+            star.title = 'View natural English phrasing & grammar tip';
+            star.textContent = ' ★';
+            star.dataset.correctionIndex = correctionIndex;
+            star.dataset.type = 'voice';
+            star.addEventListener('click', toggleCorrection);
+            div.appendChild(star);
+          }
         } else if (type === 'listening-indicator') {
           div.innerHTML = `<span>${content}</span><span class="dots"><span></span><span></span><span></span></span>`;
         } else if (type === 'system') {
@@ -2800,8 +3517,10 @@
         els.aiAvatar.className = 'ai-avatar-small thinking';
         analyzeUserSpeech(userText);
 
-        const lastMsg = els.conversationArea.querySelector('.conv-msg.user:last-child');
-        if (!lastMsg || lastMsg.dataset.final !== 'true') { addConversationMessage('user', userText); }
+        let userBubble = els.conversationArea.querySelector('.conv-msg.user:last-child');
+        if (!userBubble || userBubble.dataset.final !== 'true') {
+          userBubble = addConversationMessage('user', userText);
+        }
 
         try {
           const res = await fetch('/api/voice-chat', {
@@ -2828,6 +3547,17 @@
                 explanation: data.explanation || ''
               };
               if (data.correction) { if (state.fluencyStats) state.fluencyStats.mistakes++; }
+              // Add star icon to user bubble if not already present
+              if (userBubble && !userBubble.querySelector('.correction-star')) {
+                const star = document.createElement('span');
+                star.className = 'correction-star';
+                star.title = 'View natural phrasing & grammar coaching';
+                star.textContent = ' ★';
+                star.dataset.correctionIndex = data.correctionIndex;
+                star.dataset.type = 'voice';
+                star.addEventListener('click', toggleCorrection);
+                userBubble.appendChild(star);
+              }
             }
             addConversationMessage('ai', data.reply, data.correctionIndex);
             await speakText(data.reply, data.emotion || 'neutral');
@@ -2961,56 +3691,871 @@
       // FRIEND CALL SETUP
       // ==========================================================
       function setupFriendCall() {
-        els.voiceTypeBtn.addEventListener('click', () => {
-          state.wantsVideo = false;
-          els.voiceTypeBtn.classList.add('active');
-          els.videoTypeBtn.classList.remove('active');
-        });
+        // Tab switching
+        function switchFriendTab(tabName) {
+          const tabs = [
+            { name: 'friends', btn: els.tabBtnFriends, panel: els.panelFriends },
+            { name: 'search', btn: els.tabBtnSearch, panel: els.panelSearch },
+            { name: 'requests', btn: els.tabBtnRequests, panel: els.panelRequests },
+            { name: 'history', btn: els.tabBtnHistory, panel: els.panelHistory }
+          ];
+          tabs.forEach(t => {
+            if (t.name === tabName) {
+              if (t.btn) t.btn.classList.add('active');
+              if (t.panel) t.panel.classList.add('active');
+            } else {
+              if (t.btn) t.btn.classList.remove('active');
+              if (t.panel) t.panel.classList.remove('active');
+            }
+          });
+          if (tabName === 'friends' || tabName === 'requests') {
+            loadFriendsState();
+          } else if (tabName === 'history') {
+            loadCallHistory();
+          }
+        }
 
-        els.videoTypeBtn.addEventListener('click', () => {
-          state.wantsVideo = true;
-          els.videoTypeBtn.classList.add('active');
-          els.voiceTypeBtn.classList.remove('active');
-        });
+        if (els.tabBtnFriends) els.tabBtnFriends.addEventListener('click', () => switchFriendTab('friends'));
+        if (els.tabBtnSearch) els.tabBtnSearch.addEventListener('click', () => switchFriendTab('search'));
+        if (els.tabBtnRequests) els.tabBtnRequests.addEventListener('click', () => switchFriendTab('requests'));
+        if (els.tabBtnHistory) els.tabBtnHistory.addEventListener('click', () => switchFriendTab('history'));
 
-        els.connectBtn.addEventListener('click', () => {
-          if (state.isCalling && state.ringingCallId) {
-            // Currently ringing (waiting for the other side to respond) — this click cancels it.
-            state.socket.emit('cancel-call', state.ringingCallId);
-            stopRingback();
-            state.isCalling = false;
-            state.ringingCallId = null;
-            els.friendCallStatus.textContent = '📞 Call cancelled';
-            els.connectBtn.disabled = false;
-            els.connectBtn.textContent = 'Connect';
+        // Push Notifications
+        if (els.pushNotifToggleBtn) {
+          els.pushNotifToggleBtn.addEventListener('click', () => requestPushSubscription());
+        }
+
+        // Friends State loader
+        window.loadFriendsState = async function () {
+          try {
+            const res = await fetch('/api/friends/state');
+            const json = await res.json();
+            if (json.ok) {
+              state.friends = json.friends || [];
+              state.friendRequests = json.requests || { incoming: [], outgoing: [] };
+              state.blockedUsers = json.blocked || [];
+              state.missedCallsCount = json.missedCalls || 0;
+              renderFriendsList();
+              renderFriendRequests();
+              updateFriendBadges();
+            }
+          } catch (e) {
+            console.warn('Friends state fetch notice:', e.message);
+          }
+        };
+
+        function renderFriendsList() {
+          if (!els.myFriendsList) return;
+          if (!state.friends || state.friends.length === 0) {
+            els.myFriendsList.innerHTML = `
+              <div style="padding:22px 14px; text-align:center; color:var(--text-muted); font-size:12px; background:var(--bg-input); border-radius:var(--radius-md); border:1px dashed var(--border-color);">
+                <div style="font-size:24px; margin-bottom:6px;">🤝</div>
+                <div style="font-weight:700; color:var(--text-primary); margin-bottom:4px;">No Friends Added Yet</div>
+                <div>Search a 4-digit User ID in the <strong>Search ID</strong> tab to send your first friend request!</div>
+                <button type="button" class="search-id-btn" style="margin:12px auto 0; font-size:11.5px; padding:6px 14px;" id="btnGoToSearch">🔍 Search 4-Digit ID</button>
+              </div>
+            `;
+            const goBtn = document.getElementById('btnGoToSearch');
+            if (goBtn) goBtn.addEventListener('click', () => switchFriendTab('search'));
             return;
           }
-          const targetId = els.friendIdInput.value.trim();
-          if (!targetId || targetId.length !== 4) { els.friendCallStatus.textContent = '⚠️ Enter a valid 4-digit ID'; return; }
-          if (targetId === state.userId) { els.friendCallStatus.textContent = '⚠️ You cannot call yourself'; return; }
-          const wantsVideo = !!state.wantsVideo;
-          els.friendCallStatus.textContent = '🔍 Looking for user ' + targetId + '...';
-          els.connectBtn.disabled = true;
-          els.connectBtn.textContent = 'Calling...';
-          state.isCalling = true;
-          state.socket.emit('find-user', targetId, (result) => {
-            if (!result.exists) { els.friendCallStatus.textContent = '❌ User not found'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; state.isCalling = false; return; }
-            if (!result.online) { els.friendCallStatus.textContent = '❌ User is offline'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; state.isCalling = false; return; }
-            if (result.busy) { els.friendCallStatus.textContent = '❌ User is in a call'; els.connectBtn.disabled = false; els.connectBtn.textContent = 'Connect'; state.isCalling = false; return; }
-            els.friendCallStatus.textContent = '📞 Calling ' + targetId + '...';
-            els.connectBtn.disabled = false;
-            els.connectBtn.textContent = '✖ Cancel';
-            state.socket.emit('call-request', { targetUserId: targetId, isVideo: wantsVideo });
-          });
-        });
 
-        els.randomMatchBtn.addEventListener('click', () => {
-          if (state.isFriendCall || state.isCallActive || state.isCalling || state.groupRoom) { return; }
-          els.friendCallStatus.textContent = '🔍 Finding a random user...';
-          els.randomMatchBtn.disabled = true;
-          setWACallState('searching', { isVideo: !!state.wantsVideo });
-          state.socket.emit('find-random', { isVideo: !!state.wantsVideo });
-        });
+          let html = '';
+          state.friends.forEach(f => {
+            const isOnline = !!f.online;
+            const isBusy = !!f.busy;
+            const statusDotClass = isBusy ? 'busy' : (isOnline ? 'online' : 'offline');
+            const statusLabel = isBusy ? '📞 In Call' : (isOnline ? '🟢 Online' : '⚫ Offline');
+            const initial = (f.displayName || f.userCode || '?').charAt(0).toUpperCase();
+
+            html += `
+              <div class="friend-item-card" data-usercode="${f.userCode}">
+                <div class="friend-avatar-wrap">
+                  <span>${initial}</span>
+                  <span class="friend-live-dot ${statusDotClass}"></span>
+                </div>
+                <div class="friend-item-details">
+                  <div class="friend-item-name">${escapeHtml(f.displayName || `User #${f.userCode}`)}</div>
+                  <div class="friend-item-sub">
+                    <span style="color:#38bdf8; font-weight:700;">#${f.userCode}</span>
+                    <span>•</span>
+                    <span>${statusLabel}</span>
+                  </div>
+                </div>
+                <div class="friend-item-actions">
+                  <button type="button" class="btn-call-voice btn-friend-call-voice" data-code="${f.userCode}" title="Voice Call" ${!isOnline || isBusy ? 'disabled style="opacity:0.45; cursor:not-allowed;"' : ''}>
+                    📞
+                  </button>
+                  <button type="button" class="btn-call-video btn-friend-call-video" data-code="${f.userCode}" title="Video Call" ${!isOnline || isBusy ? 'disabled style="opacity:0.45; cursor:not-allowed;"' : ''}>
+                    🎥
+                  </button>
+                  <button type="button" class="btn-friend-chat btn-friend-open-chat" data-code="${f.userCode}" title="Chat">
+                    💬
+                  </button>
+                  <button type="button" class="btn-more-options btn-friend-more-menu" data-code="${f.userCode}" data-name="${escapeHtml(f.displayName || f.userCode)}" title="More options">
+                    ⋮
+                  </button>
+                </div>
+              </div>
+            `;
+          });
+          els.myFriendsList.innerHTML = html;
+        }
+
+        function renderFriendRequests() {
+          const incoming = (state.friendRequests && state.friendRequests.incoming) || [];
+          const outgoing = (state.friendRequests && state.friendRequests.outgoing) || [];
+
+          if (els.incomingRequestsList) {
+            if (incoming.length === 0) {
+              els.incomingRequestsList.innerHTML = '<div style="font-size:12px; color:var(--text-muted); padding:10px 0;">No incoming friend requests</div>';
+            } else {
+              let incHtml = '';
+              incoming.forEach(req => {
+                incHtml += `
+                  <div class="request-card">
+                    <div class="request-card-info">
+                      <div class="request-user-name">${escapeHtml(req.fromName || `User #${req.fromUser}`)}</div>
+                      <div class="request-user-id">User #${req.fromUser}</div>
+                    </div>
+                    <div class="request-btn-group">
+                      <button type="button" class="btn-accept-request" data-reqid="${req.id}" data-from="${req.fromUser}">Accept</button>
+                      <button type="button" class="btn-decline-request" data-reqid="${req.id}">Decline</button>
+                    </div>
+                  </div>
+                `;
+              });
+              els.incomingRequestsList.innerHTML = incHtml;
+            }
+          }
+
+          if (els.outgoingRequestsList) {
+            if (outgoing.length === 0) {
+              els.outgoingRequestsList.innerHTML = '<div style="font-size:12px; color:var(--text-muted); padding:10px 0;">No outgoing requests</div>';
+            } else {
+              let outHtml = '';
+              outgoing.forEach(req => {
+                outHtml += `
+                  <div class="request-card">
+                    <div class="request-card-info">
+                      <div class="request-user-name">${escapeHtml(req.toName || `User #${req.toUser}`)}</div>
+                      <div class="request-user-id">User #${req.toUser} • ⏳ Pending</div>
+                    </div>
+                    <div class="request-btn-group">
+                      <button type="button" class="btn-cancel-outgoing" data-reqid="${req.id}">Cancel</button>
+                    </div>
+                  </div>
+                `;
+              });
+              els.outgoingRequestsList.innerHTML = outHtml;
+            }
+          }
+        }
+
+        function updateFriendBadges() {
+          const friendsCount = (state.friends && state.friends.length) || 0;
+          const incCount = (state.friendRequests && state.friendRequests.incoming && state.friendRequests.incoming.length) || 0;
+          const outCount = (state.friendRequests && state.friendRequests.outgoing && state.friendRequests.outgoing.length) || 0;
+          const missedCount = state.missedCallsCount || 0;
+
+          if (els.friendsCountBadge) {
+            els.friendsCountBadge.textContent = friendsCount;
+            els.friendsCountBadge.style.display = friendsCount > 0 ? 'inline-block' : 'none';
+          }
+          if (els.requestsCountBadge) {
+            els.requestsCountBadge.textContent = incCount;
+            els.requestsCountBadge.style.display = incCount > 0 ? 'inline-block' : 'none';
+          }
+          if (els.missedCallsBadge) {
+            els.missedCallsBadge.textContent = missedCount;
+            els.missedCallsBadge.style.display = missedCount > 0 ? 'inline-block' : 'none';
+          }
+          if (els.incomingReqCount) els.incomingReqCount.textContent = incCount;
+          if (els.outgoingReqCount) els.outgoingReqCount.textContent = outCount;
+          if (els.missedFilterCount) els.missedFilterCount.textContent = missedCount;
+        }
+
+        // Search user by 4-digit ID
+        window.searchUserByCode = async function (code) {
+          const clean = String(code || '').trim().replace(/^#+/, '');
+          if (!clean || clean.length < 4 || clean.length > 8) {
+            showToast('⚠️', 'Search Error', 'Please enter a valid 4-digit User ID (e.g. 4291)');
+            return;
+          }
+          if (!els.searchProfileCard) return;
+
+          els.searchProfileCard.style.display = 'block';
+          els.searchProfileCard.innerHTML = `
+            <div style="padding:14px; text-align:center; color:var(--text-muted); font-size:12px;">
+              🔍 Searching User #${escapeHtml(clean)}...
+            </div>
+          `;
+
+          try {
+            const res = await fetch(`/api/friends/profile/${encodeURIComponent(clean)}`);
+            const json = await res.json();
+            if (!res.ok || !json.ok || !json.profile) {
+              els.searchProfileCard.innerHTML = `
+                <div style="padding:14px; text-align:center; color:#f87171; font-size:12.5px;">
+                  ❌ User #${escapeHtml(clean)} not found on VocaMate
+                </div>
+              `;
+              return;
+            }
+
+            const p = json.profile;
+            state.searchedProfile = p;
+            const initial = (p.displayName || p.userCode || '?').charAt(0).toUpperCase();
+            const isOnline = !!p.online;
+            const isBusy = !!p.busy;
+            const statusLabel = isBusy ? '📞 In-Call' : (isOnline ? '🟢 Online' : '⚫ Offline');
+
+            let relBannerHtml = '';
+            let actionButtonsHtml = '';
+
+            if (p.relationship === 'self') {
+              relBannerHtml = `<div class="profile-rel-banner stranger">ℹ️ This is your own VocaMate 4-digit ID</div>`;
+              actionButtonsHtml = `<div style="font-size:11.5px; color:var(--text-muted);">You cannot call or friend yourself.</div>`;
+            } else if (p.relationship === 'friends') {
+              relBannerHtml = `<div class="profile-rel-banner friends">✅ You are accepted friends • Direct calling enabled</div>`;
+              actionButtonsHtml = `
+                <div class="profile-action-buttons">
+                  <button type="button" class="btn-primary-action btn-profile-voice-call" data-code="${p.userCode}" ${!isOnline || isBusy ? 'disabled style="opacity:0.45; cursor:not-allowed;"' : ''}>
+                    📞 Voice Call
+                  </button>
+                  <button type="button" class="btn-primary-action btn-profile-video-call" style="background:#0284c7;" data-code="${p.userCode}" ${!isOnline || isBusy ? 'disabled style="opacity:0.45; cursor:not-allowed;"' : ''}>
+                    🎥 Video Call
+                  </button>
+                  <button type="button" class="btn-secondary-action btn-profile-chat" data-code="${p.userCode}">
+                    💬 Chat
+                  </button>
+                  <button type="button" class="btn-danger-action btn-profile-remove-friend" data-code="${p.userCode}">
+                    Remove Friend
+                  </button>
+                </div>
+              `;
+            } else if (p.relationship === 'pending_outgoing') {
+              relBannerHtml = `<div class="profile-rel-banner pending">⏳ Friend Request Sent — Waiting for their response</div>`;
+              actionButtonsHtml = `
+                <div class="profile-action-buttons">
+                  <button type="button" class="btn-secondary-action btn-profile-cancel-req" data-reqid="${p.pendingRequestId}">
+                    ✖ Cancel Request
+                  </button>
+                </div>
+              `;
+            } else if (p.relationship === 'pending_incoming') {
+              relBannerHtml = `<div class="profile-rel-banner pending">👋 This user sent you a Friend Request!</div>`;
+              actionButtonsHtml = `
+                <div class="profile-action-buttons">
+                  <button type="button" class="btn-primary-action btn-profile-accept-req" data-reqid="${p.pendingRequestId}">
+                    ✅ Accept Request
+                  </button>
+                  <button type="button" class="btn-danger-action btn-profile-decline-req" data-reqid="${p.pendingRequestId}">
+                    Decline
+                  </button>
+                </div>
+              `;
+            } else if (p.relationship === 'blocked_by_me') {
+              relBannerHtml = `<div class="profile-rel-banner blocked">🚫 You have blocked this user</div>`;
+              actionButtonsHtml = `
+                <div class="profile-action-buttons">
+                  <button type="button" class="btn-secondary-action btn-profile-unblock" data-code="${p.userCode}">
+                    Unblock User
+                  </button>
+                </div>
+              `;
+            } else if (p.relationship === 'blocked_by_them') {
+              relBannerHtml = `<div class="profile-rel-banner stranger">User is currently unavailable</div>`;
+            } else {
+              // Stranger / Unknown
+              relBannerHtml = `
+                <div class="profile-rel-banner stranger">
+                  🔒 Calling Privacy: Friends Only. Unknown users cannot be called directly.
+                </div>
+              `;
+              actionButtonsHtml = `
+                <div class="profile-action-buttons">
+                  <button type="button" class="btn-primary-action btn-profile-add-friend" data-code="${p.userCode}" data-name="${escapeHtml(p.displayName || p.userCode)}">
+                    ➕ Send Friend Request
+                  </button>
+                </div>
+              `;
+            }
+
+            els.searchProfileCard.innerHTML = `
+              <div class="profile-card-header">
+                <div class="profile-avatar">${initial}</div>
+                <div class="profile-info">
+                  <div class="profile-name">${escapeHtml(p.displayName || `User #${p.userCode}`)}</div>
+                  <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
+                    <span class="profile-id-tag">ID: #${p.userCode}</span>
+                    <span class="profile-status-badge">${statusLabel}</span>
+                  </div>
+                </div>
+              </div>
+              ${relBannerHtml}
+              ${actionButtonsHtml}
+            `;
+          } catch (err) {
+            els.searchProfileCard.innerHTML = `<div style="padding:14px; text-align:center; color:#f87171; font-size:12px;">Failed to load profile: ${escapeHtml(err.message)}</div>`;
+          }
+        };
+
+        if (els.searchUserBtn) {
+          els.searchUserBtn.addEventListener('click', () => {
+            const code = els.searchFriendIdInput ? els.searchFriendIdInput.value : '';
+            searchUserByCode(code);
+          });
+        }
+        if (els.searchFriendIdInput) {
+          els.searchFriendIdInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              searchUserByCode(els.searchFriendIdInput.value);
+            }
+          });
+        }
+
+        // Direct secure friend calling function
+        window.startFriendCall = function (targetUserId, isVideo) {
+          const targetCode = String(targetUserId || '').trim();
+          if (!targetCode) return;
+
+          // Check if accepted friend
+          const friendObj = (state.friends || []).find(f => f.userCode === targetCode);
+          if (!friendObj) {
+            showToast('🔒', 'Friends Only', 'Direct Audio/Video calling is only allowed between accepted friends. Send a friend request first.');
+            return;
+          }
+          if (!friendObj.online) {
+            showToast('⚫', 'User Offline', `${friendObj.displayName || targetCode} is currently offline.`);
+            return;
+          }
+          if (friendObj.busy) {
+            showToast('📞', 'User Busy', `${friendObj.displayName || targetCode} is currently in another call.`);
+            return;
+          }
+          if (state.isFriendCall || state.isCallActive || state.isCalling || state.groupRoom) {
+            showToast('⚠️', 'In-Call', 'You are already in an active call.');
+            return;
+          }
+
+          state.wantsVideo = !!isVideo;
+          state.isCalling = true;
+          els.friendCallStatus.textContent = '📞 Calling ' + (friendObj.displayName || targetCode) + '...';
+
+          setWACallState('ringing', {
+            targetUserId: targetCode,
+            userName: friendObj.displayName,
+            isVideo: !!isVideo
+          });
+
+          state.socket.emit('call-request', { targetUserId: targetCode, isVideo: !!isVideo });
+        };
+
+        // Actions inside search profile card
+        if (els.searchProfileCard) {
+          els.searchProfileCard.addEventListener('click', async (e) => {
+            const addBtn = e.target.closest('.btn-profile-add-friend');
+            if (addBtn) {
+              const code = addBtn.dataset.code;
+              try {
+                addBtn.disabled = true;
+                addBtn.textContent = 'Sending...';
+                const res = await fetch('/api/friends/request', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ targetUserId: code })
+                });
+                const json = await res.json();
+                if (json.ok) {
+                  showToast('📩', 'Request Sent', `Friend request sent to #${code}`);
+                  searchUserByCode(code);
+                  loadFriendsState();
+                } else {
+                  showToast('⚠️', 'Error', json.error || 'Failed to send request');
+                  addBtn.disabled = false;
+                  addBtn.textContent = '➕ Send Friend Request';
+                }
+              } catch (err) {
+                showToast('⚠️', 'Error', err.message);
+                addBtn.disabled = false;
+                addBtn.textContent = '➕ Send Friend Request';
+              }
+              return;
+            }
+
+            const voiceBtn = e.target.closest('.btn-profile-voice-call');
+            if (voiceBtn) {
+              startFriendCall(voiceBtn.dataset.code, false);
+              return;
+            }
+
+            const videoBtn = e.target.closest('.btn-profile-video-call');
+            if (videoBtn) {
+              startFriendCall(videoBtn.dataset.code, true);
+              return;
+            }
+
+            const chatBtn = e.target.closest('.btn-profile-chat');
+            if (chatBtn) {
+              openFriendChat(chatBtn.dataset.code);
+              return;
+            }
+
+            const removeBtn = e.target.closest('.btn-profile-remove-friend');
+            if (removeBtn) {
+              const code = removeBtn.dataset.code;
+              if (confirm(`Remove User #${code} from your friends list?`)) {
+                await fetch('/api/friends/remove', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ friendUserCode: code })
+                });
+                showToast('👋', 'Friend Removed', `Removed User #${code}`);
+                searchUserByCode(code);
+                loadFriendsState();
+              }
+              return;
+            }
+
+            const cancelBtn = e.target.closest('.btn-profile-cancel-req');
+            if (cancelBtn) {
+              const reqId = cancelBtn.dataset.reqid;
+              await fetch('/api/friends/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId: reqId })
+              });
+              showToast('✖', 'Cancelled', 'Friend request cancelled');
+              if (state.searchedProfile) searchUserByCode(state.searchedProfile.userCode);
+              loadFriendsState();
+              return;
+            }
+
+            const acceptBtn = e.target.closest('.btn-profile-accept-req');
+            if (acceptBtn) {
+              const reqId = acceptBtn.dataset.reqid;
+              await fetch('/api/friends/accept', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId: reqId })
+              });
+              showToast('🎉', 'Friend Added', 'You can now call each other directly!');
+              if (state.searchedProfile) searchUserByCode(state.searchedProfile.userCode);
+              loadFriendsState();
+              return;
+            }
+
+            const declineBtn = e.target.closest('.btn-profile-decline-req');
+            if (declineBtn) {
+              const reqId = declineBtn.dataset.reqid;
+              await fetch('/api/friends/decline', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId: reqId })
+              });
+              showToast('✖', 'Declined', 'Friend request declined');
+              if (state.searchedProfile) searchUserByCode(state.searchedProfile.userCode);
+              loadFriendsState();
+              return;
+            }
+
+            const unblockBtn = e.target.closest('.btn-profile-unblock');
+            if (unblockBtn) {
+              const code = unblockBtn.dataset.code;
+              await fetch('/api/friends/unblock', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetUserCode: code })
+              });
+              showToast('🔓', 'Unblocked', `User #${code} unblocked`);
+              searchUserByCode(code);
+              loadFriendsState();
+              return;
+            }
+          });
+        }
+
+        // Delegated clicks on Friends List
+        if (els.myFriendsList) {
+          els.myFriendsList.addEventListener('click', (e) => {
+            const voiceBtn = e.target.closest('.btn-friend-call-voice');
+            if (voiceBtn) {
+              startFriendCall(voiceBtn.dataset.code, false);
+              return;
+            }
+            const videoBtn = e.target.closest('.btn-friend-call-video');
+            if (videoBtn) {
+              startFriendCall(videoBtn.dataset.code, true);
+              return;
+            }
+            const chatBtn = e.target.closest('.btn-friend-open-chat');
+            if (chatBtn) {
+              openFriendChat(chatBtn.dataset.code);
+              return;
+            }
+            const moreBtn = e.target.closest('.btn-friend-more-menu');
+            if (moreBtn) {
+              const code = moreBtn.dataset.code;
+              const name = moreBtn.dataset.name || code;
+              const choice = prompt(`Friend Options for ${name} (#${code}):\n1. Remove Friend\n2. Block User\n3. Report User\n\nEnter 1, 2, or 3:`);
+              if (choice === '1') {
+                if (confirm(`Remove ${name} (#${code}) from your friends list?`)) {
+                  fetch('/api/friends/remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ friendUserCode: code })
+                  }).then(() => {
+                    showToast('👋', 'Friend Removed', `Removed ${name}`);
+                    loadFriendsState();
+                  });
+                }
+              } else if (choice === '2') {
+                if (confirm(`Block ${name} (#${code})? They will not be able to contact you.`)) {
+                  fetch('/api/friends/block', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ targetUserCode: code })
+                  }).then(() => {
+                    showToast('🚫', 'User Blocked', `Blocked ${name}`);
+                    loadFriendsState();
+                  });
+                }
+              } else if (choice === '3') {
+                openReportModal(code, name);
+              }
+              return;
+            }
+          });
+        }
+
+        // Delegated clicks on Incoming Requests
+        if (els.incomingRequestsList) {
+          els.incomingRequestsList.addEventListener('click', async (e) => {
+            const accBtn = e.target.closest('.btn-accept-request');
+            if (accBtn) {
+              const reqId = accBtn.dataset.reqid;
+              await fetch('/api/friends/accept', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId: reqId })
+              });
+              showToast('🎉', 'Friend Connected', 'Friend request accepted! You can now call each other.');
+              loadFriendsState();
+              return;
+            }
+            const decBtn = e.target.closest('.btn-decline-request');
+            if (decBtn) {
+              const reqId = decBtn.dataset.reqid;
+              await fetch('/api/friends/decline', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId: reqId })
+              });
+              showToast('✖', 'Declined', 'Friend request declined');
+              loadFriendsState();
+              return;
+            }
+          });
+        }
+
+        // Delegated clicks on Outgoing Requests
+        if (els.outgoingRequestsList) {
+          els.outgoingRequestsList.addEventListener('click', async (e) => {
+            const cancelBtn = e.target.closest('.btn-cancel-outgoing');
+            if (cancelBtn) {
+              const reqId = cancelBtn.dataset.reqid;
+              await fetch('/api/friends/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId: reqId })
+              });
+              showToast('✖', 'Cancelled', 'Friend request cancelled');
+              loadFriendsState();
+              return;
+            }
+          });
+        }
+
+        // Call History loaders & filters
+        window.loadCallHistory = async function () {
+          if (!els.callHistoryList) return;
+          try {
+            const res = await fetch('/api/friends/call-history');
+            const json = await res.json();
+            if (json.ok) {
+              state.callHistory = json.history || [];
+              renderCallHistory();
+            }
+          } catch (e) {
+            console.warn('Call history fetch notice:', e.message);
+          }
+        };
+
+        function renderCallHistory() {
+          if (!els.callHistoryList) return;
+          let items = state.callHistory || [];
+          if (state.currentHistoryFilter === 'missed') {
+            items = items.filter(c => c.isMissed);
+          }
+
+          if (items.length === 0) {
+            els.callHistoryList.innerHTML = `
+              <div style="font-size:12px; color:var(--text-muted); padding:20px 0; text-align:center;">
+                ${state.currentHistoryFilter === 'missed' ? 'No missed calls 👏' : 'No call history recorded yet.'}
+              </div>
+            `;
+            return;
+          }
+
+          let html = '';
+          items.forEach(c => {
+            const isOut = c.direction === 'outgoing';
+            const isMissed = !!c.isMissed;
+            const isVideo = c.mediaType === 'video';
+            const icon = isMissed ? '📵' : (isOut ? '↗️' : '↙️');
+            const typeLabel = isVideo ? 'Video Call' : 'Voice Call';
+            const durLabel = isMissed ? 'Missed' : (c.status === 'declined' ? 'Declined' : (c.durationSeconds ? `${Math.floor(c.durationSeconds / 60)}m ${c.durationSeconds % 60}s` : 'Completed'));
+            const timeAgo = formatTimeAgo(c.endedAt || c.startedAt);
+            const isFriend = (state.friends || []).some(f => f.userCode === c.peerCode);
+
+            html += `
+              <div class="call-log-card">
+                <div class="call-log-icon">${icon}</div>
+                <div class="call-log-details">
+                  <div class="call-log-peer">
+                    <span>${escapeHtml(c.peerName || `User #${c.peerCode}`)}</span>
+                    <span style="font-size:11px; color:#38bdf8; font-weight:600;">#${c.peerCode}</span>
+                  </div>
+                  <div class="call-log-sub ${isMissed ? 'missed' : ''}">
+                    ${typeLabel} • ${durLabel} • ${timeAgo}
+                  </div>
+                </div>
+                <div>
+                  ${isFriend
+                    ? `<button type="button" class="btn-call-back" data-code="${c.peerCode}" data-video="${isVideo ? '1' : '0'}">📞 Call</button>`
+                    : `<button type="button" class="btn-secondary-action btn-add-from-history" data-code="${c.peerCode}" style="padding:4px 8px; font-size:11px;">➕ Add</button>`
+                  }
+                </div>
+              </div>
+            `;
+          });
+          els.callHistoryList.innerHTML = html;
+        }
+
+        function formatTimeAgo(timestamp) {
+          if (!timestamp) return '';
+          const diff = Math.floor((Date.now() - timestamp) / 1000);
+          if (diff < 60) return 'Just now';
+          if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+          if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+          return `${Math.floor(diff / 86400)}d ago`;
+        }
+
+        if (els.filterAllCalls) {
+          els.filterAllCalls.addEventListener('click', () => {
+            state.currentHistoryFilter = 'all';
+            els.filterAllCalls.classList.add('active');
+            if (els.filterMissedCalls) els.filterMissedCalls.classList.remove('active');
+            renderCallHistory();
+          });
+        }
+        if (els.filterMissedCalls) {
+          els.filterMissedCalls.addEventListener('click', () => {
+            state.currentHistoryFilter = 'missed';
+            els.filterMissedCalls.classList.add('active');
+            if (els.filterAllCalls) els.filterAllCalls.classList.remove('active');
+            renderCallHistory();
+          });
+        }
+
+        if (els.callHistoryList) {
+          els.callHistoryList.addEventListener('click', (e) => {
+            const callBackBtn = e.target.closest('.btn-call-back');
+            if (callBackBtn) {
+              const code = callBackBtn.dataset.code;
+              const isVid = callBackBtn.dataset.video === '1';
+              startFriendCall(code, isVid);
+              return;
+            }
+            const addHistBtn = e.target.closest('.btn-add-from-history');
+            if (addHistBtn) {
+              const code = addHistBtn.dataset.code;
+              switchFriendTab('search');
+              if (els.searchFriendIdInput) els.searchFriendIdInput.value = code;
+              searchUserByCode(code);
+              return;
+            }
+          });
+        }
+
+        // Report modal wiring
+        window.openReportModal = function (targetCode, targetName) {
+          if (!els.reportUserModal) return;
+          if (els.reportTargetUserCode) els.reportTargetUserCode.value = targetCode;
+          if (els.reportTargetDisplayName) els.reportTargetDisplayName.textContent = `${targetName} (#${targetCode})`;
+          if (els.reportDetailsInput) els.reportDetailsInput.value = '';
+          els.reportUserModal.style.display = 'flex';
+        };
+
+        if (els.cancelReportBtn) {
+          els.cancelReportBtn.addEventListener('click', () => {
+            if (els.reportUserModal) els.reportUserModal.style.display = 'none';
+          });
+        }
+        if (els.submitReportBtn) {
+          els.submitReportBtn.addEventListener('click', async () => {
+            const targetCode = els.reportTargetUserCode ? els.reportTargetUserCode.value : '';
+            const reason = els.reportReasonSelect ? els.reportReasonSelect.value : 'other';
+            const details = els.reportDetailsInput ? els.reportDetailsInput.value : '';
+            if (!targetCode) return;
+
+            try {
+              els.submitReportBtn.disabled = true;
+              els.submitReportBtn.textContent = 'Submitting...';
+              await fetch('/api/friends/report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetUserCode: targetCode, reason, details })
+              });
+              showToast('🚩', 'Report Submitted', 'Thank you for keeping VocaMate safe. Your report has been recorded.');
+              if (els.reportUserModal) els.reportUserModal.style.display = 'none';
+            } catch (err) {
+              showToast('⚠️', 'Report Error', err.message);
+            } finally {
+              els.submitReportBtn.disabled = false;
+              els.submitReportBtn.textContent = 'Submit Report';
+            }
+          });
+        }
+
+        // Web Push helpers
+        window.initPushNotifications = async function () {
+          if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            if (els.pushNotifToggleBtn) els.pushNotifToggleBtn.style.display = 'none';
+            return;
+          }
+          try {
+            const reg = await navigator.serviceWorker.register('/sw.js');
+            const sub = await reg.pushManager.getSubscription();
+            if (sub) {
+              state.isPushSubscribed = true;
+              updatePushUI(true);
+              fetch('/api/friends/push-subscription', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subscription: sub })
+              }).catch(() => {});
+            } else {
+              state.isPushSubscribed = false;
+              updatePushUI(false);
+            }
+          } catch (e) {
+            console.warn('SW init notice:', e.message);
+          }
+        };
+
+        window.requestPushSubscription = async function () {
+          if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            showToast('⚠️', 'Push Error', 'Web Push is not supported in this browser.');
+            return;
+          }
+          try {
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') {
+              showToast('⚠️', 'Permission Required', 'Notification permission was denied or blocked.');
+              updatePushUI(false);
+              return;
+            }
+            const res = await fetch('/api/friends/vapid-public-key');
+            const { publicKey } = await res.json();
+            if (!publicKey) throw new Error('VAPID public key not configured.');
+
+            const reg = await navigator.serviceWorker.ready;
+            const padding = '='.repeat((4 - publicKey.length % 4) % 4);
+            const base64 = (publicKey + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+              outputArray[i] = rawData.charCodeAt(i);
+            }
+
+            const sub = await reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: outputArray
+            });
+
+            await fetch('/api/friends/push-subscription', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ subscription: sub })
+            });
+
+            state.isPushSubscribed = true;
+            updatePushUI(true);
+            showToast('🔔', 'Ringing Active', 'Incoming call ringing is active even when tab is in background or closed!');
+          } catch (err) {
+            console.warn('Push registration error:', err.message);
+            showToast('⚠️', 'Push Error', err.message);
+          }
+        };
+
+        function updatePushUI(active) {
+          if (!els.pushNotifToggleBtn || !els.pushNotifLabel) return;
+          if (active) {
+            els.pushNotifToggleBtn.classList.add('active');
+            els.pushNotifLabel.textContent = 'Ringing Active ✅';
+          } else {
+            els.pushNotifToggleBtn.classList.remove('active');
+            els.pushNotifLabel.textContent = 'Enable Ringing';
+          }
+        }
+
+        // Backward-compatibility handlers for legacy controls
+        if (els.voiceTypeBtn) {
+          els.voiceTypeBtn.addEventListener('click', () => {
+            state.wantsVideo = false;
+            els.voiceTypeBtn.classList.add('active');
+            if (els.videoTypeBtn) els.videoTypeBtn.classList.remove('active');
+          });
+        }
+
+        if (els.videoTypeBtn) {
+          els.videoTypeBtn.addEventListener('click', () => {
+            state.wantsVideo = true;
+            els.videoTypeBtn.classList.add('active');
+            if (els.voiceTypeBtn) els.voiceTypeBtn.classList.remove('active');
+          });
+        }
+
+        if (els.connectBtn) {
+          els.connectBtn.addEventListener('click', () => {
+            if (state.isCalling && state.ringingCallId) {
+              state.socket.emit('cancel-call', state.ringingCallId);
+              stopRingback();
+              state.isCalling = false;
+              state.ringingCallId = null;
+              els.friendCallStatus.textContent = '📞 Call cancelled';
+              els.connectBtn.disabled = false;
+              els.connectBtn.textContent = 'Connect';
+              return;
+            }
+            const targetId = els.friendIdInput ? els.friendIdInput.value.trim() : '';
+            if (targetId) startFriendCall(targetId, !!state.wantsVideo);
+          });
+        }
+
+        // Global Peer Random Match (Separate and intact!)
+        if (els.randomMatchBtn) {
+          els.randomMatchBtn.addEventListener('click', () => {
+            if (state.isFriendCall || state.isCallActive || state.isCalling || state.groupRoom) { return; }
+            els.friendCallStatus.textContent = '🔍 Finding a random user...';
+            els.randomMatchBtn.disabled = true;
+            setWACallState('searching', { isVideo: !!state.wantsVideo });
+            state.socket.emit('find-random', { isVideo: !!state.wantsVideo });
+          });
+        }
 
         // VocaMate peer calling overlay controls
         if (els.waAcceptBtn) {
@@ -3189,13 +4734,31 @@
           if (chatIconBtn) {
             e.stopPropagation();
             const uid = chatIconBtn.getAttribute('data-userid');
-            if (uid && uid !== state.userId) { openFriendChat(uid); }
+            if (uid && uid !== state.userId) {
+              const isFriend = (state.friends || []).some(f => f.userCode === uid);
+              if (isFriend) {
+                openFriendChat(uid);
+              } else {
+                switchFriendTab('search');
+                if (els.searchFriendIdInput) els.searchFriendIdInput.value = uid;
+                searchUserByCode(uid);
+              }
+            }
             return;
           }
           const chip = e.target.closest('.chip');
           if (chip) {
             const uid = chip.getAttribute('data-userid');
-            if (uid) { els.friendIdInput.value = uid; }
+            if (uid && uid !== state.userId) {
+              const isFriend = (state.friends || []).some(f => f.userCode === uid);
+              if (isFriend) {
+                switchFriendTab('friends');
+              } else {
+                switchFriendTab('search');
+                if (els.searchFriendIdInput) els.searchFriendIdInput.value = uid;
+                searchUserByCode(uid);
+              }
+            }
           }
         });
       }
@@ -3706,14 +5269,14 @@
           const data = await authFetch('/api/auth/signup', { email, password, displayName });
           state.pendingVerifyEmail = email;
           if (els.otpEmailDisplay) els.otpEmailDisplay.textContent = email;
-          
+
           if (els.verifyOtpInput) {
             els.verifyOtpInput.value = '';
           }
-          
+
           showAuthView('otp');
           if (els.verifyOtpInput) els.verifyOtpInput.focus();
-          
+
           if (data.sandboxRestricted) {
             if (els.authOtpWarning) {
               els.authOtpWarning.innerHTML = `
@@ -3809,7 +5372,7 @@
           const data = await authFetch('/api/auth/forgot-password', { identifier, email: identifier });
           state.pendingResetIdentifier = identifier;
           state.pendingResetEmail = data.email || identifier;
-          
+
           if (els.resetOtpInput) els.resetOtpInput.value = '';
           if (els.resetNewPassword) els.resetNewPassword.value = '';
           if (els.resetConfirmPassword) els.resetConfirmPassword.value = '';
@@ -3823,7 +5386,7 @@
             `;
             els.resetAccountBanner.style.display = 'block';
           }
-          
+
           if (data.sandboxRestricted) {
             if (els.resetWarningBanner) {
               els.resetWarningBanner.innerHTML = `
@@ -3892,11 +5455,49 @@
         });
       }
 
+      function enterApplication(user, profile) {
+        state.authUser = user;
+        const userName = (profile && profile.name) || user.displayName || 'Friend';
+        state.userName = userName;
+        if (profile) {
+          state.userProfile.level = profile.level || state.userProfile.level;
+          state.userProfile.profession = profile.profession || state.userProfile.profession;
+          state.userProfile.goal = profile.goal || state.userProfile.goal;
+        }
+        els.authOverlay.style.display = 'none';
+        els.onboarding.style.display = 'none';
+        els.mainApp.style.display = 'flex';
+        initApp();
+        setTimeout(() => {
+          if (state.socket && state.socket.connected) {
+            state.socket.emit('set-user-name', userName);
+          }
+        }, 500);
+        const badge = document.querySelector('.user-id-badge');
+        if (badge && !badge.querySelector('.name-display')) {
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'name-display';
+          nameSpan.textContent = '👤 ' + userName;
+          badge.appendChild(nameSpan);
+        }
+        setTimeout(() => startTextChatGreeting(), 1000);
+      }
+
       function onAuthSuccess(user) {
         state.authUser = user;
         els.authOverlay.style.display = 'none';
-        els.nameInput.value = user.displayName;
-        els.onboarding.style.display = 'flex';
+        let savedProfile = null;
+        try {
+          const raw = localStorage.getItem('vocamate_user_profile_' + user.userCode);
+          if (raw) savedProfile = JSON.parse(raw);
+        } catch (e) {}
+
+        if (savedProfile) {
+          enterApplication(user, savedProfile);
+        } else {
+          els.nameInput.value = user.displayName || '';
+          els.onboarding.style.display = 'flex';
+        }
       }
 
       if (els.logoutBtn) {
@@ -4323,7 +5924,7 @@
         if (els.adminEmailGatewayContainer) els.adminEmailGatewayContainer.style.display = 'none';
         if (els.adminEmailLogsContainer) els.adminEmailLogsContainer.style.display = 'none';
         if (els.adminUserDetailView) els.adminUserDetailView.style.display = 'none';
-        
+
         // Only show students overview ribbon & search filters when viewing learner cards
         if (els.adminStatsRibbon) els.adminStatsRibbon.style.display = (mode === 'cards') ? 'grid' : 'none';
         if (els.adminFiltersBar) els.adminFiltersBar.style.display = (mode === 'cards') ? 'flex' : 'none';
@@ -4894,7 +6495,7 @@
             'chandrashekharbansal.2006@gmail.com',
             'chandrashekharb.2405@gmail.com'
           ];
-          unverifiedCount = adminState.usersData.users.filter(u => 
+          unverifiedCount = adminState.usersData.users.filter(u =>
             !u.isVerified && !adminEmails.includes((u.email || '').toLowerCase())
           ).length;
         }
@@ -5052,8 +6653,8 @@
             <div class="admin-empty-state">
               <div class="icon">📅</div>
               <h5>${isFilterActive ? 'No Events in this Category' : 'No Activity in ' + tfLabel}</h5>
-              <p>${isFilterActive 
-                ? 'No actions logged under "' + escapeHtml(f) + '" for this user in ' + tfLabel + '.' 
+              <p>${isFilterActive
+                ? 'No actions logged under "' + escapeHtml(f) + '" for this user in ' + tfLabel + '.'
                 : 'No actions were logged for this student in the selected period.'}
               </p>
               ${timeframe !== 'all' ? `
@@ -5495,7 +7096,7 @@
           let html = '';
           logs.forEach(log => {
             const timeStr = formatFullDate(log.timestamp);
-            
+
             let typePill = '<span class="admin-log-pill type-verification">✉️ Verification</span>';
             if (log.type === 'password_reset') typePill = '<span class="admin-log-pill type-reset">🔑 Reset OTP</span>';
             else if (log.type === 'login_alert') typePill = '<span class="admin-log-pill type-alert">🛡️ Login Alert</span>';
@@ -5512,7 +7113,7 @@
 
             let spamHealth = '<span style="font-size:11.5px; color:#34d399; font-weight:600;">🟢 Primary Inbox (Google DKIM)</span>';
             if (log.provider === 'resend') {
-              spamHealth = log.sandboxRestricted 
+              spamHealth = log.sandboxRestricted
                 ? '<span style="font-size:11.5px; color:#fbbf24; font-weight:600;">🟡 Sandbox Restricted</span>'
                 : '<span style="font-size:11.5px; color:#34d399; font-weight:600;">🟢 Sent via Resend</span>';
             } else if (log.provider === 'console_fallback') {
@@ -5548,7 +7149,1046 @@
         }
       }
 
-      console.log('🚀 VocaMate loaded successfully!');
+      // ============================================================
+      // AI INTERVIEW PRACTICE SYSTEM
+      // ============================================================
+      const interviewState = {
+        topicKey: 'java',
+        customTopic: '',
+        difficulty: 'intermediate',
+        totalQuestions: 5,
+        currentSessionId: null,
+        currentQuestionNumber: 1,
+        currentQuestionText: '',
+        isSpeechListening: false,
+        speechRecognition: null,
+        activeEvaluation: null,
+        completedReport: null
+      };
+
+      function setupInterviewSystem() {
+        const grid = document.getElementById('interviewTopicGrid');
+        const customWrap = document.getElementById('customTopicInputWrap');
+        const customInput = document.getElementById('customTopicInput');
+        const diffPills = document.querySelectorAll('#interviewDiffPills .choice-pill');
+        const countPills = document.querySelectorAll('#interviewCountPills .choice-pill');
+        const btnStart = document.getElementById('btnStartInterview');
+        const btnCancel = document.getElementById('btnCancelInterview');
+        const btnListen = document.getElementById('btnListenQuestion');
+        const btnMic = document.getElementById('btnInterviewMic');
+        const btnSubmit = document.getElementById('btnSubmitAnswer');
+        const btnNext = document.getElementById('btnNextQuestion');
+        const btnEmailReport = document.getElementById('btnEmailInterviewReport');
+        const btnRestart = document.getElementById('btnRestartInterview');
+        const btnPastReports = document.getElementById('btnInterviewPastReports');
+
+        // Topic Card Selection
+        if (grid) {
+          const cards = grid.querySelectorAll('.interview-topic-card');
+          cards.forEach(card => {
+            card.addEventListener('click', () => {
+              cards.forEach(c => c.classList.remove('active'));
+              card.classList.add('active');
+              interviewState.topicKey = card.dataset.topic;
+              if (interviewState.topicKey === 'custom') {
+                if (customWrap) customWrap.style.display = 'block';
+                if (customInput) customInput.focus();
+              } else {
+                if (customWrap) customWrap.style.display = 'none';
+              }
+            });
+          });
+        }
+
+        // Difficulty Pills
+        diffPills.forEach(pill => {
+          pill.addEventListener('click', () => {
+            diffPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            interviewState.difficulty = pill.dataset.diff;
+          });
+        });
+
+        // Question Count Pills
+        countPills.forEach(pill => {
+          pill.addEventListener('click', () => {
+            countPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            interviewState.totalQuestions = parseInt(pill.dataset.count, 10);
+          });
+        });
+
+        // Start Interview
+        if (btnStart) {
+          btnStart.addEventListener('click', async () => {
+            let customTopic = '';
+            if (interviewState.topicKey === 'custom') {
+              customTopic = (customInput ? customInput.value : '').trim();
+              if (!customTopic) {
+                showToast('⚠️', 'Custom Topic Required', 'Please enter your custom interview role or topic');
+                if (customInput) customInput.focus();
+                return;
+              }
+            }
+
+            btnStart.disabled = true;
+            btnStart.textContent = '🚀 Preparing AI Interviewer...';
+
+            try {
+              const res = await fetch('/api/interview/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  topicKey: interviewState.topicKey,
+                  customTopic,
+                  difficulty: interviewState.difficulty,
+                  totalQuestions: interviewState.totalQuestions
+                })
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || 'Failed to start interview');
+
+              interviewState.currentSessionId = data.sessionId;
+              interviewState.currentQuestionNumber = data.questionNumber || 1;
+              interviewState.totalQuestions = data.totalQuestions || interviewState.totalQuestions;
+              interviewState.currentQuestionText = data.question;
+
+              // Transition to Active Interview View
+              document.getElementById('interviewSetupView').style.display = 'none';
+              document.getElementById('interviewReportView').style.display = 'none';
+              document.getElementById('interviewActiveView').style.display = 'block';
+
+              document.getElementById('interviewActiveTopicBadge').textContent = data.topicTitle;
+              document.getElementById('interviewActiveDiffBadge').textContent = (data.difficulty || 'Intermediate').toUpperCase();
+              document.getElementById('interviewProgressCounter').textContent = `Question 1 of ${interviewState.totalQuestions}`;
+              document.getElementById('interviewProgressFill').style.width = `${(1 / interviewState.totalQuestions) * 100}%`;
+              document.getElementById('interviewQuestionNumberLabel').textContent = `Question 1`;
+              document.getElementById('interviewQuestionText').textContent = data.question;
+
+              document.getElementById('interviewAnswerText').value = '';
+              document.getElementById('interviewEvalCard').style.display = 'none';
+              document.getElementById('interviewAnswerBox').style.display = 'block';
+
+              showToast('🎯', 'Interview Started', `Examiner is ready for ${data.topicTitle}`);
+            } catch (err) {
+              showToast('❌', 'Error', err.message);
+            } finally {
+              btnStart.disabled = false;
+              btnStart.textContent = '🚀 Start Mock Interview';
+            }
+          });
+        }
+
+        // Listen to question using browser SpeechSynthesis or Audio
+        if (btnListen) {
+          btnListen.addEventListener('click', () => {
+            const text = interviewState.currentQuestionText;
+            if (!text) return;
+            if ('speechSynthesis' in window) {
+              window.speechSynthesis.cancel();
+              const utter = new SpeechSynthesisUtterance(text);
+              utter.rate = 0.95;
+              utter.pitch = 1.0;
+              window.speechSynthesis.speak(utter);
+            } else {
+              showToast('🔊', 'Audio', 'Speech playback not supported in this browser');
+            }
+          });
+        }
+
+        // Voice Input (Speech-to-text) for Candidate Answer
+        if (btnMic) {
+          const micIcon = document.getElementById('interviewMicIcon');
+          const micText = document.getElementById('interviewMicText');
+          const textarea = document.getElementById('interviewAnswerText');
+
+          const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (SpeechRec) {
+            interviewState.speechRecognition = new SpeechRec();
+            interviewState.speechRecognition.continuous = true;
+            interviewState.speechRecognition.interimResults = true;
+            interviewState.speechRecognition.lang = 'en-US';
+
+            interviewState.speechRecognition.onresult = (event) => {
+              let transcript = '';
+              for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+              }
+              if (textarea) {
+                textarea.value = textarea.value ? `${textarea.value} ${transcript}`.trim() : transcript;
+              }
+            };
+
+            interviewState.speechRecognition.onerror = (e) => {
+              console.warn('Speech recognition notice:', e.error);
+              interviewState.isSpeechListening = false;
+              btnMic.classList.remove('listening');
+              if (micText) micText.textContent = 'Speak Answer (Mic)';
+            };
+
+            interviewState.speechRecognition.onend = () => {
+              interviewState.isSpeechListening = false;
+              btnMic.classList.remove('listening');
+              if (micText) micText.textContent = 'Speak Answer (Mic)';
+            };
+
+            btnMic.addEventListener('click', () => {
+              if (interviewState.isSpeechListening) {
+                interviewState.speechRecognition.stop();
+                interviewState.isSpeechListening = false;
+                btnMic.classList.remove('listening');
+                if (micText) micText.textContent = 'Speak Answer (Mic)';
+              } else {
+                try {
+                  interviewState.speechRecognition.start();
+                  interviewState.isSpeechListening = true;
+                  btnMic.classList.add('listening');
+                  if (micText) micText.textContent = 'Listening... (Click to Stop)';
+                } catch (e) {
+                  console.warn(e);
+                }
+              }
+            });
+          } else {
+            btnMic.style.display = 'none';
+          }
+        }
+
+        // Submit Answer & Run AI Evaluation
+        if (btnSubmit) {
+          btnSubmit.addEventListener('click', async () => {
+            const answer = (document.getElementById('interviewAnswerText').value || '').trim();
+            if (!answer) {
+              showToast('⚠️', 'Answer Required', 'Please provide an answer before submitting.');
+              document.getElementById('interviewAnswerText').focus();
+              return;
+            }
+
+            if (interviewState.isSpeechListening && interviewState.speechRecognition) {
+              interviewState.speechRecognition.stop();
+            }
+
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = '🤖 Examiner Evaluating...';
+
+            try {
+              const res = await fetch('/api/interview/answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  sessionId: interviewState.currentSessionId,
+                  answer
+                })
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || 'Evaluation failed');
+
+              const ev = data.currentEvaluation;
+              interviewState.activeEvaluation = ev;
+
+              // Render evaluation card
+              document.getElementById('evalScoreBadge').textContent = `${ev.score !== undefined ? ev.score : '8.0'} / 10`;
+              document.getElementById('evalCorrectText').textContent = ev.whatWasCorrect || 'Good explanation.';
+              document.getElementById('evalMissingText').textContent = ev.whatWasMissing || 'No major omissions.';
+              document.getElementById('evalMistakesText').textContent = ev.mistakes || 'No factual mistakes.';
+              document.getElementById('evalModelAnswerText').textContent = ev.betterAnswer || 'A structured response starts with the core definition and provides real-world context.';
+              document.getElementById('evalSuggestionsText').textContent = ev.improvementSuggestions || 'Keep practicing clear, confident articulation.';
+
+              document.getElementById('interviewEvalCard').style.display = 'block';
+              document.getElementById('interviewAnswerBox').style.display = 'none';
+
+              if (data.isCompleted) {
+                btnNext.textContent = '📊 View Complete Performance Report →';
+                interviewState.completedReport = data.finalReport;
+              } else {
+                btnNext.textContent = 'Next Question →';
+                interviewState.nextQuestionData = {
+                  questionNumber: data.nextQuestionNumber,
+                  question: data.nextQuestion
+                };
+              }
+
+              // Smooth scroll to evaluation card
+              document.getElementById('interviewEvalCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (err) {
+              showToast('❌', 'Error', err.message);
+            } finally {
+              btnSubmit.disabled = false;
+              btnSubmit.textContent = 'Submit Answer & Evaluate';
+            }
+          });
+        }
+
+        // Next Question or Final Report Transition
+        if (btnNext) {
+          btnNext.addEventListener('click', () => {
+            if (interviewState.completedReport) {
+              renderFinalInterviewReport(interviewState.completedReport);
+            } else if (interviewState.nextQuestionData) {
+              const next = interviewState.nextQuestionData;
+              interviewState.currentQuestionNumber = next.questionNumber;
+              interviewState.currentQuestionText = next.question;
+
+              document.getElementById('interviewProgressCounter').textContent = `Question ${next.questionNumber} of ${interviewState.totalQuestions}`;
+              document.getElementById('interviewProgressFill').style.width = `${(next.questionNumber / interviewState.totalQuestions) * 100}%`;
+              document.getElementById('interviewQuestionNumberLabel').textContent = `Question ${next.questionNumber}`;
+              document.getElementById('interviewQuestionText').textContent = next.question;
+
+              document.getElementById('interviewAnswerText').value = '';
+              document.getElementById('interviewEvalCard').style.display = 'none';
+              document.getElementById('interviewAnswerBox').style.display = 'block';
+
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          });
+        }
+
+        // Email Interview Report to User's Registered Email
+        if (btnEmailReport) {
+          btnEmailReport.addEventListener('click', async () => {
+            if (!interviewState.completedReport) return;
+            btnEmailReport.disabled = true;
+            btnEmailReport.textContent = '📨 Dispatching Report...';
+            const statusEl = document.getElementById('emailReportStatus');
+            if (statusEl) statusEl.textContent = '';
+
+            try {
+              const res = await fetch('/api/interview/email-report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  sessionId: interviewState.currentSessionId,
+                  reportData: interviewState.completedReport
+                })
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || 'Failed to email report');
+
+              if (statusEl) statusEl.textContent = `Delivered to ${data.email} ✅`;
+              showToast('📧', 'Report Dispatched', `Comprehensive report emailed to ${data.email}`);
+            } catch (err) {
+              if (statusEl) statusEl.textContent = `Email notice: ${err.message}`;
+              showToast('⚠️', 'Email Notice', err.message);
+            } finally {
+              btnEmailReport.disabled = false;
+              btnEmailReport.textContent = '📧 Email Report to My Registered Email';
+            }
+          });
+        }
+
+        // Cancel / Exit Interview
+        if (btnCancel) {
+          btnCancel.addEventListener('click', () => {
+            if (confirm('Are you sure you want to end this interview practice session?')) {
+              document.getElementById('interviewActiveView').style.display = 'none';
+              document.getElementById('interviewReportView').style.display = 'none';
+              document.getElementById('interviewSetupView').style.display = 'block';
+            }
+          });
+        }
+
+        // Restart Interview / Practice Again
+        if (btnRestart) {
+          btnRestart.addEventListener('click', () => {
+            document.getElementById('interviewActiveView').style.display = 'none';
+            document.getElementById('interviewReportView').style.display = 'none';
+            document.getElementById('interviewSetupView').style.display = 'block';
+          });
+        }
+
+        // View Past Reports History
+        if (btnPastReports) {
+          btnPastReports.addEventListener('click', async () => {
+            try {
+              const res = await fetch('/api/interview/history');
+              const data = await res.json();
+              const history = data.history || [];
+              if (history.length === 0) {
+                showToast('📜', 'No Reports Yet', 'Complete an interview session to generate your first performance report.');
+                return;
+              }
+              renderFinalInterviewReport(history[0]);
+            } catch (e) {
+              showToast('❌', 'Error', e.message);
+            }
+          });
+        }
+      }
+
+      function renderFinalInterviewReport(report) {
+        if (!report) return;
+        document.getElementById('interviewActiveView').style.display = 'none';
+        document.getElementById('interviewSetupView').style.display = 'none';
+        document.getElementById('interviewReportView').style.display = 'block';
+
+        document.getElementById('reportOverallScoreNum').innerHTML = `${report.overallScore}<span style="font-size:24px; font-weight:600; opacity:0.85;">/100</span>`;
+        document.getElementById('reportGradeBadge').textContent = report.overallGrade || 'Strong / Recommended';
+        document.getElementById('reportMetaSubtitle').textContent = `${report.topicTitle} • ${(report.difficulty || 'Intermediate').toUpperCase()} • ${report.totalQuestions || 5} Questions`;
+        document.getElementById('reportSummaryText').textContent = report.summary || 'Solid overall technical delivery.';
+
+        // Strengths
+        const strengthsList = document.getElementById('reportStrengthsList');
+        strengthsList.innerHTML = '';
+        (report.strengths || []).forEach(s => {
+          const li = document.createElement('li');
+          li.textContent = s;
+          strengthsList.appendChild(li);
+        });
+
+        // Weaknesses
+        const weaknessesList = document.getElementById('reportWeaknessesList');
+        weaknessesList.innerHTML = '';
+        (report.weaknesses || []).forEach(w => {
+          const li = document.createElement('li');
+          li.textContent = w;
+          weaknessesList.appendChild(li);
+        });
+
+        // Improvements
+        const improvementsList = document.getElementById('reportImprovementsList');
+        improvementsList.innerHTML = '';
+        (report.areasToImprove || []).forEach(a => {
+          const li = document.createElement('li');
+          li.textContent = a;
+          improvementsList.appendChild(li);
+        });
+
+        // Question breakdown
+        const breakdownWrap = document.getElementById('reportQuestionsBreakdown');
+        breakdownWrap.innerHTML = '';
+        (report.questionEvaluations || []).forEach((q, idx) => {
+          const card = document.createElement('div');
+          card.style.cssText = 'background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:14px; margin-bottom:12px;';
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <strong style="color:var(--text-primary); font-size:13.5px;">Q${idx + 1}: ${escapeHtml(q.question)}</strong>
+              <span style="background:#0284c7; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px;">${q.score}/10</span>
+            </div>
+            <p style="margin:4px 0 8px 0; font-size:13px; color:var(--text-secondary);"><strong>Your Answer:</strong> "${escapeHtml(q.answer)}"</p>
+            <div style="font-size:12.5px; color:#4ade80; margin-bottom:3px;"><strong>✓ Correct:</strong> ${escapeHtml(q.whatWasCorrect)}</div>
+            <div style="font-size:12.5px; color:#fbbf24; margin-bottom:3px;"><strong>⚠️ Missing:</strong> ${escapeHtml(q.whatWasMissing)}</div>
+            <div style="font-size:12.5px; color:#f87171; margin-bottom:3px;"><strong>✗ Inaccuracies:</strong> ${escapeHtml(q.mistakes)}</div>
+            <div style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.25); border-radius:6px; padding:8px 10px; font-size:12px; color:#7dd3fc; margin-top:6px;">
+              <strong>💡 Model Professional Answer:</strong> ${escapeHtml(q.betterAnswer)}
+            </div>
+          `;
+          breakdownWrap.appendChild(card);
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // ============================================================
+      // GROUP DISCUSSION (GD) SYSTEM
+      // ============================================================
+      const gdState = {
+        activeView: 'random',
+        randomGroupSize: 4,
+        privateGroupSize: 4,
+        isWaitingRandom: false,
+        currentRoom: null,
+        timerInterval: null,
+        timerRemainingSeconds: 360,
+        isSpeaking: false,
+        speechRecognition: null,
+        pendingInviteData: null
+      };
+
+      function setupGdSystem() {
+        const navRandom = document.getElementById('gdNavRandomBtn');
+        const navPrivate = document.getElementById('gdNavPrivateBtn');
+        const navHistory = document.getElementById('gdNavHistoryBtn');
+
+        const viewRandom = document.getElementById('gdRandomSetupView');
+        const viewPrivate = document.getElementById('gdPrivateSetupView');
+        const viewActive = document.getElementById('gdActiveRoomView');
+        const viewReport = document.getElementById('gdReportView');
+        const viewHistory = document.getElementById('gdHistoryView');
+
+        function switchGdSubView(v) {
+          gdState.activeView = v;
+          [navRandom, navPrivate, navHistory].forEach(b => b.classList.remove('active'));
+          [viewRandom, viewPrivate, viewActive, viewReport, viewHistory].forEach(s => s.style.display = 'none');
+
+          if (v === 'random') {
+            navRandom.classList.add('active');
+            viewRandom.style.display = 'block';
+          } else if (v === 'private') {
+            navPrivate.classList.add('active');
+            viewPrivate.style.display = 'block';
+            loadGdFriendsList();
+          } else if (v === 'history') {
+            navHistory.classList.add('active');
+            viewHistory.style.display = 'block';
+            loadGdHistory();
+          } else if (v === 'active') {
+            viewActive.style.display = 'block';
+          } else if (v === 'report') {
+            viewReport.style.display = 'block';
+          }
+        }
+
+        navRandom.addEventListener('click', () => switchGdSubView('random'));
+        navPrivate.addEventListener('click', () => switchGdSubView('private'));
+        navHistory.addEventListener('click', () => switchGdSubView('history'));
+
+        // Random GD Size Buttons
+        const randomSizeBtns = document.querySelectorAll('#gdRandomSizeSelector .gd-size-btn');
+        randomSizeBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            randomSizeBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            gdState.randomGroupSize = parseInt(btn.dataset.size, 10);
+          });
+        });
+
+        // Join Random GD Pool
+        const btnJoinRandom = document.getElementById('btnJoinRandomGdPool');
+        const btnLeaveRandom = document.getElementById('btnLeaveRandomGdPool');
+
+        btnJoinRandom.addEventListener('click', async () => {
+          try {
+            btnJoinRandom.disabled = true;
+            btnJoinRandom.textContent = 'Joining Pool...';
+
+            if (state.socket) {
+              state.socket.emit('gd:join-pool', { groupSize: gdState.randomGroupSize }, (res) => {
+                btnJoinRandom.disabled = false;
+                btnJoinRandom.textContent = '🎲 Join Random GD Waiting Pool';
+
+                if (res.status === 'matched') {
+                  enterGdRoom(res.room);
+                } else if (res.status === 'waiting') {
+                  document.getElementById('gdRandomInitialState').style.display = 'none';
+                  document.getElementById('gdWaitingPoolCard').style.display = 'block';
+                  document.getElementById('gdWaitingTargetCount').textContent = res.neededCount;
+                  document.getElementById('gdWaitingCounterBadge').textContent = `Joined: ${res.currentCount} / ${res.neededCount}`;
+                  showToast('⏳', 'Waiting Pool Joined', `Waiting for ${res.neededCount} participants`);
+                }
+              });
+            }
+          } catch (e) {
+            btnJoinRandom.disabled = false;
+            btnJoinRandom.textContent = '🎲 Join Random GD Waiting Pool';
+            showToast('❌', 'Error', e.message);
+          }
+        });
+
+        btnLeaveRandom.addEventListener('click', () => {
+          if (state.socket) {
+            state.socket.emit('gd:leave-pool', {}, () => {
+              document.getElementById('gdWaitingPoolCard').style.display = 'none';
+              document.getElementById('gdRandomInitialState').style.display = 'block';
+              showToast('🚪', 'Pool Left', 'You left the Random GD waiting pool');
+            });
+          }
+        });
+
+        // Private GD Size Pills
+        const privateSizePills = document.querySelectorAll('#gdPrivateSizePills .choice-pill');
+        privateSizePills.forEach(pill => {
+          pill.addEventListener('click', () => {
+            privateSizePills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            gdState.privateGroupSize = parseInt(pill.dataset.size, 10);
+          });
+        });
+
+        // Create Private GD
+        const btnCreatePrivate = document.getElementById('btnCreatePrivateGd');
+        btnCreatePrivate.addEventListener('click', async () => {
+          const rawIds = (document.getElementById('gdFriendIdsInput').value || '').trim();
+          const selectedChips = Array.from(document.querySelectorAll('#gdFriendsPickerList input[type="checkbox"]:checked')).map(cb => cb.value);
+          const friendIds = Array.from(new Set([...selectedChips, ...rawIds.split(/[,\s]+/).filter(Boolean)]));
+
+          if (friendIds.length === 0) {
+            showToast('⚠️', 'Friends Required', 'Please select or enter at least one friend ID to invite');
+            return;
+          }
+
+          btnCreatePrivate.disabled = true;
+          btnCreatePrivate.textContent = 'Creating Room & Inviting...';
+
+          try {
+            const topic = (document.getElementById('gdPrivateTopicInput').value || '').trim();
+            const res = await fetch('/api/gd/private/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                groupSize: gdState.privateGroupSize,
+                customTopic: topic,
+                invitedFriendCodes: friendIds
+              })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to create private GD');
+
+            const room = data.room;
+            gdState.currentRoom = room;
+
+            // Show private waiting room
+            document.getElementById('gdPrivateSetupView').querySelector('.interview-hero-banner').style.display = 'none';
+            document.getElementById('gdPrivateSetupView').querySelector('div[style*="background:var(--bg-card)"]').style.display = 'none';
+            document.getElementById('gdPrivateWaitingRoom').style.display = 'block';
+            document.getElementById('gdPrivateRoomTopicLabel').textContent = `Topic: "${room.topic}"`;
+
+            renderPrivateWaitingRoster(room);
+            showToast('🚀', 'Private GD Created', `Sent invitations to ${friendIds.length} friends`);
+          } catch (err) {
+            showToast('❌', 'Error', err.message);
+          } finally {
+            btnCreatePrivate.disabled = false;
+            btnCreatePrivate.textContent = '🚀 Create GD & Send Invites';
+          }
+        });
+
+        // Start Private GD Now (Host button)
+        const btnStartPrivateNow = document.getElementById('btnStartPrivateGdNow');
+        btnStartPrivateNow.addEventListener('click', async () => {
+          if (!gdState.currentRoom) return;
+          try {
+            const res = await fetch('/api/gd/private/start', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ roomId: gdState.currentRoom.roomId })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to start GD');
+            enterGdRoom(data.room);
+          } catch (e) {
+            showToast('❌', 'Error', e.message);
+          }
+        });
+
+        const btnCancelPrivate = document.getElementById('btnCancelPrivateGd');
+        btnCancelPrivate.addEventListener('click', () => {
+          document.getElementById('gdPrivateWaitingRoom').style.display = 'none';
+          document.getElementById('gdPrivateSetupView').querySelector('.interview-hero-banner').style.display = 'flex';
+          document.getElementById('gdPrivateSetupView').querySelector('div[style*="background:var(--bg-card)"]').style.display = 'block';
+        });
+
+        // Live GD Chat & Speaking
+        const btnSendGd = document.getElementById('btnSendGdMessage');
+        const inputGd = document.getElementById('gdMessageInput');
+        const btnMicGd = document.getElementById('btnGdMicToggle');
+        const btnEndGd = document.getElementById('btnEndGdSession');
+
+        btnSendGd.addEventListener('click', sendActiveGdMessage);
+        inputGd.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            sendActiveGdMessage();
+          }
+        });
+
+        // GD Speech Recognition
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRec && btnMicGd) {
+          gdState.speechRecognition = new SpeechRec();
+          gdState.speechRecognition.continuous = true;
+          gdState.speechRecognition.interimResults = true;
+          gdState.speechRecognition.lang = 'en-US';
+
+          gdState.speechRecognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              transcript += event.results[i][0].transcript;
+            }
+            if (inputGd) {
+              inputGd.value = inputGd.value ? `${inputGd.value} ${transcript}`.trim() : transcript;
+            }
+          };
+
+          gdState.speechRecognition.onend = () => {
+            gdState.isSpeaking = false;
+            btnMicGd.classList.remove('listening');
+            if (state.socket && gdState.currentRoom) {
+              state.socket.emit('gd:speaking-state', { roomId: gdState.currentRoom.roomId, isSpeaking: false });
+            }
+          };
+
+          btnMicGd.addEventListener('click', () => {
+            if (gdState.isSpeaking) {
+              gdState.speechRecognition.stop();
+              gdState.isSpeaking = false;
+              btnMicGd.classList.remove('listening');
+              if (state.socket && gdState.currentRoom) {
+                state.socket.emit('gd:speaking-state', { roomId: gdState.currentRoom.roomId, isSpeaking: false });
+              }
+            } else {
+              try {
+                gdState.speechRecognition.start();
+                gdState.isSpeaking = true;
+                btnMicGd.classList.add('listening');
+                if (state.socket && gdState.currentRoom) {
+                  state.socket.emit('gd:speaking-state', { roomId: gdState.currentRoom.roomId, isSpeaking: true });
+                }
+              } catch (e) {
+                console.warn(e);
+              }
+            }
+          });
+        }
+
+        // End GD Session
+        btnEndGd.addEventListener('click', () => {
+          if (!gdState.currentRoom) return;
+          if (confirm('Are you sure you want to end this Group Discussion and generate AI evaluations?')) {
+            if (state.socket) {
+              state.socket.emit('gd:end', { roomId: gdState.currentRoom.roomId });
+            }
+          }
+        });
+
+        // Email GD Report
+        const btnEmailGd = document.getElementById('btnEmailGdReport');
+        btnEmailGd.addEventListener('click', async () => {
+          if (!gdState.currentRoom) return;
+          btnEmailGd.disabled = true;
+          btnEmailGd.textContent = '📨 Dispatching Report...';
+          const statusEl = document.getElementById('emailGdReportStatus');
+
+          try {
+            const res = await fetch(`/api/gd/room/${gdState.currentRoom.roomId}/email-report`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to email GD report');
+            if (statusEl) statusEl.textContent = `Delivered to ${data.email} ✅`;
+            showToast('📧', 'GD Report Delivered', `Individual analysis emailed to ${data.email}`);
+          } catch (err) {
+            if (statusEl) statusEl.textContent = `Email notice: ${err.message}`;
+            showToast('⚠️', 'Email Notice', err.message);
+          } finally {
+            btnEmailGd.disabled = false;
+            btnEmailGd.textContent = '📧 Email My Report to Registered Email';
+          }
+        });
+
+        const btnRestartGd = document.getElementById('btnRestartGd');
+        btnRestartGd.addEventListener('click', () => {
+          switchGdSubView('random');
+        });
+
+        // Incoming GD Invite Modal Buttons
+        const btnAcceptInvite = document.getElementById('btnAcceptGdInvite');
+        const btnDeclineInvite = document.getElementById('btnDeclineGdInvite');
+
+        btnAcceptInvite.addEventListener('click', async () => {
+          if (!gdState.pendingInviteData) return;
+          const { roomId } = gdState.pendingInviteData;
+          document.getElementById('gdInviteOverlay').style.display = 'none';
+
+          try {
+            const res = await fetch('/api/gd/private/respond', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ roomId, accept: true })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to accept GD invite');
+
+            switchMainTab('gd');
+            switchGdSubView('private');
+            enterGdRoom(data.room);
+          } catch (e) {
+            showToast('❌', 'Error', e.message);
+          }
+        });
+
+        btnDeclineInvite.addEventListener('click', async () => {
+          if (!gdState.pendingInviteData) return;
+          const { roomId } = gdState.pendingInviteData;
+          document.getElementById('gdInviteOverlay').style.display = 'none';
+
+          fetch('/api/gd/private/respond', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomId, accept: false })
+          }).catch(() => {});
+        });
+
+        // Setup Socket Listeners for GD
+        if (state.socket) {
+          state.socket.on('gd:matched', ({ room }) => {
+            document.getElementById('gdWaitingPoolCard').style.display = 'none';
+            document.getElementById('gdRandomInitialState').style.display = 'block';
+            switchMainTab('gd');
+            enterGdRoom(room);
+            showToast('🎉', 'GD Matched!', `Joined ${room.groupSize}-person discussion`);
+          });
+
+          state.socket.on('gd:invite', (data) => {
+            gdState.pendingInviteData = data;
+            document.getElementById('gdInviteModalText').innerHTML = `
+              <strong>${escapeHtml(data.hostUser.displayName)}</strong> (ID #${data.hostUser.userCode}) invited you to a <strong>${data.groupSize}-person Group Discussion</strong>!
+              <br><br>
+              <em style="color:#38bdf8;">"${escapeHtml(data.topic)}"</em>
+            `;
+            document.getElementById('gdInviteOverlay').style.display = 'flex';
+          });
+
+          state.socket.on('gd:participant-updated', ({ room }) => {
+            if (gdState.currentRoom && gdState.currentRoom.roomId === room.roomId) {
+              gdState.currentRoom = room;
+              renderPrivateWaitingRoster(room);
+            }
+          });
+
+          state.socket.on('gd:started', ({ room }) => {
+            if (gdState.currentRoom && gdState.currentRoom.roomId === room.roomId) {
+              enterGdRoom(room);
+            }
+          });
+
+          state.socket.on('gd:new-message', ({ message }) => {
+            appendGdMessage(message);
+          });
+
+          state.socket.on('gd:speaker-changed', ({ userCode, isSpeaking }) => {
+            const chip = document.querySelector(`.gd-participant-chip[data-user-code="${userCode}"]`);
+            if (chip) {
+              chip.classList.toggle('speaking', isSpeaking);
+            }
+          });
+
+          state.socket.on('gd:evaluating', () => {
+            showToast('🤖', 'AI Evaluating', 'Discussion ended. AI Moderator is analyzing every participant...');
+          });
+
+          state.socket.on('gd:completed', ({ report }) => {
+            renderGdReport(report);
+          });
+        }
+      }
+
+      function loadGdFriendsList() {
+        const wrap = document.getElementById('gdFriendsPickerList');
+        if (!wrap) return;
+        fetch('/api/friends/list')
+          .then(r => r.json())
+          .then(data => {
+            const friends = data.friends || [];
+            if (friends.length === 0) {
+              wrap.innerHTML = '<span style="font-size:12px; color:var(--text-muted);">No accepted friends yet. You can enter friends\' 4-digit IDs manually below.</span>';
+              return;
+            }
+            wrap.innerHTML = friends.map(f => `
+              <label style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-full); padding:4px 10px; font-size:12px; font-weight:700; color:var(--text-primary); cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                <input type="checkbox" value="${f.userCode}" style="cursor:pointer;" />
+                ${escapeHtml(f.displayName)} (#${f.userCode})
+              </label>
+            `).join('');
+          })
+          .catch(() => {});
+      }
+
+      function renderPrivateWaitingRoster(room) {
+        const roster = document.getElementById('gdPrivateParticipantsRoster');
+        if (!roster) return;
+        const participants = room.participants || [];
+        const invited = room.invitedFriends || [];
+
+        let html = '';
+        participants.forEach(p => {
+          html += `
+            <div style="background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); border-radius:var(--radius-md); padding:8px 14px; font-size:12.5px; font-weight:700; color:#4ade80;">
+              ✓ ${escapeHtml(p.displayName)} (#${p.userCode}) ${p.isHost ? '👑 Host' : ''}
+            </div>
+          `;
+        });
+        invited.forEach(inv => {
+          if (!participants.some(p => p.userCode === inv.userCode)) {
+            html += `
+              <div style="background:rgba(255,255,255,0.06); border:1px dashed var(--border-color); border-radius:var(--radius-md); padding:8px 14px; font-size:12.5px; color:var(--text-muted);">
+                ⏳ #${inv.userCode} (${inv.status || 'pending'})
+              </div>
+            `;
+          }
+        });
+        roster.innerHTML = html;
+      }
+
+      function enterGdRoom(room) {
+        gdState.currentRoom = room;
+        const viewRandom = document.getElementById('gdRandomSetupView');
+        const viewPrivate = document.getElementById('gdPrivateSetupView');
+        const viewActive = document.getElementById('gdActiveRoomView');
+        const viewReport = document.getElementById('gdReportView');
+
+        [viewRandom, viewPrivate, viewReport].forEach(v => v.style.display = 'none');
+        viewActive.style.display = 'block';
+
+        if (state.socket) {
+          state.socket.emit('gd:join-room', { roomId: room.roomId });
+        }
+
+        document.getElementById('gdActiveCategoryBadge').textContent = room.topicCategory || 'Group Discussion';
+        document.getElementById('gdActiveTopicTitle').textContent = room.topic;
+
+        // Render participant chips
+        const strip = document.getElementById('gdParticipantsStrip');
+        strip.innerHTML = (room.participants || []).map(p => `
+          <div class="gd-participant-chip" data-user-code="${p.userCode}">
+            <span>👤</span>
+            <span>${escapeHtml(p.displayName)}</span>
+          </div>
+        `).join('');
+
+        // Clear feed and show initial messages
+        const feed = document.getElementById('gdDiscussionFeed');
+        feed.innerHTML = '';
+        (room.messages || []).forEach(m => appendGdMessage(m));
+
+        // Start 6-minute timer
+        if (gdState.timerInterval) clearInterval(gdState.timerInterval);
+        gdState.timerRemainingSeconds = room.durationSeconds || 360;
+        updateGdTimerDisplay();
+        gdState.timerInterval = setInterval(() => {
+          gdState.timerRemainingSeconds -= 1;
+          updateGdTimerDisplay();
+          if (gdState.timerRemainingSeconds <= 0) {
+            clearInterval(gdState.timerInterval);
+            if (state.socket) {
+              state.socket.emit('gd:end', { roomId: room.roomId });
+            }
+          }
+        }, 1000);
+      }
+
+      function updateGdTimerDisplay() {
+        const el = document.getElementById('gdActiveTimer');
+        if (!el) return;
+        const mins = Math.floor(Math.max(0, gdState.timerRemainingSeconds) / 60);
+        const secs = Math.max(0, gdState.timerRemainingSeconds) % 60;
+        el.textContent = `⏱️ ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+
+      function appendGdMessage(msg) {
+        const feed = document.getElementById('gdDiscussionFeed');
+        if (!feed || !msg) return;
+
+        const row = document.createElement('div');
+        const isMe = String(msg.sender) === String(state.myUserId);
+
+        if (msg.isAi || msg.sender === 'AI_MODERATOR') {
+          row.className = 'gd-message-row moderator';
+          row.innerHTML = `
+            <div class="gd-msg-bubble">
+              <strong style="display:block; font-size:12px; margin-bottom:4px; letter-spacing:0.5px;">🤖 AI MODERATOR:</strong>
+              ${escapeHtml(msg.text)}
+            </div>
+          `;
+        } else {
+          row.className = `gd-message-row ${isMe ? 'me' : 'other'}`;
+          row.innerHTML = `
+            <span style="font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:2px; ${isMe ? 'text-align:right;' : ''}">
+              ${escapeHtml(msg.displayName)}
+            </span>
+            <div class="gd-msg-bubble">
+              ${escapeHtml(msg.text)}
+            </div>
+          `;
+        }
+
+        feed.appendChild(row);
+        feed.scrollTop = feed.scrollHeight;
+      }
+
+      function sendActiveGdMessage() {
+        const input = document.getElementById('gdMessageInput');
+        const text = (input ? input.value : '').trim();
+        if (!text || !gdState.currentRoom) return;
+
+        input.value = '';
+        if (state.socket) {
+          state.socket.emit('gd:message', {
+            roomId: gdState.currentRoom.roomId,
+            text
+          });
+        }
+      }
+
+      function renderGdReport(report) {
+        if (!report) return;
+        if (gdState.timerInterval) clearInterval(gdState.timerInterval);
+
+        const viewActive = document.getElementById('gdActiveRoomView');
+        const viewReport = document.getElementById('gdReportView');
+        viewActive.style.display = 'none';
+        viewReport.style.display = 'block';
+
+        const myCode = String(state.myUserId);
+        const myReport = (report.reportsByParticipant && report.reportsByParticipant[myCode])
+          ? report.reportsByParticipant[myCode]
+          : Object.values(report.reportsByParticipant || {})[0] || {};
+
+        document.getElementById('gdReportScoreNum').innerHTML = `${myReport.overallScore || 78}<span style="font-size:22px; font-weight:600; opacity:0.85;">/100</span>`;
+        document.getElementById('gdReportCandidateName').textContent = `${myReport.displayName || 'Candidate'} (#${myCode})`;
+        document.getElementById('gdReportTopicSubtitle').textContent = `Topic: "${report.topic}" • ${report.groupSize || 4} Participants`;
+
+        // 7 metrics
+        document.getElementById('gdMetricParticipation').textContent = `${myReport.participation || 8}/10`;
+        document.getElementById('gdMetricCommunication').textContent = `${myReport.communication || 8}/10`;
+        document.getElementById('gdMetricRelevance').textContent = `${myReport.relevance || 8}/10`;
+        document.getElementById('gdMetricConfidence').textContent = `${myReport.confidence || 7}/10`;
+        document.getElementById('gdMetricClarity').textContent = `${myReport.clarity || 8}/10`;
+        document.getElementById('gdMetricLeadership').textContent = `${myReport.leadership || 7}/10`;
+        document.getElementById('gdMetricTeamwork').textContent = `${myReport.teamwork || 8}/10`;
+
+        document.getElementById('gdReportFeedbackText').textContent = myReport.overallFeedback || 'Active and collaborative participation.';
+
+        // Points list
+        const pointsList = document.getElementById('gdReportPointsList');
+        pointsList.innerHTML = (myReport.pointsMade || []).map(p => `<li>${escapeHtml(p)}</li>`).join('');
+
+        // Mistakes list
+        const mistakesList = document.getElementById('gdReportMistakesList');
+        mistakesList.innerHTML = (myReport.mistakes || []).map(m => `<li>${escapeHtml(m)}</li>`).join('');
+
+        // Suggestions list
+        const suggestionsList = document.getElementById('gdReportSuggestionsList');
+        suggestionsList.innerHTML = (myReport.suggestions || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      async function loadGdHistory() {
+        const container = document.getElementById('gdHistoryListContainer');
+        if (!container) return;
+        container.innerHTML = '<div style="color:var(--text-muted); font-size:13px;">Loading GD history...</div>';
+
+        try {
+          const res = await fetch('/api/gd/history');
+          const data = await res.json();
+          const list = data.history || [];
+          if (list.length === 0) {
+            container.innerHTML = '<div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:20px; text-align:center; color:var(--text-muted); font-size:13.5px;">No Group Discussions completed yet. Join a Random GD or invite friends to practice!</div>';
+            return;
+          }
+
+          container.innerHTML = list.map(item => {
+            const myReport = (item.reportsByParticipant && item.reportsByParticipant[String(state.myUserId)]) || {};
+            return `
+              <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <strong style="color:var(--text-primary); font-size:14px;">${escapeHtml(item.topic)}</strong>
+                  <span style="background:#0284c7; color:#fff; font-weight:800; font-size:12px; padding:3px 10px; border-radius:999px;">${myReport.overallScore || 75}/100</span>
+                </div>
+                <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:8px;">
+                  👥 ${item.groupSize || 4} Participants • ${item.totalMessages || 0} Total Turns
+                </div>
+                <div style="font-size:12.5px; color:var(--text-muted); font-style:italic;">
+                  "${escapeHtml(myReport.overallFeedback || 'Completed')}"
+                </div>
+              </div>
+            `;
+          }).join('');
+        } catch (e) {
+          container.innerHTML = `<div style="color:#f87171;">Failed to load GD history: ${escapeHtml(e.message)}</div>`;
+        }
+      }
       console.log('✅ Text Chat & Voice Conversation - COMPLETELY INDEPENDENT');
       console.log('✅ Correction Star - Click ★ to see correction');
       console.log('✅ Corrections stored separately - No API errors');

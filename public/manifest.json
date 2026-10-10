@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "VocaMate — English Practice & Calls",
+  "short_name": "VocaMate",
+  "description": "AI English Speaking Practice with Madhu & Secure Friend Calling",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0284c7",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "192x192",
+      "type": "image/x-icon",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "512x512",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ]
+}

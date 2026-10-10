@@ -83,7 +83,10 @@ if (!isPostgresUrl) {
 // ============================================================
 // IN-MEMORY / LOCAL JSON BACKED STORE FALLBACK
 // ============================================================
-const mockDataFile = path.join(__dirname, '..', 'english-passport-auth-data.json');
+const mockDataFile = path.join(__dirname, '..', 'vocamate-auth-data.json');
+const legacyMockDataFile = path.join(__dirname, '..', 'english-passport-auth-data.json');
+const mockTmpFile = mockDataFile + '.tmp';
+
 let mockStore = {
   users: [],
   sessions: [],
@@ -92,10 +95,42 @@ let mockStore = {
   nextUserId: 1
 };
 
+function ensureSeedAdminUser() {
+  const adminEmail = 'chandrashekharb.2405@gmail.com';
+  const existing = mockStore.users.find(u => u.email.toLowerCase() === adminEmail);
+  if (!existing) {
+    const now = new Date().toISOString();
+    mockStore.users.unshift({
+      id: mockStore.nextUserId++,
+      user_code: '2405',
+      email: adminEmail,
+      display_name: 'Chandrashekhar Bansal',
+      password_hash: '$2a$10$VyB74./mrm0IftbjeS0N6.AR4CYYuYe7OcbBp5NpqhZwx09yi6DUG',
+      is_verified: true,
+      avatar_url: null,
+      created_at: now,
+      updated_at: now
+    });
+    saveMockStoreNow();
+  } else {
+    if (!existing.is_verified) {
+      existing.is_verified = true;
+      saveMockStoreNow();
+    }
+  }
+}
+
 function loadMockStore() {
   try {
+    let targetPath = null;
     if (fs.existsSync(mockDataFile)) {
-      const content = fs.readFileSync(mockDataFile, 'utf8');
+      targetPath = mockDataFile;
+    } else if (fs.existsSync(legacyMockDataFile)) {
+      targetPath = legacyMockDataFile;
+    }
+
+    if (targetPath) {
+      const content = fs.readFileSync(targetPath, 'utf8');
       const parsed = JSON.parse(content);
       mockStore = {
         users: Array.isArray(parsed.users) ? parsed.users.map(u => ({ ...u, is_verified: u.is_verified !== undefined ? Boolean(u.is_verified) : true })) : [],
@@ -108,28 +143,22 @@ function loadMockStore() {
   } catch (e) {
     console.warn('Could not load local auth store:', e.message);
   }
+
+  ensureSeedAdminUser();
 }
 
-let mockSaveScheduled = false;
-function saveMockStore(immediate = false) {
-  if (immediate) {
-    try {
-      fs.writeFileSync(mockDataFile, JSON.stringify(mockStore, null, 2), 'utf8');
-    } catch (e) {
-      console.error('Could not save local auth store:', e.message);
-    }
-    return;
+function saveMockStoreNow() {
+  try {
+    const payload = JSON.stringify(mockStore, null, 2);
+    fs.writeFileSync(mockTmpFile, payload, 'utf8');
+    fs.renameSync(mockTmpFile, mockDataFile);
+  } catch (e) {
+    console.error('Could not save local auth store:', e.message);
   }
-  if (mockSaveScheduled) return;
-  mockSaveScheduled = true;
-  setTimeout(() => {
-    mockSaveScheduled = false;
-    try {
-      fs.writeFileSync(mockDataFile, JSON.stringify(mockStore, null, 2), 'utf8');
-    } catch (e) {
-      console.error('Could not save local auth store:', e.message);
-    }
-  }, 100);
+}
+
+function saveMockStore(immediate = true) {
+  saveMockStoreNow();
 }
 
 loadMockStore();

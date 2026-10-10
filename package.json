@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "lint": "node -c server.js auth.js mailer.js db.js db/pool.js sheets.js media.js activity.js",
+    "lint": "node -c server.js auth.js mailer.js db.js db/pool.js sheets.js media.js activity.js friends.js interview.js gd.js words.js interview-questions.js",
     "build": "echo 'Build complete'"
   },
   "engines": {
@@ -25,7 +25,8 @@
     "nodemailer": "^10.0.13",
     "pg": "^8.23.0",
     "pg-connection-string": "^2.6.4",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

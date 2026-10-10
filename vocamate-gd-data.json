@@ -1,0 +1,516 @@
+{
+  "reports": [
+    {
+      "roomId": "gd_pvt_1791636221936_367",
+      "type": "private",
+      "groupSize": 4,
+      "topic": "Is remote work more productive than working from an office?",
+      "topicCategory": "Custom Topic",
+      "startedAt": 1791636221937,
+      "completedAt": 1791636221938,
+      "totalMessages": 3,
+      "participants": [
+        {
+          "userCode": "gd_tester_1",
+          "displayName": "Chandra"
+        },
+        {
+          "userCode": "gd_tester_2",
+          "displayName": "Priya"
+        }
+      ],
+      "reportsByParticipant": {
+        "gd_tester_1": {
+          "userCode": "gd_tester_1",
+          "displayName": "Chandra",
+          "avatarUrl": null,
+          "messagesCount": 1,
+          "wordsSpoken": 16,
+          "participation": 3,
+          "communication": 8,
+          "relevance": 9,
+          "confidence": 7,
+          "clarity": 9,
+          "leadership": 4,
+          "teamwork": 5,
+          "overallScore": 58,
+          "pointsMade": [
+            "Elimination of commuting time increases availability for focused professional tasks.",
+            "Remote environments facilitate higher-quality output for high-impact problem solving."
+          ],
+          "mistakes": [
+            "Insufficient frequency of participation; contributed only once in the entire discussion.",
+            "Failed to engage with or acknowledge the counter-arguments presented by other participants."
+          ],
+          "suggestions": [
+            "Increase participation frequency to demonstrate sustained engagement throughout the discussion.",
+            "Actively listen to peers and build upon their points to showcase collaborative skills.",
+            "Adopt a more proactive stance by initiating new sub-topics or summarizing group consensus."
+          ],
+          "overallFeedback": "Chandra provided a clear, concise, and highly relevant opening statement that effectively set the tone for the discussion. However, the candidate failed to maintain engagement, resulting in a passive role that lacks the leadership and teamwork required for a high-scoring performance."
+        },
+        "gd_tester_2": {
+          "userCode": "gd_tester_2",
+          "displayName": "Priya",
+          "avatarUrl": null,
+          "messagesCount": 1,
+          "wordsSpoken": 15,
+          "participation": 3,
+          "communication": 8,
+          "relevance": 9,
+          "confidence": 8,
+          "clarity": 9,
+          "leadership": 4,
+          "teamwork": 7,
+          "overallScore": 65,
+          "pointsMade": [
+            "Acknowledged the benefits of commute reduction while highlighting its limitations.",
+            "Emphasized the importance of physical presence for spontaneous innovation and interpersonal trust."
+          ],
+          "mistakes": [
+            "Low volume of participation; only contributed once during the entire discussion.",
+            "Failed to build upon or invite other participants into the conversation, limiting collaborative impact."
+          ],
+          "suggestions": [
+            "Increase your frequency of intervention to demonstrate sustained engagement throughout the discussion.",
+            "Practice active listening by explicitly referencing or building upon points made by other candidates before introducing your own.",
+            "Aim to initiate new sub-topics or steer the group toward a consensus to showcase leadership potential."
+          ],
+          "overallFeedback": "Priya provided a concise and highly relevant counter-argument that added depth to the discussion. However, her limited participation significantly impacted her overall score, as she did not demonstrate the sustained engagement or leadership required for a high-performing group discussion."
+        }
+      }
+    },
+    {
+      "roomId": "gd_pvt_1791635788341_467",
+      "type": "private",
+      "groupSize": 4,
+      "topic": "Is Artificial Intelligence beneficial for education?",
+      "topicCategory": "Custom Topic",
+      "startedAt": 1791635788341,
+      "completedAt": 1791635788342,
+      "totalMessages": 2,
+      "participants": [
+        {
+          "userCode": "2405",
+          "displayName": "Chandra"
+        },
+        {
+          "userCode": "2406",
+          "displayName": "Bob"
+        }
+      ],
+      "reportsByParticipant": {
+        "2405": {
+          "userCode": "2405",
+          "displayName": "Chandra",
+          "avatarUrl": null,
+          "messagesCount": 1,
+          "wordsSpoken": 14,
+          "participation": 3,
+          "communication": 7,
+          "relevance": 9,
+          "confidence": 6,
+          "clarity": 8,
+          "leadership": 2,
+          "teamwork": 5,
+          "overallScore": 52,
+          "pointsMade": [
+            "AI enables personalized tutoring at scale.",
+            "AI allows students to master subjects at their own pace."
+          ],
+          "mistakes": [
+            "The contribution was too brief, limiting the depth of the discussion.",
+            "Failed to engage with other participants or build upon the collective flow."
+          ],
+          "suggestions": [
+            "Aim to contribute more frequently to maintain visibility and influence in the group.",
+            "Elaborate on your points with specific examples or data to substantiate your claims.",
+            "Actively listen to others and use 'linking phrases' to connect your ideas to theirs."
+          ],
+          "overallFeedback": "Chandra provided a clear, relevant, and concise point, demonstrating a good grasp of the topic. However, a single contribution is insufficient for a group discussion, as it lacks the necessary engagement and leadership required to drive the conversation forward."
+        },
+        "2406": {
+          "userCode": "2406",
+          "displayName": "Bob",
+          "avatarUrl": null,
+          "messagesCount": 0,
+          "wordsSpoken": 0,
+          "participation": 3,
+          "communication": 4,
+          "relevance": 5,
+          "confidence": 4,
+          "clarity": 5,
+          "leadership": 3,
+          "teamwork": 5,
+          "overallScore": 45,
+          "pointsMade": [
+            "Joined the session room"
+          ],
+          "mistakes": [
+            "Did not submit verbal or written arguments"
+          ],
+          "suggestions": [
+            "Initiate arguments early in the discussion to establish presence",
+            "Actively build upon points made by other speakers using polite transitions"
+          ],
+          "overallFeedback": "Joined the discussion. We encourage speaking up boldly in the next session to showcase your thoughts."
+        }
+      }
+    },
+    {
+      "roomId": "gd_pvt_1791635765427_834",
+      "type": "private",
+      "groupSize": 4,
+      "topic": "Is Artificial Intelligence beneficial for education?",
+      "topicCategory": "Custom Topic",
+      "startedAt": 1791635765428,
+      "completedAt": 1791635765430,
+      "totalMessages": 2,
+      "participants": [
+        {
+          "userCode": "2405",
+          "displayName": "Chandra"
+        },
+        {
+          "userCode": "2406",
+          "displayName": "Bob"
+        }
+      ],
+      "reportsByParticipant": {
+        "2405": {
+          "userCode": "2405",
+          "displayName": "Chandra",
+          "avatarUrl": null,
+          "messagesCount": 1,
+          "wordsSpoken": 14,
+          "participation": 3,
+          "communication": 7,
+          "relevance": 9,
+          "confidence": 6,
+          "clarity": 8,
+          "leadership": 2,
+          "teamwork": 5,
+          "overallScore": 52,
+          "pointsMade": [
+            "AI enables personalized tutoring at scale.",
+            "AI allows students to master subjects at an individualized pace."
+          ],
+          "mistakes": [
+            "Limited engagement; provided only one contribution throughout the entire discussion.",
+            "Lacked depth or supporting examples to substantiate the initial claim."
+          ],
+          "suggestions": [
+            "Increase participation frequency to demonstrate sustained engagement with the group.",
+            "Elaborate on your points with real-world examples or counter-arguments to add depth.",
+            "Actively engage with other participants' views to show teamwork and collaborative spirit."
+          ],
+          "overallFeedback": "Chandra provided a clear and relevant opening statement that correctly identified a key benefit of AI in education. However, the performance was significantly hampered by a lack of active participation and failure to build upon the group's ongoing dialogue. To improve, Chandra must contribute more frequently and demonstrate the ability to facilitate a deeper discussion."
+        },
+        "2406": {
+          "userCode": "2406",
+          "displayName": "Bob",
+          "avatarUrl": null,
+          "messagesCount": 0,
+          "wordsSpoken": 0,
+          "participation": 3,
+          "communication": 4,
+          "relevance": 5,
+          "confidence": 4,
+          "clarity": 5,
+          "leadership": 3,
+          "teamwork": 5,
+          "overallScore": 45,
+          "pointsMade": [
+            "Joined the session room"
+          ],
+          "mistakes": [
+            "Did not submit verbal or written arguments"
+          ],
+          "suggestions": [
+            "Initiate arguments early in the discussion to establish presence",
+            "Actively build upon points made by other speakers using polite transitions"
+          ],
+          "overallFeedback": "Joined the discussion. We encourage speaking up boldly in the next session to showcase your thoughts."
+        }
+      }
+    },
+    {
+      "roomId": "gd_pvt_1791394568498_530",
+      "type": "private",
+      "groupSize": 4,
+      "topic": "Clean Code vs Fast Shipping: How to balance technical debt in fast-growing startups?",
+      "topicCategory": "Custom Topic",
+      "startedAt": 1791394568499,
+      "completedAt": 1791394568500,
+      "totalMessages": 3,
+      "participants": [
+        {
+          "userCode": "2001",
+          "displayName": "Dev Host"
+        },
+        {
+          "userCode": "2002",
+          "displayName": "Friend Two"
+        },
+        {
+          "userCode": "2003",
+          "displayName": "Friend Three"
+        },
+        {
+          "userCode": "2004",
+          "displayName": "Friend Four"
+        }
+      ],
+      "reportsByParticipant": {
+        "2001": {
+          "userCode": "2001",
+          "displayName": "Dev Host",
+          "avatarUrl": null,
+          "messagesCount": 1,
+          "wordsSpoken": 13,
+          "participation": 3,
+          "communication": 7,
+          "relevance": 9,
+          "confidence": 7,
+          "clarity": 8,
+          "leadership": 4,
+          "teamwork": 6,
+          "overallScore": 55,
+          "pointsMade": [
+            "Prioritizing speed to market is essential for initial product validation.",
+            "Early-stage startups must focus on proving their core value hypothesis before perfecting code."
+          ],
+          "mistakes": [
+            "Extremely low volume of participation, failing to contribute to the ongoing development of the discussion.",
+            "Lack of engagement with the other participant's counter-point."
+          ],
+          "suggestions": [
+            "Increase your frequency of input to demonstrate sustained engagement throughout the discussion.",
+            "Actively build upon or challenge the points raised by other participants to show collaborative leadership.",
+            "Expand your arguments with specific examples or frameworks to add more depth to your contributions."
+          ],
+          "overallFeedback": "While your initial point was highly relevant and articulated with professional clarity, your overall contribution was insufficient for a group discussion. To improve, you must shift from making singular statements to engaging in a continuous dialogue with other participants."
+        },
+        "2002": {
+          "userCode": "2002",
+          "displayName": "Friend Two",
+          "avatarUrl": null,
+          "messagesCount": 1,
+          "wordsSpoken": 19,
+          "participation": 3,
+          "communication": 7,
+          "relevance": 9,
+          "confidence": 7,
+          "clarity": 8,
+          "leadership": 4,
+          "teamwork": 8,
+          "overallScore": 65,
+          "pointsMade": [
+            "Advocated for modular architectural design to mitigate future refactoring risks.",
+            "Proposed setting clear boundaries to maintain stability while balancing development speed."
+          ],
+          "mistakes": [
+            "Extremely limited participation; contributed only once, preventing a sustained discussion impact.",
+            "Relied on a 'me-too' opening phrase ('I agree') which diminishes the perceived originality of the insight."
+          ],
+          "suggestions": [
+            "Aim to contribute at least 3-4 times throughout the discussion to demonstrate sustained engagement.",
+            "Transition from reactive agreement to proactive initiation by introducing new dimensions or counter-arguments."
+          ],
+          "overallFeedback": "The candidate provided a technically sound and highly relevant contribution that addressed the core trade-off of the topic. However, their overall impact was severely limited by a lack of participation, failing to drive the conversation forward or demonstrate leadership qualities."
+        },
+        "2003": {
+          "userCode": "2003",
+          "displayName": "Friend Three",
+          "avatarUrl": null,
+          "messagesCount": 0,
+          "wordsSpoken": 0,
+          "participation": 3,
+          "communication": 4,
+          "relevance": 5,
+          "confidence": 4,
+          "clarity": 5,
+          "leadership": 3,
+          "teamwork": 5,
+          "overallScore": 45,
+          "pointsMade": [
+            "Joined the session room"
+          ],
+          "mistakes": [
+            "Did not submit verbal or written arguments"
+          ],
+          "suggestions": [
+            "Initiate arguments early in the discussion to establish presence",
+            "Actively build upon points made by other speakers using polite transitions"
+          ],
+          "overallFeedback": "Joined the discussion. We encourage speaking up boldly in the next session to showcase your thoughts."
+        },
+        "2004": {
+          "userCode": "2004",
+          "displayName": "Friend Four",
+          "avatarUrl": null,
+          "messagesCount": 0,
+          "wordsSpoken": 0,
+          "participation": 3,
+          "communication": 4,
+          "relevance": 5,
+          "confidence": 4,
+          "clarity": 5,
+          "leadership": 3,
+          "teamwork": 5,
+          "overallScore": 45,
+          "pointsMade": [
+            "Joined the session room"
+          ],
+          "mistakes": [
+            "Did not submit verbal or written arguments"
+          ],
+          "suggestions": [
+            "Initiate arguments early in the discussion to establish presence",
+            "Actively build upon points made by other speakers using polite transitions"
+          ],
+          "overallFeedback": "Joined the discussion. We encourage speaking up boldly in the next session to showcase your thoughts."
+        }
+      }
+    },
+    {
+      "roomId": "gd_rnd_1791394208525_488",
+      "type": "random",
+      "groupSize": 4,
+      "topic": "Ethics of Data Privacy in the Era of Big Tech: Should governments strictly regulate AI training on public user data?",
+      "topicCategory": "Ethics & Law",
+      "startedAt": 1791394208526,
+      "completedAt": 1791394208527,
+      "totalMessages": 3,
+      "participants": [
+        {
+          "userCode": "1001",
+          "displayName": "Aarav"
+        },
+        {
+          "userCode": "1002",
+          "displayName": "Priya"
+        },
+        {
+          "userCode": "1003",
+          "displayName": "Rohan"
+        },
+        {
+          "userCode": "1004",
+          "displayName": "Ananya"
+        }
+      ],
+      "reportsByParticipant": {
+        "1001": {
+          "userCode": "1001",
+          "displayName": "Aarav",
+          "avatarUrl": null,
+          "messagesCount": 1,
+          "wordsSpoken": 14,
+          "participation": 2,
+          "communication": 6,
+          "relevance": 2,
+          "confidence": 5,
+          "clarity": 6,
+          "leadership": 2,
+          "teamwork": 4,
+          "overallScore": 35,
+          "pointsMade": [
+            "Generative AI enhances productivity",
+            "Generative AI does not eliminate software developer jobs"
+          ],
+          "mistakes": [
+            "Failed to address the core topic of data privacy and government regulation of AI training data"
+          ],
+          "suggestions": [
+            "Carefully analyze the prompt before speaking to ensure your contribution remains relevant to the specific topic",
+            "Increase participation frequency to demonstrate sustained engagement with the group discussion",
+            "Connect your points back to the ethical or regulatory aspects of the debate rather than focusing solely on productivity"
+          ],
+          "overallFeedback": "Aarav failed to address the specific prompt regarding data privacy and government regulation, focusing instead on the impact of AI on employment. His contribution was off-topic and minimal, which significantly hindered his performance in this formal group discussion."
+        },
+        "1002": {
+          "userCode": "1002",
+          "displayName": "Priya",
+          "avatarUrl": null,
+          "messagesCount": 1,
+          "wordsSpoken": 18,
+          "participation": 2,
+          "communication": 6,
+          "relevance": 2,
+          "confidence": 5,
+          "clarity": 6,
+          "leadership": 2,
+          "teamwork": 5,
+          "overallScore": 35,
+          "pointsMade": [
+            "Suggested that automation of entry-level coding tasks will increase hiring standards for developers.",
+            "Acknowledged the productivity perspective while highlighting potential labor market shifts."
+          ],
+          "mistakes": [
+            "The contribution was entirely off-topic, focusing on software engineering labor markets instead of the assigned topic regarding data privacy and AI regulation.",
+            "Failed to address the core ethical concerns or the role of government oversight."
+          ],
+          "suggestions": [
+            "Ensure you read and comprehend the specific GD topic thoroughly before speaking to maintain relevance.",
+            "Strive to contribute more frequently to demonstrate engagement and leadership throughout the discussion.",
+            "When agreeing with a peer, pivot quickly to link their point back to the central theme of the discussion."
+          ],
+          "overallFeedback": "Priya provided a coherent point regarding AI's impact on employment, but it was fundamentally irrelevant to the topic of data privacy and government regulation. Her participation was minimal, and she failed to steer the conversation back to the ethical concerns requested by the prompt."
+        },
+        "1003": {
+          "userCode": "1003",
+          "displayName": "Rohan",
+          "avatarUrl": null,
+          "messagesCount": 0,
+          "wordsSpoken": 0,
+          "participation": 3,
+          "communication": 4,
+          "relevance": 5,
+          "confidence": 4,
+          "clarity": 5,
+          "leadership": 3,
+          "teamwork": 5,
+          "overallScore": 45,
+          "pointsMade": [
+            "Joined the session room"
+          ],
+          "mistakes": [
+            "Did not submit verbal or written arguments"
+          ],
+          "suggestions": [
+            "Initiate arguments early in the discussion to establish presence",
+            "Actively build upon points made by other speakers using polite transitions"
+          ],
+          "overallFeedback": "Joined the discussion. We encourage speaking up boldly in the next session to showcase your thoughts."
+        },
+        "1004": {
+          "userCode": "1004",
+          "displayName": "Ananya",
+          "avatarUrl": null,
+          "messagesCount": 0,
+          "wordsSpoken": 0,
+          "participation": 3,
+          "communication": 4,
+          "relevance": 5,
+          "confidence": 4,
+          "clarity": 5,
+          "leadership": 3,
+          "teamwork": 5,
+          "overallScore": 45,
+          "pointsMade": [
+            "Joined the session room"
+          ],
+          "mistakes": [
+            "Did not submit verbal or written arguments"
+          ],
+          "suggestions": [
+            "Initiate arguments early in the discussion to establish presence",
+            "Actively build upon points made by other speakers using polite transitions"
+          ],
+          "overallFeedback": "Joined the discussion. We encourage speaking up boldly in the next session to showcase your thoughts."
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "wordsByUser": {
+    "2405": [
+      {
+        "id": "w_1791532628838_179",
+        "word": "eloquent",
+        "partOfSpeech": "adjective",
+        "pronunciation": "/ˈɛl.ə.kwənt/",
+        "definition": "Fluent or persuasive in speaking or writing.",
+        "hindiMeaning": "सुवक्ता / प्रभावशाली और सुस्पष्ट बोलने वाला",
+        "example": "An eloquent speaker can inspire an entire auditorium with clear and moving language.",
+        "context": "Test AI conversation",
+        "mastery": "learning",
+        "reviewCount": 1,
+        "successfulRecalls": 1,
+        "lastReviewedAt": 1791532628840,
+        "savedAt": 1791532628838,
+        "updatedAt": 1791532628838
+      }
+    ]
+  }
+}

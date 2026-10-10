@@ -1,6 +1,6 @@
 {
   "name": "VocaMate",
-  "description": "AI English conversation practice with text chat, 20 voices, and real-time audio and video calls with friends.",
+  "description": "AI English conversation practice with natural chat, 20 voices, AI Mock Interviews, Group Discussions (GD), and real-time audio and video calls with friends.",
   "permissions": [],
   "capabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
